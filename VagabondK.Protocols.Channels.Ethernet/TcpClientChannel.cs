@@ -16,12 +16,6 @@ namespace VagabondK.Protocols.Channels
         /// 생성자
         /// </summary>
         /// <param name="host">호스트</param>
-        public TcpClientChannel(string host) : this(host, 502, 10000) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="host">호스트</param>
         /// <param name="port">포트</param>
         public TcpClientChannel(string host, int port) : this(host, port, 10000) { }
 

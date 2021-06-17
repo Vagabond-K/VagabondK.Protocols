@@ -16,12 +16,6 @@ namespace VagabondK.Protocols.Channels
         /// 생성자
         /// </summary>
         /// <param name="host">호스트</param>
-        public UdpClientChannel(string host) : this(host, 502) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="host">호스트</param>
         /// <param name="remotePort">원격 포트</param>
         public UdpClientChannel(string host, int remotePort)
         {
