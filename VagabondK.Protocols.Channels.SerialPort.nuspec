@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>VagabondK.Protocols.Channels.SerialPort</id>
+    <version>1.0.0</version>
+    <authors>Vagabond K</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">LGPL-2.1-only</license>
+    <icon>nugetIcon.png</icon>
+    <projectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Channels.SerialPort</projectUrl>
+    <description>여러 프로토콜들에 사용되는 시리얼 포트 기반 채널 라이브러리입니다.</description>
+    <repository type="git" url="https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Channels.SerialPort" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="SerialPortStream" version="2.2.2" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETFramework4.6.1">
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.IO.Ports" version="5.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="UAP10.0.16299">
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\netstandard2.0\VagabondK.Protocols.Channels.SerialPort.dll" target="lib\netstandard2.0"/>
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\netstandard2.0\VagabondK.Protocols.Channels.SerialPort.xml" target="lib\netstandard2.0"/>
+
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\netcoreapp3.1\VagabondK.Protocols.Channels.SerialPort.dll" target="lib\netcoreapp3.1"/>
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\netcoreapp3.1\VagabondK.Protocols.Channels.SerialPort.xml" target="lib\netcoreapp3.1"/>
+
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\net461\VagabondK.Protocols.Channels.SerialPort.dll" target="lib\net461"/>
+    <file src="VagabondK.Protocols.Channels.SerialPort\bin\Release\net461\VagabondK.Protocols.Channels.SerialPort.xml" target="lib\net461"/>
+
+    <file src="VagabondK.Protocols.Channels.SerialPort.UWP\bin\Release\VagabondK.Protocols.Channels.SerialPort.dll" target="lib\uap10.0.16299"/>
+    <file src="VagabondK.Protocols.Channels.SerialPort.UWP\bin\Release\VagabondK.Protocols.Channels.SerialPort.xml" target="lib\uap10.0.16299"/>
+
+    <file src="nugetIcon.png"/>
+  </files>
+</package>

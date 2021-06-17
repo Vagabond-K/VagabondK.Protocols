@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VagabondK.Protocols.Channels.Ethernet\VagabondK.Protocols.Channels.Ethernet.csproj" />
+    <ProjectReference Include="..\..\..\VagabondK.Protocols.Modbus\VagabondK.Protocols.Modbus.csproj" />
+  </ItemGroup>
+
+</Project>

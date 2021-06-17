@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net461;netcoreapp3.1</TargetFrameworks>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\VagabondK.Protocols.Channels.SerialPort.xml</DocumentationFile>
+    <RootNamespace>VagabondK.Protocols.Channels</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VagabondK.Protocols.Abstractions\VagabondK.Protocols.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="SerialPortStream" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="System.IO.Ports" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

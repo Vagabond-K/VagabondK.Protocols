@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    이 파일에는 리플렉션 및 기타 동적 코드 패턴을 통해 애플리케이션에서
+    액세스하는 형식에 대한 사양인 런타임 지시문이 들어 있습니다. 런타임 지시문은
+    .NET 네이티브 최적화 프로그램을 제어하고 라이브러리에서 액세스하는 코드를 제거하지 않음을 확인하는 데 사용됩니다.
+    라이브러리가 리플렉션을 수행하지 않는 경우 일반적으로 이 파일을 편집할 필요가 없습니다. 그러나
+    라이브러리가 특히 형식(특히 전달되거나 형식 또는 형식에서 파생되는 형식)에 대해 리플렉션하는 경우
+    런타임 지시문을 작성해야 합니다.
+
+    라이브러리에서 가장 일반적인 리플렉션 사용은 라이브러리에 전달되는 형식에 대한 정보를 찾는 것입니다.
+    런타임 지시문에는 라이브러리에 전달되는 형식에 대한 요구 사항을 표시하는 세 가지 방법이
+    있습니다.
+
+    1.  Parameter, GenericParameter, TypeParameter, TypeEnumerableParameter
+        이러한 지시문을 사용하여 매개 변수로 전달되는 형식에 대해 리플렉션합니다.
+
+    2.  SubTypes
+        SubTypes 지시문을 사용하여 다른 형식에서 파생되는 형식에 대해 리플렉션합니다.
+
+    3.  AttributeImplies
+        AttributeImplies 지시문을 사용하여 라이브러리에서 특성으로 데코레이팅된 메서드 또는 형식에 대해
+        리플렉션해야 하는지를 나타냅니다.
+
+    라이브러리에 대한 런타임 지시문 작성에 대한 자세한 내용을 보려면
+    https://go.microsoft.com/fwlink/?LinkID=391919를 방문하세요.
+-->
+<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
+  <Library Name="VagabondK.Protocols.Channels.SerialPort.UWP">
+
+  	<!-- 여기에 라이브러리에 대한 지시문 추가-->
+
+  </Library>
+</Directives>
