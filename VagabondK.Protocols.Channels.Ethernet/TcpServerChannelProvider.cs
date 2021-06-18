@@ -23,11 +23,24 @@ namespace VagabondK.Protocols.Channels
         /// 생성자
         /// </summary>
         /// <param name="port">TCP 연결 수신 포트</param>
-        public TcpServerChannelProvider(int port)
+        public TcpServerChannelProvider(int port) : this(IPAddress.Any, port) { }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="ipAddress">로컬 IP 주소</param>
+        /// <param name="port">TCP 연결 수신 포트</param>
+        public TcpServerChannelProvider(IPAddress ipAddress, int port)
         {
+            IPAddress = ipAddress;
             Port = port;
-            tcpListener = new TcpListener(IPAddress.Any, Port);
+            tcpListener = new TcpListener(IPAddress, Port);
         }
+
+        /// <summary>
+        /// 로컬 IP 주소
+        /// </summary>
+        public IPAddress IPAddress { get; }
 
         /// <summary>
         /// TCP 연결 수신 포트

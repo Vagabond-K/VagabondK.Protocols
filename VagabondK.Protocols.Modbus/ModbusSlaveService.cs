@@ -24,8 +24,9 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="channel">통신 채널</param>
-        public ModbusSlaveService(IChannel channel) : this(new IChannel[] { channel })
+        public ModbusSlaveService(IChannel channel)
         {
+            AddChannel(channel);
         }
 
         /// <summary>
@@ -36,6 +37,38 @@ namespace VagabondK.Protocols.Modbus
         {
             foreach (var channel in channels)
                 AddChannel(channel);
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusSlaveService(ModbusSerializer serializer)
+        {
+            this.serializer = serializer;
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="channel">통신 채널</param>
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusSlaveService(IChannel channel, ModbusSerializer serializer)
+        {
+            AddChannel(channel);
+            this.serializer = serializer;
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="channels">통신 채널 목록</param>
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusSlaveService(IEnumerable<IChannel> channels, ModbusSerializer serializer)
+        {
+            foreach (var channel in channels)
+                AddChannel(channel);
+            this.serializer = serializer;
         }
 
         private ModbusSerializer serializer;
@@ -105,13 +138,13 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// 통신 채널 Logger
+        /// 채널 유지 제한시간(밀리세컨드 단위). 이 시간 동안 요청이 발생하지 않으면 채널을 닫습니다. 기본값은 10000(10초)이고, 0이면 채널을 항상 유지합니다.
         /// </summary>
-        public IChannelLogger Logger { get; set; }
+        public int ChannelTimeout { get; set; } = 10000;
 
         private void OnReceivedUnrecognizedMessage(object sender, UnrecognizedEventArgs e)
         {
-            Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
+            e?.Channel?.Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
         }
 
         private readonly Dictionary<Channel, ChannelTask> channelTasks = new Dictionary<Channel, ChannelTask>();
@@ -132,7 +165,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 if (channel is Channel modbusChannel)
                 {
-                    var channelTask = new ChannelTask(this, modbusChannel);
+                    var channelTask = new ChannelTask(this, modbusChannel, false);
                     channelTasks[modbusChannel] = channelTask;
                     channelTask.Start();
                 }
@@ -173,7 +206,7 @@ namespace VagabondK.Protocols.Modbus
         {
             lock (channels)
             {
-                var channelTask = new ChannelTask(this, e.Channel);
+                var channelTask = new ChannelTask(this, e.Channel, true);
                 channelTasks[e.Channel] = channelTask;
                 channelTask.Start();
             }
@@ -266,7 +299,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 var responseMessage = Serializer.Serialize(response).ToArray();
                 channel.Write(responseMessage);
-                Logger?.Log(new ModbusMessageLog(channel, response, responseMessage));
+                channel?.Logger?.Log(new ModbusMessageLog(channel, response, responseMessage));
             }
         }
 
@@ -418,14 +451,16 @@ namespace VagabondK.Protocols.Modbus
 
         class ChannelTask
         {
-            public ChannelTask(ModbusSlaveService modbusSlave, Channel channel)
+            public ChannelTask(ModbusSlaveService modbusSlave, Channel channel, bool createdFromProvider)
             {
                 this.modbusSlave = modbusSlave;
                 this.channel = channel;
+                this.createdFromProvider = createdFromProvider;
             }
 
             private readonly ModbusSlaveService modbusSlave;
             private readonly Channel channel;
+            private readonly bool createdFromProvider;
             private bool isRunning = false;
 
             public void Start()
@@ -439,17 +474,31 @@ namespace VagabondK.Protocols.Modbus
                         {
                             try
                             {
-                                RequestBuffer buffer = new RequestBuffer(modbusSlave, channel);
-                                var request = modbusSlave.Serializer.Deserialize(buffer);
-                                if (request != null)
+                                void receive()
                                 {
-                                    modbusSlave.Logger?.Log(new ModbusMessageLog(channel, request, buffer.ToArray()));
-                                    modbusSlave.OnReceivedModbusRequest(channel, request);
+                                    RequestBuffer buffer = new RequestBuffer(modbusSlave, channel);
+                                    var request = modbusSlave.Serializer.Deserialize(buffer);
+                                    if (request != null)
+                                    {
+                                        channel.Logger?.Log(new ModbusMessageLog(channel, request, buffer.ToArray()));
+                                        modbusSlave.OnReceivedModbusRequest(channel, request);
+                                    }
+                                }
+
+                                var channelTimeout = modbusSlave.ChannelTimeout;
+                                if (channelTimeout == 0)
+                                {
+                                    receive();
+                                }
+                                else if (!Task.Run(receive).Wait(channelTimeout) && createdFromProvider)
+                                {
+                                    modbusSlave.RemoveChannel(channel);
                                 }
                             }
                             catch
                             {
-                                modbusSlave.RemoveChannel(channel);
+                                if (createdFromProvider)
+                                    modbusSlave.RemoveChannel(channel);
                             }
                         }
                         if (!channel.IsDisposed)

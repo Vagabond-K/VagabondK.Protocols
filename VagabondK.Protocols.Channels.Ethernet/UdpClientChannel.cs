@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,15 @@ namespace VagabondK.Protocols.Channels
         }
 
         /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="localPort">로컬 포트</param>
+        public UdpClientChannel(int localPort)
+        {
+            LocalPort = localPort;
+        }
+
+        /// <summary>
         /// 호스트
         /// </summary>
         public string Host { get; }
@@ -59,6 +69,8 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private bool isRunningReceive = false;
         private string description;
+
+        private IPEndPoint remoteEndPoint;
 
         /// <summary>
         /// 채널 설명
@@ -110,8 +122,11 @@ namespace VagabondK.Protocols.Channels
                     else
                         udpClient = new UdpClient();
 
-                    udpClient.Connect(Host ?? string.Empty, RemotePort);
-                    description = udpClient.Client.RemoteEndPoint.ToString();
+                    if (RemotePort != 0)
+                    {
+                        udpClient.Connect(Host ?? string.Empty, RemotePort);
+                        description = udpClient.Client.RemoteEndPoint.ToString();
+                    }
                 }
             }
         }
@@ -134,15 +149,29 @@ namespace VagabondK.Protocols.Channels
                                 CheckConnection();
                                 if (udpClient != null)
                                 {
-                                    byte[] buffer = new byte[8192];
-                                    while (true)
+                                    if (RemotePort == 0)
                                     {
-                                        int received = udpClient.Client.Receive(buffer);
+                                        var buffer = udpClient.Receive(ref remoteEndPoint);
                                         lock (readBuffer)
                                         {
-                                            for (int i = 0; i < received; i++)
+                                            for (int i = 0; i < buffer.Length; i++)
                                                 readBuffer.Enqueue(buffer[i]);
                                             readEventWaitHandle.Set();
+                                        }
+                                        description = remoteEndPoint.ToString();
+                                    }
+                                    else
+                                    {
+                                        byte[] buffer = new byte[8192];
+                                        while (true)
+                                        {
+                                            int received = udpClient.Client.Receive(buffer);
+                                            lock (readBuffer)
+                                            {
+                                                for (int i = 0; i < received; i++)
+                                                    readBuffer.Enqueue(buffer[i]);
+                                                readEventWaitHandle.Set();
+                                            }
                                         }
                                     }
                                 }
@@ -176,7 +205,11 @@ namespace VagabondK.Protocols.Channels
             {
                 try
                 {
-                    if (udpClient?.Client?.Connected == true)
+                    if (remoteEndPoint != null)
+                    {
+                        udpClient.Send(bytes, bytes.Length, remoteEndPoint);
+                    }
+                    else if (udpClient?.Client?.Connected == true)
                         udpClient?.Client?.Send(bytes);
                 }
                 catch

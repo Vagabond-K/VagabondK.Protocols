@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
 using VagabondK.Protocols.Modbus;
@@ -12,27 +13,34 @@ namespace SimpleModbusSlave
         {
             var logger = new ConsoleChannelLogger();
 
-            var channelProvider = new TcpServerChannelProvider(502)
-            //var channelProvider = new UdpServerChannelProvider(502)
-            {
-                Logger = logger
-            };
+            IChannel channel = new TcpServerChannelProvider(502) { Logger = logger };        //TCP Server
+            //IChannel channel = new TcpClientChannel("127.0.0.1", 502) { Logger = logger };   //TCP Client
+            //IChannel channel = new UdpServerChannelProvider(502) { Logger = logger };        //UDP
 
-            var modbusSlaveService = new ModbusSlaveService(channelProvider)
+            var modbusSlaveService = new ModbusSlaveService(channel)
             {
                 //Serializer = new ModbusRtuSerializer(),
                 Serializer = new ModbusTcpSerializer(),
                 //Serializer = new ModbusAsciiSerializer(),
-                Logger = logger,
-                [1] = new ModbusSlave()
             };
 
-            modbusSlaveService[1].InputRegisters.SetValue(102, 4.56f);
-            modbusSlaveService[1].InputRegisters.SetValue(100, 1.23f);
+            var modbusSlave1 = modbusSlaveService[1] = new ModbusSlave();
 
-            channelProvider.Start();
+            var float100 = 1.23f;
+            var float102 = 4.56f;
 
-            Console.ReadKey();
+            (channel as ChannelProvider)?.Start();
+
+            while (true)
+            {
+                float100 += 0.01f;
+                float102 += 0.01f;
+
+                modbusSlave1.InputRegisters.SetValue(100, float100);
+                modbusSlave1.InputRegisters.SetValue(102, float102);
+
+                Thread.Sleep(1000);
+            }
         }
     }
 }

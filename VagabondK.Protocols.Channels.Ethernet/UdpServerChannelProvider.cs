@@ -23,11 +23,28 @@ namespace VagabondK.Protocols.Channels
         /// 생성자
         /// </summary>
         /// <param name="port">UDP 메시지 수신 포트</param>
+        /// <param name="addressFamily">주소 지정 체계</param>
+        public UdpServerChannelProvider(int port, AddressFamily addressFamily)
+        {
+            Port = port;
+            AddressFamily = addressFamily;
+            udpClient = new UdpClient(Port, AddressFamily);
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="port">UDP 메시지 수신 포트</param>
         public UdpServerChannelProvider(int port)
         {
             Port = port;
             udpClient = new UdpClient(port);
         }
+
+        /// <summary>
+        /// 주소 지정 체계
+        /// </summary>
+        public AddressFamily AddressFamily { get; }
 
         /// <summary>
         /// UDP 메시지 수신 포트
@@ -79,25 +96,32 @@ namespace VagabondK.Protocols.Channels
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
                         IPEndPoint remoteEndPoint = null;
-                        var received = udpClient.Receive(ref remoteEndPoint);
+                        try
+                        {
+                            var received = udpClient.Receive(ref remoteEndPoint);
 
-                        if (channels.TryGetValue(remoteEndPoint.ToString(), out var channelReference)
-                            && channelReference.TryGetTarget(out var channel))
-                        {
-                            channel.AddReceivedMessage(received);
-                        }
-                        else
-                        {
-                            channel = new UdpClientChannel(this, remoteEndPoint, received)
+                            if (channels.TryGetValue(remoteEndPoint.ToString(), out var channelReference)
+                                && channelReference.TryGetTarget(out var channel))
                             {
-                                Logger = Logger
-                            };
-                            Logger?.Log(new ChannelOpenEventLog(channel));
-                            channels[channel.Description] = new WeakReference<UdpClientChannel>(channel);
-                            RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                                channel.AddReceivedMessage(received);
+                            }
+                            else
+                            {
+                                channel = new UdpClientChannel(this, remoteEndPoint, received)
+                                {
+                                    Logger = Logger
+                                };
+                                Logger?.Log(new ChannelOpenEventLog(channel));
+                                channels[channel.Description] = new WeakReference<UdpClientChannel>(channel);
+                                RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                            }
+                            foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
+                                channels.Remove(disposed);
                         }
-                        foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
-                            channels.Remove(disposed);
+                        catch (Exception ex)
+                        {
+                            Logger?.Log(new ChannelErrorLog(this, ex));
+                        }
                     }
                 }, cancellationTokenSource.Token);
             }
@@ -154,6 +178,7 @@ namespace VagabondK.Protocols.Channels
                 {
                     provider?.channels?.Remove(Description);
                     IsDisposed = true;
+                    Logger?.Log(new ChannelCloseEventLog(this));
                 }
             }
 

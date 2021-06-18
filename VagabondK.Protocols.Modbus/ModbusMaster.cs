@@ -15,6 +15,40 @@ namespace VagabondK.Protocols.Modbus
     public class ModbusMaster : IDisposable
     {
         /// <summary>
+        /// 생성자
+        /// </summary>
+        public ModbusMaster() { }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="channel">통신 채널</param>
+        public ModbusMaster(IChannel channel)
+        {
+            this.channel = channel;
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusMaster(ModbusSerializer serializer)
+        {
+            this.serializer = serializer;
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="channel">통신 채널</param>
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusMaster(IChannel channel, ModbusSerializer serializer)
+        {
+            this.channel = channel;
+            this.serializer = serializer;
+        }
+
+        /// <summary>
         /// 리소스 해제
         /// </summary>
         public void Dispose()
@@ -78,14 +112,9 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         public bool ThrowsModbusExceptions { get; set; } = true;
 
-        /// <summary>
-        /// 통신 채널 Logger
-        /// </summary>
-        public IChannelLogger Logger { get; set; }
-
         private void OnReceivedUnrecognizedMessage(object sender, UnrecognizedEventArgs e)
         {
-            Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
+            e?.Channel?.Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
         }
 
         /// <summary>
@@ -121,7 +150,7 @@ namespace VagabondK.Protocols.Modbus
             }
 
             channel.Write(requestMessage);
-            Logger?.Log(new ModbusMessageLog(channel, request, requestMessage));
+            channel?.Logger?.Log(new ModbusMessageLog(channel, request, requestMessage));
 
             ModbusResponse result;
             try
@@ -130,18 +159,18 @@ namespace VagabondK.Protocols.Modbus
             }
             catch (ModbusCommException ex)
             {
-                Logger?.Log(new ChannelErrorLog(channel, ex));
+                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
                 throw ex;
             }
 
             if (result is ModbusExceptionResponse exceptionResponse)
             {
-                Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse.ExceptionCode, buffer.ToArray()));
+                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse.ExceptionCode, buffer.ToArray()));
                 if (ThrowsModbusExceptions)
                     throw new ModbusException(exceptionResponse.ExceptionCode);
             }
             else
-                Logger?.Log(new ModbusMessageLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray()));
+                channel?.Logger?.Log(new ModbusMessageLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray()));
 
 
             return result;
