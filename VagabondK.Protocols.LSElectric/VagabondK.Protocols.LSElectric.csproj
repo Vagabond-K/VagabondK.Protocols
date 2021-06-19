@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461;netcoreapp3.1</TargetFrameworks>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\VagabondK.Protocols.LSIS.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\VagabondK.Protocols.LSElectric.xml</DocumentationFile>
     <Company>Vagabond K</Company>
     <Authors>Vagabond K</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>nugetIcon.png</PackageIcon>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.LSIS</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.LSElectric</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>LS산전 제품과의 통신 기능을 제공하는 라이브러리입니다.</Description>
+    <Description>LS ELECTRIC 제품과의 통신 기능을 제공하는 라이브러리입니다.</Description>
     <Version>1.0.0</Version>
-    <PackageProjectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.LSIS</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.LSElectric</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace VagabondK.Protocols.LSIS.Cnet
+namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
-    /// LS산전 Cnet 프로토콜 요청 메시지
+    /// LS ELECTRIC Cnet 프로토콜 요청 메시지
     /// </summary>
     public abstract class CnetRequest : CnetMessage, ICloneable
     {

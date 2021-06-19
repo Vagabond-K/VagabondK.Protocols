@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace VagabondK.Protocols.LSIS
+namespace VagabondK.Protocols.LSElectric
 {
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct DeviceValue

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
-using VagabondK.Protocols.LSIS;
-using VagabondK.Protocols.LSIS.Cnet;
+using VagabondK.Protocols.LSElectric.Cnet;
 
 namespace SimpleCnetClient
 {

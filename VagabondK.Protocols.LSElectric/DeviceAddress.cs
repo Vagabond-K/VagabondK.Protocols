@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace VagabondK.Protocols.LSIS
+namespace VagabondK.Protocols.LSElectric
 {
     /// <summary>
-    /// LS산전 PLC 디바이스 주소
+    /// LS ELECTRIC PLC 디바이스 주소
     /// </summary>
     public struct DeviceAddress
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="deviceType">LS산전 PLC 디바이스 영역</param>
-        /// <param name="dataType">LS산전 PLC 데이터 형식</param>
+        /// <param name="deviceType">LS ELECTRIC PLC 디바이스 영역</param>
+        /// <param name="dataType">LS ELECTRIC PLC 데이터 형식</param>
         /// <param name="address">주소</param>
         /// <param name="subAddresses">세부 주소 목록(U 영역의 .을 이용한 분리 주소)</param>
         public DeviceAddress(DeviceType deviceType, DataType dataType, uint address, params byte[] subAddresses)
@@ -26,12 +26,12 @@ namespace VagabondK.Protocols.LSIS
         }
 
         /// <summary>
-        /// LS산전 PLC 디바이스 영역
+        /// LS ELECTRIC PLC 디바이스 영역
         /// </summary>
         public DeviceType DeviceType { get; }
 
         /// <summary>
-        /// LS산전 PLC 데이터 형식
+        /// LS ELECTRIC PLC 데이터 형식
         /// </summary>
         public DataType DataType { get; }
 

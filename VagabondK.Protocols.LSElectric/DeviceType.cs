@@ -1,7 +1,7 @@
-﻿namespace VagabondK.Protocols.LSIS
+﻿namespace VagabondK.Protocols.LSElectric
 {
     /// <summary>
-    /// LS산전 PLC 디바이스 영역
+    /// LS ELECTRIC PLC 디바이스 영역
     /// </summary>
     public enum DeviceType : byte
     {

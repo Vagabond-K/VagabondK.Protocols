@@ -1,7 +1,7 @@
-﻿namespace VagabondK.Protocols.LSIS.Cnet
+﻿namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
-    /// LS산전 Cnet 프로토콜 커맨드
+    /// LS ELECTRIC Cnet 프로토콜 커맨드
     /// </summary>
     public enum CnetCommand : byte
     {
@@ -26,7 +26,7 @@
     }
 
     /// <summary>
-    /// LS산전 Cnet 프로토콜 커맨드 타입
+    /// LS ELECTRIC Cnet 프로토콜 커맨드 타입
     /// </summary>
     public enum CnetCommandType : ushort
     {
