@@ -66,23 +66,16 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         protected override void OnCreateFrameData(List<byte> byteList) { }
     }
 
-    public abstract class CnetReadResponse : CnetACKResponse
+    public class CnetReadResponse : CnetACKResponse, IReadOnlyDictionary<DeviceAddress, DeviceValue>
     {
-        internal CnetReadResponse(CnetReadRequest request) : base(request) { }
-    }
+        internal CnetReadResponse(IEnumerable<DeviceValue> values, CnetReadEachAddressRequest request) : base(request) => SetData(values, request);
+        internal CnetReadResponse(IEnumerable<DeviceValue> values, CnetExecuteMonitorEachAddressRequest request) : base(request) => SetData(values, request);
 
-    public class CnetReadEachAdressResponse : CnetACKResponse, IReadOnlyDictionary<DeviceAddress, DeviceValue>
-    {
-        internal CnetReadEachAdressResponse(IEnumerable<DeviceValue> values, CnetReadEachAddressRequest request) : base(request) => SetData(true, values, request);
-        internal CnetReadEachAdressResponse(IEnumerable<DeviceValue> values, CnetExecuteMonitorEachAddressRequest request) : base(request) => SetData(true, values, request);
+        internal CnetReadResponse(IEnumerable<byte> bytes, CnetReadAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
+        internal CnetReadResponse(IEnumerable<byte> bytes, CnetExecuteMonitorAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
 
-        internal CnetReadEachAdressResponse(IEnumerable<byte> bytes, CnetReadAddressBlockRequest request) : base(request) => SetData(false, bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
-        internal CnetReadEachAdressResponse(IEnumerable<byte> bytes, CnetExecuteMonitorAddressBlockRequest request) : base(request) => SetData(false, bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
-
-        private void SetData(bool isEachAddresskRequest, IEnumerable<DeviceValue> values, IEnumerable<DeviceAddress> deviceAddresses)
+        private void SetData(IEnumerable<DeviceValue> values, IEnumerable<DeviceAddress> deviceAddresses)
         {
-            this.isEachAddresskRequest = isEachAddresskRequest;
-
             var valueArray = values.ToArray();
             var deviceAddressArray = deviceAddresses.ToArray();
 
@@ -92,10 +85,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item =>item.Value);
         }
 
-        private void SetData(bool isEachAddresskRequest, IEnumerable<byte> bytes, DeviceAddress deviceAddress, byte count)
+        private void SetData(IEnumerable<byte> bytes, DeviceAddress deviceAddress, byte count)
         {
-            this.isEachAddresskRequest = isEachAddresskRequest;
-
             var byteArray = bytes.ToArray();
 
             int valueUnit = 1;
@@ -134,6 +125,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                     throw new ArgumentOutOfRangeException(nameof(DataType));
             }
 
+            dataType = deviceAddress.DataType;
+
             if (byteArray.Length != count * valueUnit) throw new ArgumentOutOfRangeException(nameof(bytes));
 
             deviceValueList = Enumerable.Range(0, count).Select(i =>
@@ -143,7 +136,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item => item.Value);
         }
 
-        private bool isEachAddresskRequest;
+        private DataType? dataType;
         private List<KeyValuePair<DeviceAddress, DeviceValue>> deviceValueList;
         private Dictionary<DeviceAddress, DeviceValue> deviceValueDictionary;
 
@@ -165,13 +158,66 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
         protected override void OnCreateFrameData(List<byte> byteList)
         {
-            if (isEachAddresskRequest)
+            if (dataType == null)
             {
-
+                byteList.AddRange(ToAsciiBytes(deviceValueList.Count));
+                foreach (var item in deviceValueList)
+                {
+                    switch (item.Key.DataType)
+                    {
+                        case DataType.Bit:
+                            byteList.AddRange(ToAsciiBytes(1));
+                            byteList.AddRange(ToAsciiBytes(item.Value.BitValue ? 1 : 0));
+                            break;
+                        case DataType.Byte:
+                            byteList.AddRange(ToAsciiBytes(1));
+                            byteList.AddRange(ToAsciiBytes(item.Value.ByteValue));
+                            break;
+                        case DataType.Word:
+                            byteList.AddRange(ToAsciiBytes(2));
+                            byteList.AddRange(ToAsciiBytes(item.Value.WordValue, 4));
+                            break;
+                        case DataType.DoubleWord:
+                            byteList.AddRange(ToAsciiBytes(4));
+                            byteList.AddRange(ToAsciiBytes(item.Value.DoubleWordValue, 8));
+                            break;
+                        case DataType.LongWord:
+                            byteList.AddRange(ToAsciiBytes(8));
+                            byteList.AddRange(ToAsciiBytes(item.Value.LongWordValue, 16));
+                            break;
+                    }
+                }
             }
             else
             {
-
+                switch (dataType.Value)
+                {
+                    case DataType.Bit:
+                        byteList.AddRange(ToAsciiBytes(deviceValueList.Count));
+                        foreach (var item in deviceValueList)
+                            byteList.AddRange(ToAsciiBytes(item.Value.BitValue ? 1 : 0));
+                        break;
+                    case DataType.Byte:
+                        byteList.AddRange(ToAsciiBytes(deviceValueList.Count));
+                        foreach (var item in deviceValueList)
+                            byteList.AddRange(ToAsciiBytes(item.Value.ByteValue));
+                        break;
+                    case DataType.Word:
+                        byteList.AddRange(ToAsciiBytes(2 * deviceValueList.Count));
+                        foreach (var item in deviceValueList)
+                            byteList.AddRange(ToAsciiBytes(item.Value.WordValue, 4));
+                        break;
+                    case DataType.DoubleWord:
+                        byteList.AddRange(ToAsciiBytes(4 * deviceValueList.Count));
+                        foreach (var item in deviceValueList)
+                            byteList.AddRange(ToAsciiBytes(item.Value.DoubleWordValue, 8));
+                        break;
+                    case DataType.LongWord:
+                        byteList.AddRange(ToAsciiBytes(8 * deviceValueList.Count));
+                        foreach (var item in deviceValueList)
+                            byteList.AddRange(ToAsciiBytes(item.Value.LongWordValue, 16));
+                        break;
+                }
             }
         }
     }
