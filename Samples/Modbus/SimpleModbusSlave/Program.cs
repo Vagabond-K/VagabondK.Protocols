@@ -13,9 +13,9 @@ namespace SimpleModbusSlave
         {
             var logger = new ConsoleChannelLogger();
 
-            IChannel channel = new TcpServerChannelProvider(502) { Logger = logger };        //TCP Server
-            //IChannel channel = new TcpClientChannel("127.0.0.1", 502) { Logger = logger };   //TCP Client
-            //IChannel channel = new UdpServerChannelProvider(502) { Logger = logger };        //UDP
+            IChannel channel = new TcpChannelProvider(502) { Logger = logger };        //TCP Server
+            //IChannel channel = new TcpChannel("127.0.0.1", 502) { Logger = logger };   //TCP Client
+            //IChannel channel = new UdpChannelProvider(502) { Logger = logger };        //UDP
 
             var modbusSlaveService = new ModbusSlaveService(channel)
             {

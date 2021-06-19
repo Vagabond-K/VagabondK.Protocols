@@ -10,21 +10,21 @@ using VagabondK.Protocols.Logging;
 namespace VagabondK.Protocols.Channels
 {
     /// <summary>
-    /// UDP 서버 기반 통신 채널 공급자
+    /// UDP 소켓 기반 통신 채널 공급자
     /// </summary>
-    public class UdpServerChannelProvider : ChannelProvider
+    public class UdpChannelProvider : ChannelProvider
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        public UdpServerChannelProvider() : this(502) { }
+        public UdpChannelProvider() : this(502) { }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="port">UDP 메시지 수신 포트</param>
         /// <param name="addressFamily">주소 지정 체계</param>
-        public UdpServerChannelProvider(int port, AddressFamily addressFamily)
+        public UdpChannelProvider(int port, AddressFamily addressFamily)
         {
             Port = port;
             AddressFamily = addressFamily;
@@ -35,7 +35,7 @@ namespace VagabondK.Protocols.Channels
         /// 생성자
         /// </summary>
         /// <param name="port">UDP 메시지 수신 포트</param>
-        public UdpServerChannelProvider(int port)
+        public UdpChannelProvider(int port)
         {
             Port = port;
             udpClient = new UdpClient(port);
@@ -88,7 +88,7 @@ namespace VagabondK.Protocols.Channels
             lock (this)
             {
                 if (IsDisposed)
-                    throw new ObjectDisposedException(nameof(TcpServerChannelProvider));
+                    throw new ObjectDisposedException(nameof(UdpChannelProvider));
 
                 cancellationTokenSource = new CancellationTokenSource();
                 Task.Run(() =>
@@ -140,7 +140,7 @@ namespace VagabondK.Protocols.Channels
 
         class UdpClientChannel : Channel
         {
-            internal UdpClientChannel(UdpServerChannelProvider provider, IPEndPoint endPoint, byte[] received)
+            internal UdpClientChannel(UdpChannelProvider provider, IPEndPoint endPoint, byte[] received)
             {
                 this.provider = provider;
                 this.endPoint = endPoint;
@@ -149,7 +149,7 @@ namespace VagabondK.Protocols.Channels
                 AddReceivedMessage(received);
             }
 
-            private readonly UdpServerChannelProvider provider;
+            private readonly UdpChannelProvider provider;
             private readonly IPEndPoint endPoint;
 
             private readonly object writeLock = new object();

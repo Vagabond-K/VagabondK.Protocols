@@ -1,8 +1,11 @@
-﻿namespace VagabondK.Protocols.Modbus.Logging
+﻿using System;
+
+namespace VagabondK.Protocols.Modbus.Logging
 {
     /// <summary>
     /// Modbus Log 카테고리
     /// </summary>
+    [Flags]
     public enum ModbusLogCategory : int
     {
         /// <summary>

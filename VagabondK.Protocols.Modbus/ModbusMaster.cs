@@ -176,34 +176,38 @@ namespace VagabondK.Protocols.Modbus
             return result;
         }
 
-
-
-
-
         /// <summary>
         /// 다중 Coil 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Coil 값 목록</returns>
-        public bool[] ReadCoils(byte slaveAddress, ushort address, ushort length) => ReadCoils(slaveAddress, address, length, Timeout);
+        /// <returns>Modbus 논리값 읽기 응답</returns>
+        public ModbusReadBooleanResponse ReadCoils(byte slaveAddress, ushort address, ushort length) => ReadCoils(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Discrete Input 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Discrete Input 값 목록</returns>
-        public bool[] ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length) => ReadDiscreteInputs(slaveAddress, address, length, Timeout);
+        /// <returns>Modbus 논리값 읽기 응답</returns>
+        public ModbusReadBooleanResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length) => ReadDiscreteInputs(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Holding Register 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Holding Register 값 목록</returns>
-        public ushort[] ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisters(slaveAddress, address, length, Timeout);
+        /// <returns>Modbus 레지스터 읽기 응답</returns>
+        public ModbusReadRegisterResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisters(slaveAddress, address, length, Timeout);
+        /// <summary>
+        /// 다중 Input Register 읽기
+        /// </summary>
+        /// <param name="slaveAddress">슬레이브 주소</param>
+        /// <param name="address">데이터 주소</param>
+        /// <param name="length">길이</param>
+        /// <returns>Modbus 레지스터 읽기 응답</returns>
+        public ModbusReadRegisterResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length) => ReadInputRegisters(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Holding Register를 Raw 바이트 배열로 읽기
         /// </summary>
@@ -212,14 +216,6 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="length">길이</param>
         /// <returns>Holding Register들의 Raw 바이트 배열</returns>
         public byte[] ReadHoldingRegisterBytes(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisterBytes(slaveAddress, address, length, Timeout);
-        /// <summary>
-        /// 다중 Input Register 읽기
-        /// </summary>
-        /// <param name="slaveAddress">슬레이브 주소</param>
-        /// <param name="address">데이터 주소</param>
-        /// <param name="length">길이</param>
-        /// <returns>Input Register 값 목록</returns>
-        public ushort[] ReadInputRegisters(byte slaveAddress, ushort address, ushort length) => ReadInputRegisters(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Input Register를 Raw 바이트 배열로 읽기
         /// </summary>
@@ -669,8 +665,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Coil 값 목록</returns>
-        public bool[] ReadCoils(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, length), timeout) as ModbusReadBooleanResponse)?.Values?.ToArray();
+        /// <returns>Modbus 논리값 읽기 응답</returns>
+        public ModbusReadBooleanResponse ReadCoils(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, length), timeout) as ModbusReadBooleanResponse;
         /// <summary>
         /// 다중 Discrete Input 읽기
         /// </summary>
@@ -678,8 +674,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Discrete Input 값 목록</returns>
-        public bool[] ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, length), timeout) as ModbusReadBooleanResponse)?.Values?.ToArray();
+        /// <returns>Modbus 논리값 읽기 응답</returns>
+        public ModbusReadBooleanResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, length), timeout) as ModbusReadBooleanResponse;
         /// <summary>
         /// 다중 Holding Register 읽기
         /// </summary>
@@ -687,8 +683,17 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register 값 목록</returns>
-        public ushort[] ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadRegisterResponse)?.Values?.ToArray();
+        /// <returns>Modbus 레지스터 읽기 응답</returns>
+        public ModbusReadRegisterResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadRegisterResponse;
+        /// <summary>
+        /// 다중 Input Register 읽기
+        /// </summary>
+        /// <param name="slaveAddress">슬레이브 주소</param>
+        /// <param name="address">데이터 주소</param>
+        /// <param name="length">길이</param>
+        /// <param name="timeout">제한시간(밀리초)</param>
+        /// <returns>Modbus 레지스터 읽기 응답</returns>
+        public ModbusReadRegisterResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadRegisterResponse;
         /// <summary>
         /// 다중 Holding Register를 Raw 바이트 배열로 읽기
         /// </summary>
@@ -698,15 +703,6 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register들의 Raw 바이트 배열</returns>
         public byte[] ReadHoldingRegisterBytes(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadRegisterResponse)?.Bytes?.ToArray();
-        /// <summary>
-        /// 다중 Input Register 읽기
-        /// </summary>
-        /// <param name="slaveAddress">슬레이브 주소</param>
-        /// <param name="address">데이터 주소</param>
-        /// <param name="length">길이</param>
-        /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register 값 목록</returns>
-        public ushort[] ReadInputRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadRegisterResponse)?.Values?.ToArray();
         /// <summary>
         /// 다중 Input Register를 Raw 바이트 배열로 읽기
         /// </summary>

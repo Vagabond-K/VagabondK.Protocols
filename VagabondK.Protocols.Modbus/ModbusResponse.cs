@@ -15,7 +15,7 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="request">Modbus 요청</param>
-        protected ModbusResponse(ModbusRequest request)
+        internal ModbusResponse(ModbusRequest request)
         {
             Request = request ?? throw new ArgumentNullException(nameof(request));
         }
@@ -51,7 +51,7 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="request">Modbus 요청</param>
-        protected ModbusOkResponse(ModbusRequest request) : base(request) { }
+        internal ModbusOkResponse(ModbusRequest request) : base(request) { }
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="exceptionCode">Modbus Exception 코드</param>
         /// <param name="request">Modbus 요청</param>
-        public ModbusExceptionResponse(ModbusExceptionCode exceptionCode, ModbusRequest request) : base(request)
+        internal ModbusExceptionResponse(ModbusExceptionCode exceptionCode, ModbusRequest request) : base(request)
         {
             ExceptionCode = exceptionCode;
         }
@@ -101,7 +101,7 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="request">Modbus 요청</param>
-        protected ModbusOkResponse(TRequest request) : base(request) { }
+        internal ModbusOkResponse(TRequest request) : base(request) { }
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="request">Modbus 읽기 요청</param>
-        protected ModbusReadResponse(ModbusReadRequest request) : base(request) { }
+        internal ModbusReadResponse(ModbusReadRequest request) : base(request) { }
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="values">응답할 논리값 배열</param>
         /// <param name="request">Modbus 읽기 요청</param>
-        public ModbusReadBooleanResponse(bool[] values, ModbusReadRequest request) : base(request)
+        internal ModbusReadBooleanResponse(bool[] values, ModbusReadRequest request) : base(request)
         {
             switch (request.Function)
             {
@@ -188,7 +188,7 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="bytes">응답할 레지스터들의 Raw 바이트 배열</param>
         /// <param name="request">Modbus 읽기 요청</param>
-        public ModbusReadRegisterResponse(byte[] bytes, ModbusReadRequest request) : base(request)
+        internal ModbusReadRegisterResponse(byte[] bytes, ModbusReadRequest request) : base(request)
         {
             switch (request.Function)
             {
@@ -375,7 +375,7 @@ namespace VagabondK.Protocols.Modbus
         /// 생성자
         /// </summary>
         /// <param name="request">Modbus 읽기 요청</param>
-        public ModbusWriteResponse(ModbusWriteRequest request) : base(request)
+        internal ModbusWriteResponse(ModbusWriteRequest request) : base(request)
         {
             switch (request.Function)
             {

@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.Abstractions", "VagabondK.Protocols.Abstractions\VagabondK.Protocols.Abstractions.csproj", "{2083E7AE-7A6A-4E34-9514-902FE7DED113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.Abstractions", "VagabondK.Protocols.Abstractions\VagabondK.Protocols.Abstractions.csproj", "{2083E7AE-7A6A-4E34-9514-902FE7DED113}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.Channels.Ethernet", "VagabondK.Protocols.Channels.Ethernet\VagabondK.Protocols.Channels.Ethernet.csproj", "{23ECE7BA-9378-470D-8AD9-26B90AE6FAE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.Channels.Ethernet", "VagabondK.Protocols.Channels.Ethernet\VagabondK.Protocols.Channels.Ethernet.csproj", "{23ECE7BA-9378-470D-8AD9-26B90AE6FAE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.Channels.SerialPort", "VagabondK.Protocols.Channels.SerialPort\VagabondK.Protocols.Channels.SerialPort.csproj", "{D7E6ACB2-CF4E-4B77-95A2-C44CE928652F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.Channels.SerialPort", "VagabondK.Protocols.Channels.SerialPort\VagabondK.Protocols.Channels.SerialPort.csproj", "{D7E6ACB2-CF4E-4B77-95A2-C44CE928652F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.Channels.SerialPort.UWP", "VagabondK.Protocols.Channels.SerialPort.UWP\VagabondK.Protocols.Channels.SerialPort.UWP.csproj", "{E01CEAC7-5D85-4760-BE5E-A49A967A4E78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.Modbus", "VagabondK.Protocols.Modbus\VagabondK.Protocols.Modbus.csproj", "{C5DCF032-342A-4909-8714-3B5DE6B30008}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.Modbus", "VagabondK.Protocols.Modbus\VagabondK.Protocols.Modbus.csproj", "{C5DCF032-342A-4909-8714-3B5DE6B30008}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{504CEDBD-DDCB-4366-AC02-1353969E7635}"
 EndProject
@@ -25,6 +25,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleModbusMaster", "Samples\Modbus\SimpleModbusMaster\SimpleModbusMaster.csproj", "{04454F48-CC02-4A02-A819-467D0B3D847C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleModbusSlave", "Samples\Modbus\SimpleModbusSlave\SimpleModbusSlave.csproj", "{80592A25-79CF-4952-A6BD-24122B714688}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VagabondK.Protocols.LSIS", "VagabondK.Protocols.LSIS\VagabondK.Protocols.LSIS.csproj", "{732171D7-191B-4608-8144-BE496AC6E981}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LSIS", "LSIS", "{4C581C92-6693-41A7-98D2-421A541712BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCnetClient", "LSIS\SimpleCnetClient\SimpleCnetClient.csproj", "{C122671A-183B-4A65-BE8D-AD799579961B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -180,6 +186,46 @@ Global
 		{80592A25-79CF-4952-A6BD-24122B714688}.Release|x64.Build.0 = Release|Any CPU
 		{80592A25-79CF-4952-A6BD-24122B714688}.Release|x86.ActiveCfg = Release|Any CPU
 		{80592A25-79CF-4952-A6BD-24122B714688}.Release|x86.Build.0 = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|ARM.Build.0 = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|x64.Build.0 = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Debug|x86.Build.0 = Debug|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|Any CPU.Build.0 = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|ARM.ActiveCfg = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|ARM.Build.0 = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|ARM64.Build.0 = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|x64.ActiveCfg = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|x64.Build.0 = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|x86.ActiveCfg = Release|Any CPU
+		{732171D7-191B-4608-8144-BE496AC6E981}.Release|x86.Build.0 = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|ARM.Build.0 = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|x64.Build.0 = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|ARM.ActiveCfg = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|ARM.Build.0 = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|ARM64.Build.0 = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|x64.ActiveCfg = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|x64.Build.0 = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C122671A-183B-4A65-BE8D-AD799579961B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +234,8 @@ Global
 		{4B0351C2-477C-40C6-AAB3-5791B1B68F6F} = {504CEDBD-DDCB-4366-AC02-1353969E7635}
 		{04454F48-CC02-4A02-A819-467D0B3D847C} = {4B0351C2-477C-40C6-AAB3-5791B1B68F6F}
 		{80592A25-79CF-4952-A6BD-24122B714688} = {4B0351C2-477C-40C6-AAB3-5791B1B68F6F}
+		{4C581C92-6693-41A7-98D2-421A541712BE} = {504CEDBD-DDCB-4366-AC02-1353969E7635}
+		{C122671A-183B-4A65-BE8D-AD799579961B} = {4C581C92-6693-41A7-98D2-421A541712BE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3AB6F52F-3E07-4F95-99EE-C0B22ABE170A}

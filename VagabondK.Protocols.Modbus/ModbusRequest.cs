@@ -30,7 +30,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 슬레이브 주소
         /// </summary>
-        public byte SlaveAddress { get; }
+        public byte SlaveAddress { get; set; }
         /// <summary>
         /// Function
         /// </summary>
@@ -38,7 +38,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 데이터 주소
         /// </summary>
-        public ushort Address { get; }
+        public ushort Address { get; set; }
         /// <summary>
         /// 요청 길이
         /// </summary>

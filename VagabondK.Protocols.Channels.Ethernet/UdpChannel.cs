@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,37 +9,41 @@ using VagabondK.Protocols.Logging;
 namespace VagabondK.Protocols.Channels
 {
     /// <summary>
-    /// TCP 클라이언트 기반 통신 채널
+    /// UCP 소켓 기반 통신 채널
     /// </summary>
-    public class TcpClientChannel : Channel
+    public class UdpChannel : Channel
     {
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="host">호스트</param>
-        /// <param name="port">포트</param>
-        public TcpClientChannel(string host, int port) : this(host, port, 10000) { }
+        /// <param name="remotePort">원격 포트</param>
+        public UdpChannel(string host, int remotePort)
+        {
+            Host = host;
+            RemotePort = remotePort;
+        }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="host">호스트</param>
-        /// <param name="port">포트</param>
-        /// <param name="connectTimeout">연결 제한시간(밀리초)</param>
-        public TcpClientChannel(string host, int port, int connectTimeout)
+        /// <param name="remotePort">원격 포트</param>
+        /// <param name="localPort">로컬 포트</param>
+        public UdpChannel(string host, int remotePort, int localPort)
         {
             Host = host;
-            Port = port;
-            ConnectTimeout = connectTimeout;
+            RemotePort = remotePort;
+            LocalPort = localPort;
         }
 
-        internal TcpClientChannel(TcpServerChannelProvider provider, TcpClient tcpClient)
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="localPort">로컬 포트</param>
+        public UdpChannel(int localPort)
         {
-            Guid = Guid.NewGuid();
-
-            this.provider = provider;
-            this.tcpClient = tcpClient;
-            description = tcpClient.Client.RemoteEndPoint.ToString();
+            LocalPort = localPort;
         }
 
         /// <summary>
@@ -47,19 +52,16 @@ namespace VagabondK.Protocols.Channels
         public string Host { get; }
 
         /// <summary>
-        /// 포트
+        /// 원격 포트
         /// </summary>
-        public int Port { get; }
+        public int RemotePort { get; }
 
         /// <summary>
-        /// 연결 제한시간(밀리초)
+        /// 로컬 포트
         /// </summary>
-        public int ConnectTimeout { get; }
+        public int? LocalPort { get; }
 
-        internal Guid Guid { get; }
-        private readonly TcpServerChannelProvider provider;
-
-        private TcpClient tcpClient = null;
+        private UdpClient udpClient = null;
         private readonly object connectLock = new object();
         private readonly object writeLock = new object();
         private readonly object readLock = new object();
@@ -67,6 +69,9 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private bool isRunningReceive = false;
         private string description;
+
+        private IPEndPoint remoteEndPoint;
+
         /// <summary>
         /// 채널 설명
         /// </summary>
@@ -75,7 +80,7 @@ namespace VagabondK.Protocols.Channels
         /// <summary>
         /// 소멸자
         /// </summary>
-        ~TcpClientChannel()
+        ~UdpChannel()
         {
             Dispose();
         }
@@ -87,7 +92,6 @@ namespace VagabondK.Protocols.Channels
         {
             if (!IsDisposed)
             {
-                provider?.channels?.Remove(Guid);
                 IsDisposed = true;
 
                 Close();
@@ -98,39 +102,30 @@ namespace VagabondK.Protocols.Channels
         {
             lock (connectLock)
             {
-                if (tcpClient != null)
+                if (udpClient != null)
                 {
                     Logger?.Log(new ChannelCloseEventLog(this));
-                    tcpClient.Close();
-                    tcpClient = null;
+                    udpClient?.Close();
+                    udpClient = null;
                 }
             }
         }
 
         private void CheckConnection()
         {
-            if (provider != null) return;
-
             lock (connectLock)
             {
-                if (!IsDisposed && tcpClient == null)
+                if (!IsDisposed && udpClient == null)
                 {
-                    tcpClient = new TcpClient();
-                    try
-                    {
-                        Task task = tcpClient.ConnectAsync(Host ?? string.Empty, Port);
-                        if (!task.Wait(ConnectTimeout))
-                            throw new SocketException(10060);
+                    if (LocalPort != null)
+                        udpClient = new UdpClient(LocalPort.Value);
+                    else
+                        udpClient = new UdpClient();
 
-                        description = tcpClient.Client.RemoteEndPoint.ToString();
-                        Logger?.Log(new ChannelOpenEventLog(this));
-                    }
-                    catch (Exception ex)
+                    if (RemotePort != 0)
                     {
-                        tcpClient?.Client?.Dispose();
-                        tcpClient = null;
-                        Logger?.Log(new ChannelErrorLog(this, ex));
-                        throw ex;
+                        udpClient.Connect(Host ?? string.Empty, RemotePort);
+                        description = udpClient.Client.RemoteEndPoint.ToString();
                     }
                 }
             }
@@ -152,17 +147,31 @@ namespace VagabondK.Protocols.Channels
                             try
                             {
                                 CheckConnection();
-                                if (tcpClient != null)
+                                if (udpClient != null)
                                 {
-                                    byte[] buffer = new byte[8192];
-                                    while (true)
+                                    if (RemotePort == 0)
                                     {
-                                        int received = tcpClient.Client.Receive(buffer);
+                                        var buffer = udpClient.Receive(ref remoteEndPoint);
                                         lock (readBuffer)
                                         {
-                                            for (int i = 0; i < received; i++)
+                                            for (int i = 0; i < buffer.Length; i++)
                                                 readBuffer.Enqueue(buffer[i]);
                                             readEventWaitHandle.Set();
+                                        }
+                                        description = remoteEndPoint.ToString();
+                                    }
+                                    else
+                                    {
+                                        byte[] buffer = new byte[8192];
+                                        while (true)
+                                        {
+                                            int received = udpClient.Client.Receive(buffer);
+                                            lock (readBuffer)
+                                            {
+                                                for (int i = 0; i < received; i++)
+                                                    readBuffer.Enqueue(buffer[i]);
+                                                readEventWaitHandle.Set();
+                                            }
                                         }
                                     }
                                 }
@@ -196,8 +205,12 @@ namespace VagabondK.Protocols.Channels
             {
                 try
                 {
-                    if (tcpClient?.Client?.Connected == true)
-                        tcpClient?.Client?.Send(bytes);
+                    if (remoteEndPoint != null)
+                    {
+                        udpClient.Send(bytes, bytes.Length, remoteEndPoint);
+                    }
+                    else if (udpClient?.Client?.Connected == true)
+                        udpClient?.Client?.Send(bytes);
                 }
                 catch
                 {
@@ -248,7 +261,7 @@ namespace VagabondK.Protocols.Channels
                 while (readBuffer.Count > 0)
                     yield return readBuffer.Dequeue();
 
-                if (tcpClient == null)
+                if (udpClient == null)
                     yield break;
 
                 byte[] receivedBuffer = new byte[4096];
@@ -256,7 +269,7 @@ namespace VagabondK.Protocols.Channels
 
                 try
                 {
-                    available = tcpClient.Client.Available;
+                    available = udpClient.Client.Available;
                 }
                 catch { }
 
@@ -265,7 +278,7 @@ namespace VagabondK.Protocols.Channels
                     int received = 0;
                     try
                     {
-                        received = tcpClient.Client.Receive(receivedBuffer);
+                        received = udpClient.Client.Receive(receivedBuffer);
                     }
                     catch { }
                     for (int i = 0; i < received; i++)
@@ -273,7 +286,7 @@ namespace VagabondK.Protocols.Channels
 
                 try
                 {
-                    available = tcpClient.Client.Available;
+                    available = udpClient.Client.Available;
                 }
                 catch { }
                 }

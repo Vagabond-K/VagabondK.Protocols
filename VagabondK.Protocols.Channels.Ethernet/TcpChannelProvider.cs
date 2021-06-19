@@ -12,25 +12,25 @@ namespace VagabondK.Protocols.Channels
     /// <summary>
     /// TCP 서버 기반 통신 채널 공급자
     /// </summary>
-    public class TcpServerChannelProvider : ChannelProvider
+    public class TcpChannelProvider : ChannelProvider
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        public TcpServerChannelProvider() : this(502) { }
+        public TcpChannelProvider() : this(502) { }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="port">TCP 연결 수신 포트</param>
-        public TcpServerChannelProvider(int port) : this(IPAddress.Any, port) { }
+        public TcpChannelProvider(int port) : this(IPAddress.Any, port) { }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="ipAddress">로컬 IP 주소</param>
         /// <param name="port">TCP 연결 수신 포트</param>
-        public TcpServerChannelProvider(IPAddress ipAddress, int port)
+        public TcpChannelProvider(IPAddress ipAddress, int port)
         {
             IPAddress = ipAddress;
             Port = port;
@@ -48,7 +48,7 @@ namespace VagabondK.Protocols.Channels
         public int Port { get; }
 
         private readonly TcpListener tcpListener;
-        internal readonly Dictionary<Guid, WeakReference<TcpClientChannel>> channels = new Dictionary<Guid, WeakReference<TcpClientChannel>>();
+        internal readonly Dictionary<Guid, WeakReference<TcpChannel>> channels = new Dictionary<Guid, WeakReference<TcpChannel>>();
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
@@ -84,27 +84,41 @@ namespace VagabondK.Protocols.Channels
             lock (this)
             {
                 if (IsDisposed)
-                    throw new ObjectDisposedException(nameof(TcpServerChannelProvider));
+                    throw new ObjectDisposedException(nameof(TcpChannelProvider));
 
                 cancellationTokenSource = new CancellationTokenSource();
                 tcpListener.Start();
-                Task.Run(() =>
+                Task.Run((Action)(() =>
                 {
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
                         var tcpClient = tcpListener.AcceptTcpClient();
 
+
+/* 'VagabondK.Protocols.Channels.Ethernet (net461)' 프로젝트에서 병합되지 않은 변경 내용
+이전:
                         var channel = new TcpClientChannel(this, tcpClient)
+이후:
+                        var channel = new Channels.TcpClientChannel(this, tcpClient)
+*/
+
+/* 'VagabondK.Protocols.Channels.Ethernet (netcoreapp3.1)' 프로젝트에서 병합되지 않은 변경 내용
+이전:
+                        var channel = new TcpClientChannel(this, tcpClient)
+이후:
+                        var channel = new Channels.TcpClientChannel(this, tcpClient)
+*/
+                        var channel = new TcpChannel(this, tcpClient)
                         {
                             Logger = Logger
                         };
-                        Logger?.Log(new ChannelOpenEventLog(channel));
-                        channels[channel.Guid] = new WeakReference<TcpClientChannel>(channel);
-                        RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                        Logger?.Log(new ChannelOpenEventLog((IChannel)channel));
+                        channels[(Guid)channel.Guid] = new WeakReference<TcpChannel>((TcpChannel)channel);
+                        RaiseCreatedEvent(new ChannelCreatedEventArgs((Channel)channel));
                         foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
                             channels.Remove(disposed);
                     }
-                }, cancellationTokenSource.Token);
+                }), cancellationTokenSource.Token);
             }
         }
 
