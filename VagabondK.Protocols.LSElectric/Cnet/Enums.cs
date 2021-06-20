@@ -22,7 +22,7 @@
         /// <summary>
         /// 모니터 실행
         /// </summary>
-        ExcuteMonitor = 0x59,
+        ExecuteMonitor = 0x59,
     }
 
     /// <summary>
@@ -65,69 +65,49 @@
         /// </summary>
         NotDefined,
         /// <summary>
-        /// 요청과 응답의 Slave Address가 일치하지 않음.
+        /// 응답 헤더가 ACK나 NAK가 아님
         /// </summary>
-        ResponseSlaveAddressDoNotMatch,
+        ResponseHeaderError,
         /// <summary>
-        /// 요청과 응답의 Function 코드가 일치하지 않음.
+        /// 요청과 응답의 국번이 일치하지 않음.
         /// </summary>
-        ResponseFunctionDoNotMatch,
+        ResponseStationNumberDoNotMatch,
         /// <summary>
-        /// 요청과 응답의 Address가 일치하지 않음.
+        /// 요청과 응답의 커맨드가 일치하지 않음.
         /// </summary>
-        ResponseAddressDoNotMatch,
+        ResponseCommandDoNotMatch,
         /// <summary>
-        /// 요청과 응답의 데이터 길이가 일치하지 않음.
+        /// 요청과 응답의 커맨드 타입이 일치하지 않음.
         /// </summary>
-        ResponseLengthDoNotMatch,
+        ResponseCommandTypeDoNotMatch,
         /// <summary>
-        /// 요청과 응답의 쓰기 값이 일치하지 않음.
+        /// 요청과 응답의 모니터 번호가 일치하지 않음.
         /// </summary>
-        ResponseWritedValueDoNotMatch,
+        ResponseMonitorNumberDoNotMatch,
         /// <summary>
-        /// 요청과 응답의 다중 쓰기 길이가 일치하지 않음.
+        /// 요청과 응답의 데이터 블록 개수가 일치하지 않음.
         /// </summary>
-        ResponseWritedLengthDoNotMatch,
+        ResponseDataBlockCountDoNotMatch,
         /// <summary>
-        /// Cnet TCP 프로토콜 아이디가 0이 아님.
+        /// 요청과 응답의 데이터 개수가 일치하지 않음.
         /// </summary>
-        CnetTcpSymbolError,
+        ResponseDataCountDoNotMatch,
         /// <summary>
-        /// Cnet TCP 헤더에 표시된 길이와 Cnet 메시지의 길이가 일치하지 않음.
+        /// 응답 종결이 EOT가 아님.
         /// </summary>
-        ResponseTcpLengthDoNotMatch,
+        ResponseTailError,
         /// <summary>
-        /// Cnet ASCII의 시작 문자(:)를 찾을 수 없음.
+        /// 응답 메시지에서 16진수 문자열 파싱 중 오류 발생.
         /// </summary>
-        ResponseAsciiStartError,
+        ResponseParseHexError,
         /// <summary>
-        /// Cnet ASCII의 종결 문자(CR LF)를 찾을 수 없음.
+        /// BCC 오류
         /// </summary>
-        ResponseAsciiEndError,
-        /// <summary>
-        /// CRC 오류
-        /// </summary>
-        ErrorCRC,
-        /// <summary>
-        /// LRC 오류
-        /// </summary>
-        ErrorLRC,
+        ErrorBCC,
         /// <summary>
         /// 응답 타임아웃
         /// </summary>
-        ResponseTimeout,
-        /// <summary>
-        /// 연결 타임아웃
-        /// </summary>
-        ConnectTimeout,
-        /// <summary>
-        /// 채널이 없음
-        /// </summary>
-        NullChannelError,
-        /// <summary>
-        /// Cnet 직렬화 형식이 정의되지 않았음.
-        /// </summary>
-        NotDefinedCnetSerializer,
+        ResponseTimeout
     }
 
 }

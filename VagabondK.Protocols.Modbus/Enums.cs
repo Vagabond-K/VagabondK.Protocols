@@ -203,14 +203,6 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         ResponseTimeout,
         /// <summary>
-        /// 연결 타임아웃
-        /// </summary>
-        ConnectTimeout,
-        /// <summary>
-        /// 채널이 없음
-        /// </summary>
-        NullChannelError,
-        /// <summary>
         /// Modbus 직렬화 형식이 정의되지 않았음.
         /// </summary>
         NotDefinedModbusSerializer,

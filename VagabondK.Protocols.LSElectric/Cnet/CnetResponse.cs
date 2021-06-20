@@ -83,7 +83,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item =>item.Value);
         }
 
-        private void SetData(IEnumerable<byte> bytes, DeviceAddress deviceAddress, byte count)
+        private void SetData(IEnumerable<byte> bytes, DeviceAddress deviceAddress, int count)
         {
             var byteArray = bytes.ToArray();
 

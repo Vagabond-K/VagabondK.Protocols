@@ -68,7 +68,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             {
                 var codeValue = Read(buffer, 2, timeout);
 
-                if (IsErrorCRC(buffer, 3, request, timeout))
+                if (IsErrorCRC(buffer, 3, timeout))
                     throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
                 ModbusExceptionCode exceptionCode = ModbusExceptionCode.NotDefined;
@@ -85,7 +85,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             }
         }
 
-        private bool IsErrorCRC(ResponseBuffer buffer, int messageLength, ModbusRequest request, int timeout)
+        private bool IsErrorCRC(ResponseBuffer buffer, int messageLength, int timeout)
         {
             var crc = Read(buffer, messageLength, 2, timeout).ToArray();
 
@@ -125,7 +125,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
             byte byteLength = Read(buffer, 2, timeout);
 
-            if (IsErrorCRC(buffer, 3 + byteLength, request, timeout))
+            if (IsErrorCRC(buffer, 3 + byteLength, timeout))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
@@ -145,7 +145,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
             byte byteLength = Read(buffer, 2, timeout);
 
-            if (IsErrorCRC(buffer, 3 + byteLength, request, timeout))
+            if (IsErrorCRC(buffer, 3 + byteLength, timeout))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
@@ -163,7 +163,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             if (IsException(buffer, request, timeout, out var responseMessage))
                 return responseMessage;
 
-            if (IsErrorCRC(buffer, 6, request, timeout))
+            if (IsErrorCRC(buffer, 6, timeout))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
@@ -194,7 +194,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             if (IsException(buffer, request, timeout, out var responseMessage))
                 return responseMessage;
 
-            if (IsErrorCRC(buffer, 6, request, timeout))
+            if (IsErrorCRC(buffer, 6, timeout))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)

@@ -79,7 +79,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         protected abstract void OnCreateFrameData(List<byte> byteList);
     }
 
-
+    public interface ICnetAddressBlockRequest
+    {
+        DeviceAddress DeviceAddress { get; }
+        int Count { get; }
+    }
 
     public abstract class CnetIncludeCommandTypeRequest : CnetRequest
     {
@@ -197,11 +201,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         }
     }
 
-    public class CnetReadAddressBlockRequest : CnetReadRequest
+    public class CnetReadAddressBlockRequest : CnetReadRequest, ICnetAddressBlockRequest
     {
-        public CnetReadAddressBlockRequest(byte stationNumber, DeviceAddress address, byte count) : this(stationNumber, address, count, true) { }
+        public CnetReadAddressBlockRequest(byte stationNumber, DeviceAddress address, int count) : this(stationNumber, address, count, true) { }
 
-        public CnetReadAddressBlockRequest(byte stationNumber, DeviceAddress address, byte count, bool useBCC)
+        public CnetReadAddressBlockRequest(byte stationNumber, DeviceAddress address, int count, bool useBCC)
             : base(stationNumber, CnetCommandType.Block, useBCC)
         {
             deviceAddress = address;
@@ -211,10 +215,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public override object Clone() => new CnetReadAddressBlockRequest(StationNumber, deviceAddress, count, UseBCC);
 
         private DeviceAddress deviceAddress;
-        private byte count;
+        private int count;
 
         public DeviceAddress DeviceAddress { get => deviceAddress; set => SetProperty(ref deviceAddress, value); }
-        public byte Count { get => count; set => SetProperty(ref count, value); }
+        public int Count { get => count; set => SetProperty(ref count, value); }
 
         protected override void OnCreateFrameData(List<byte> byteList)
         {
@@ -355,7 +359,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     }
 
-    public class CnetWriteAddressBlockRequest : CnetWriteRequest, IList<DeviceValue>
+    public class CnetWriteAddressBlockRequest : CnetWriteRequest, IList<DeviceValue>, ICnetAddressBlockRequest
     {
         public CnetWriteAddressBlockRequest(byte stationNumber, DeviceAddress address) : this(stationNumber, address, null, true) { }
         public CnetWriteAddressBlockRequest(byte stationNumber, DeviceAddress address, bool useBCC) : this(stationNumber, address, null, useBCC) { }
@@ -592,11 +596,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public CnetExecuteMonitorEachAddressRequest CreateExecuteMonitorRequest(bool useBCC) => new CnetExecuteMonitorEachAddressRequest(this, useBCC);
     }
 
-    public class CnetRegisterMonitorAddressBlockRequest : CnetRegisterMonitorRequest
+    public class CnetRegisterMonitorAddressBlockRequest : CnetRegisterMonitorRequest, ICnetAddressBlockRequest
     {
-        public CnetRegisterMonitorAddressBlockRequest(byte stationNumber, byte monitorNumber, DeviceAddress address, byte count) : this(stationNumber, monitorNumber, address, count, true) { }
+        public CnetRegisterMonitorAddressBlockRequest(byte stationNumber, byte monitorNumber, DeviceAddress address, int count) : this(stationNumber, monitorNumber, address, count, true) { }
 
-        public CnetRegisterMonitorAddressBlockRequest(byte stationNumber, byte monitorNumber, DeviceAddress address, byte count, bool useBCC)
+        public CnetRegisterMonitorAddressBlockRequest(byte stationNumber, byte monitorNumber, DeviceAddress address, int count, bool useBCC)
             : base(stationNumber, monitorNumber, CnetCommandType.Block, useBCC)
         {
             deviceAddress = address;
@@ -606,10 +610,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public override object Clone() => new CnetRegisterMonitorAddressBlockRequest(StationNumber, MonitorNumber, deviceAddress, count, UseBCC);
 
         private DeviceAddress deviceAddress;
-        private byte count;
+        private int count;
 
         public DeviceAddress DeviceAddress { get => deviceAddress; set => SetProperty(ref deviceAddress, value); }
-        public byte Count { get => count; set => SetProperty(ref count, value); }
+        public int Count { get => count; set => SetProperty(ref count, value); }
 
         protected override void OnCreateFrameData(List<byte> byteList)
         {
@@ -625,17 +629,17 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public CnetExecuteMonitorAddressBlockRequest CreateExecuteMonitorRequest(bool useBCC) => new CnetExecuteMonitorAddressBlockRequest(this, useBCC);
     }
 
-    public class CnetExecuteMonitorRequest : CnetRequest
+    public class CnetExecuteMonitorRequest : CnetIncludeCommandTypeRequest
     {
-        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber) : this(stationNumber, monitorNumber, true) { }
+        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType) : this(stationNumber, monitorNumber, commandType, true) { }
 
-        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, bool useBCC)
-            : base(stationNumber, CnetCommand.ExcuteMonitor, useBCC)
+        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType, bool useBCC)
+            : base(stationNumber, CnetCommand.ExecuteMonitor, commandType, useBCC)
         {
             this.monitorNumber = monitorNumber;
         }
 
-        public override object Clone() => new CnetExecuteMonitorRequest(StationNumber, MonitorNumber, UseBCC);
+        public override object Clone() => new CnetExecuteMonitorRequest(StationNumber, MonitorNumber, CommandType, UseBCC);
 
         private byte monitorNumber;
 
@@ -652,7 +656,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public CnetExecuteMonitorEachAddressRequest(CnetRegisterMonitorEachAddressRequest request) : this(request, true) { }
 
         public CnetExecuteMonitorEachAddressRequest(CnetRegisterMonitorEachAddressRequest request, bool useBCC)
-            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, useBCC)
+            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Each, useBCC)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             this.request = (CnetRegisterMonitorEachAddressRequest)request.Clone();
@@ -671,12 +675,12 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public class CnetExecuteMonitorAddressBlockRequest : CnetExecuteMonitorRequest
+    public class CnetExecuteMonitorAddressBlockRequest : CnetExecuteMonitorRequest, ICnetAddressBlockRequest
     {
         public CnetExecuteMonitorAddressBlockRequest(CnetRegisterMonitorAddressBlockRequest request) : this(request, true) { }
 
         public CnetExecuteMonitorAddressBlockRequest(CnetRegisterMonitorAddressBlockRequest request, bool useBCC)
-            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, useBCC)
+            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Block, useBCC)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             this.request = (CnetRegisterMonitorAddressBlockRequest)request.Clone();
@@ -687,7 +691,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         private readonly CnetRegisterMonitorAddressBlockRequest request;
 
         public DeviceAddress DeviceAddress { get => request.DeviceAddress; }
-        public byte Count { get => request.Count; }
+        public int Count { get => request.Count; }
     }
 
     
