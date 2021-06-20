@@ -8,7 +8,7 @@ namespace VagabondK.Protocols.Modbus
     /// <summary>
     /// Modbus 요청
     /// </summary>
-    public abstract class ModbusRequest : IModbusMessage
+    public abstract class ModbusRequest : IModbusMessage, IRequest<ModbusCommErrorCode>
     {
         /// <summary>
         /// 생성자
@@ -183,7 +183,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 단일 논리값
         /// </summary>
-        public bool SingleBooleanValue => Values != null && Values.Count> 0 ? Values[0] : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
+        public bool SingleBooleanValue => Values != null && Values.Count> 0 ? Values[0] : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
         /// 다중 논리값 목록
         /// </summary>
@@ -191,7 +191,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 길이
         /// </summary>
-        public override ushort Length => (ushort)(Values?.Count ?? throw new ModbusException(ModbusExceptionCode.IllegalDataValue));
+        public override ushort Length => (ushort)(Values?.Count ?? throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue));
         private readonly byte byteLength = 0;
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace VagabondK.Protocols.Modbus
         /// 단일 Holding Register 값
         /// </summary>
         public ushort SingleRegisterValue => Bytes.Count >= 2 ?
-            (ushort)(Bytes[0] << 8 | Bytes[1]) : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
+            (ushort)(Bytes[0] << 8 | Bytes[1]) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
         /// Holding Register 값들의 Raw 바이트 목록
         /// </summary>
@@ -319,7 +319,7 @@ namespace VagabondK.Protocols.Modbus
         public override IEnumerable<byte> Serialize()
         {
             if (Bytes.Count < 2)
-                throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
+                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
 
             yield return SlaveAddress;
             yield return (byte)Function;

@@ -9,7 +9,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// LS ELECTRIC Cnet 프로토콜 응답 메시지
     /// </summary>
-    public abstract class CnetResponse : CnetMessage
+    public abstract class CnetResponse : CnetMessage, IResponse
     {
         /// <summary>
         /// 생성자
@@ -19,8 +19,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         {
             Request = request ?? throw new ArgumentNullException(nameof(request));
         }
-
-        private byte[] frameData;
 
         /// <summary>
         /// LS ELECTRIC Cnet 프로토콜 요청 메시지
@@ -224,21 +222,21 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     public class CnetNAKResponse : CnetResponse
     {
-        internal CnetNAKResponse(ushort errorCode, CnetRequest request) : base(request)
+        internal CnetNAKResponse(ushort nakCode, CnetRequest request) : base(request)
         {
-            ErrorCodeValue = errorCode;
-            if (Enum.IsDefined(typeof(CnetErrorCode), errorCode))
-                ErrorCode = (CnetErrorCode)errorCode;
+            NAKCodeValue = nakCode;
+            if (Enum.IsDefined(typeof(CnetNAKCode), nakCode))
+                NAKCode = (CnetNAKCode)nakCode;
         }
 
         public override byte Header { get => NAK; }
 
-        public CnetErrorCode ErrorCode { get; } = CnetErrorCode.Unknown;
-        public ushort ErrorCodeValue { get; }
+        public CnetNAKCode NAKCode { get; } = CnetNAKCode.Unknown;
+        public ushort NAKCodeValue { get; }
 
         protected override void OnCreateFrameData(List<byte> byteList)
         {
-            byteList.AddRange(ToAsciiBytes(ErrorCodeValue, 4));
+            byteList.AddRange(ToAsciiBytes(NAKCodeValue, 4));
         }
     }
 }

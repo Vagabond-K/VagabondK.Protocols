@@ -55,7 +55,7 @@ namespace VagabondK.Protocols.Modbus
         {
             if (serializer != null)
                 serializer.Unrecognized -= OnReceivedUnrecognizedMessage;
-            Channel?.Dispose();
+            channel?.Dispose();
         }
 
         private ModbusSerializer serializer;
@@ -135,10 +135,10 @@ namespace VagabondK.Protocols.Modbus
             Channel channel = (Channel as Channel) ?? (Channel as ChannelProvider)?.PrimaryChannel;
 
             if (channel == null)
-                throw new ModbusCommException(ModbusCommErrorCode.NullChannelError, new byte[0], request);
+                throw new ArgumentNullException(nameof(Channel));
 
             if (Serializer == null)
-                throw new ModbusCommException(ModbusCommErrorCode.NotDefinedModbusSerializer, new byte[0], request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.NotDefinedModbusSerializer, new byte[0], request);
 
 
             var requestMessage = Serializer.Serialize(request).ToArray();
@@ -157,7 +157,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 result = Serializer.Deserialize(buffer, request, timeout);
             }
-            catch (ModbusCommException ex)
+            catch (RequestException<ModbusCommErrorCode> ex)
             {
                 channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
                 throw ex;
@@ -167,7 +167,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse.ExceptionCode, buffer.ToArray()));
                 if (ThrowsModbusExceptions)
-                    throw new ModbusException(exceptionResponse.ExceptionCode);
+                    throw new ErrorCodeException<ModbusExceptionCode>(exceptionResponse.ExceptionCode);
             }
             else
                 channel?.Logger?.Log(new ModbusMessageLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray()));

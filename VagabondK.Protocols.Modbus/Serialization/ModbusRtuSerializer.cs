@@ -69,7 +69,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 var codeValue = Read(buffer, 2, timeout);
 
                 if (IsErrorCRC(buffer, 3, request, timeout))
-                    throw new ModbusCommException(ModbusCommErrorCode.ErrorCRC, buffer, request);
+                    throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
                 ModbusExceptionCode exceptionCode = ModbusExceptionCode.NotDefined;
                 if (Enum.IsDefined(typeof(ModbusExceptionCode), codeValue))
@@ -126,14 +126,14 @@ namespace VagabondK.Protocols.Modbus.Serialization
             byte byteLength = Read(buffer, 2, timeout);
 
             if (IsErrorCRC(buffer, 3 + byteLength, request, timeout))
-                throw new ModbusCommException(ModbusCommErrorCode.ErrorCRC, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
             if ((Read(buffer, 1, timeout) & 0x7f) != (byte)request.Function)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
             if (byteLength != (byte)Math.Ceiling(request.Length / 8d))
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
 
             return new ModbusReadBooleanResponse(Read(buffer, 3, byteLength, timeout).SelectMany(b => ByteToBooleanArray(b)).Take(request.Length).ToArray(), request);
         }
@@ -146,14 +146,14 @@ namespace VagabondK.Protocols.Modbus.Serialization
             byte byteLength = Read(buffer, 2, timeout);
 
             if (IsErrorCRC(buffer, 3 + byteLength, request, timeout))
-                throw new ModbusCommException(ModbusCommErrorCode.ErrorCRC, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
             if ((Read(buffer, 1, timeout) & 0x7f) != (byte)request.Function)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
             if (byteLength != (byte)(request.Length * 2))
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
 
             return new ModbusReadRegisterResponse(Read(buffer, 3, byteLength, timeout).ToArray(), request);
         }
@@ -164,25 +164,25 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 return responseMessage;
 
             if (IsErrorCRC(buffer, 6, request, timeout))
-                throw new ModbusCommException(ModbusCommErrorCode.ErrorCRC, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
             if ((Read(buffer, 1, timeout) & 0x7f) != (byte)request.Function)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
             if (ToUInt16(buffer, 2) != request.Address)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseAddressDoNotMatch, buffer, request);
 
             switch (request.Function)
             {
                 case ModbusFunction.WriteSingleCoil:
                     if (Read(buffer, 4, timeout) != (request.SingleBooleanValue ? 0xff : 0x00)
                         || Read(buffer, 5, timeout) != 0x00)
-                        throw new ModbusCommException(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
+                        throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
                     break;
                 case ModbusFunction.WriteMultipleCoils:
                     if (ToUInt16(buffer, 4) != request.Length)
-                        throw new ModbusCommException(ModbusCommErrorCode.ResponseWritedLengthDoNotMatch, buffer, request);
+                        throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedLengthDoNotMatch, buffer, request);
                     break;
             }
 
@@ -195,14 +195,14 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 return responseMessage;
 
             if (IsErrorCRC(buffer, 6, request, timeout))
-                throw new ModbusCommException(ModbusCommErrorCode.ErrorCRC, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ErrorCRC, buffer, request);
 
             if (Read(buffer, 0, timeout) != request.SlaveAddress)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseSlaveAddressDoNotMatch, buffer, request);
             if ((Read(buffer, 1, timeout) & 0x7f) != (byte)request.Function)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseFunctionDoNotMatch, buffer, request);
             if (ToUInt16(buffer, 2) != request.Address)
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseAddressDoNotMatch, buffer, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseAddressDoNotMatch, buffer, request);
 
             ushort value = ToUInt16(buffer, 4);
 
@@ -210,11 +210,11 @@ namespace VagabondK.Protocols.Modbus.Serialization
             {
                 case ModbusFunction.WriteSingleHoldingRegister:
                     if (value != request.SingleRegisterValue)
-                        throw new ModbusCommException(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
+                        throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
                     break;
                 case ModbusFunction.WriteMultipleHoldingRegisters:
                     if (value != request.Length)
-                        throw new ModbusCommException(ModbusCommErrorCode.ResponseWritedLengthDoNotMatch, buffer, request);
+                        throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedLengthDoNotMatch, buffer, request);
                     break;
             }
 

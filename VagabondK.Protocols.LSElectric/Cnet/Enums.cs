@@ -40,7 +40,7 @@
         Block = 0x5342,
     }
 
-    public enum CnetErrorCode : ushort
+    public enum CnetNAKCode : ushort
     {
         /// <summary>
         /// 알 수 없음
@@ -54,4 +54,80 @@
 
         //TODO: Cnet 에러 코드 상세 작성
     }
+
+    /// <summary>
+    /// Cnet 통신 오류 코드
+    /// </summary>
+    public enum CnetCommErrorCode
+    {
+        /// <summary>
+        /// Not Defined
+        /// </summary>
+        NotDefined,
+        /// <summary>
+        /// 요청과 응답의 Slave Address가 일치하지 않음.
+        /// </summary>
+        ResponseSlaveAddressDoNotMatch,
+        /// <summary>
+        /// 요청과 응답의 Function 코드가 일치하지 않음.
+        /// </summary>
+        ResponseFunctionDoNotMatch,
+        /// <summary>
+        /// 요청과 응답의 Address가 일치하지 않음.
+        /// </summary>
+        ResponseAddressDoNotMatch,
+        /// <summary>
+        /// 요청과 응답의 데이터 길이가 일치하지 않음.
+        /// </summary>
+        ResponseLengthDoNotMatch,
+        /// <summary>
+        /// 요청과 응답의 쓰기 값이 일치하지 않음.
+        /// </summary>
+        ResponseWritedValueDoNotMatch,
+        /// <summary>
+        /// 요청과 응답의 다중 쓰기 길이가 일치하지 않음.
+        /// </summary>
+        ResponseWritedLengthDoNotMatch,
+        /// <summary>
+        /// Cnet TCP 프로토콜 아이디가 0이 아님.
+        /// </summary>
+        CnetTcpSymbolError,
+        /// <summary>
+        /// Cnet TCP 헤더에 표시된 길이와 Cnet 메시지의 길이가 일치하지 않음.
+        /// </summary>
+        ResponseTcpLengthDoNotMatch,
+        /// <summary>
+        /// Cnet ASCII의 시작 문자(:)를 찾을 수 없음.
+        /// </summary>
+        ResponseAsciiStartError,
+        /// <summary>
+        /// Cnet ASCII의 종결 문자(CR LF)를 찾을 수 없음.
+        /// </summary>
+        ResponseAsciiEndError,
+        /// <summary>
+        /// CRC 오류
+        /// </summary>
+        ErrorCRC,
+        /// <summary>
+        /// LRC 오류
+        /// </summary>
+        ErrorLRC,
+        /// <summary>
+        /// 응답 타임아웃
+        /// </summary>
+        ResponseTimeout,
+        /// <summary>
+        /// 연결 타임아웃
+        /// </summary>
+        ConnectTimeout,
+        /// <summary>
+        /// 채널이 없음
+        /// </summary>
+        NullChannelError,
+        /// <summary>
+        /// Cnet 직렬화 형식이 정의되지 않았음.
+        /// </summary>
+        NotDefinedCnetSerializer,
+    }
+
 }

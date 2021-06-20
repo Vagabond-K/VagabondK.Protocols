@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using VagabondK.Protocols.LSElectric.Cnet.Logging;
 
 namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
     /// LS ELECTRIC Cnet 프로토콜 메시지
     /// </summary>
-    public abstract class CnetMessage
+    public abstract class CnetMessage : IProtocolMessage
     {
         /// <summary>
         /// 1바이트를 16진수 아스키 문자의 바이트로 열거합니다.
@@ -100,7 +101,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 직렬화
         /// </summary>
         /// <returns>직렬화 된 바이트 열거</returns>
-        public IEnumerable<byte> Serialize()
+        public virtual IEnumerable<byte> Serialize()
         {
             lock (this)
             {

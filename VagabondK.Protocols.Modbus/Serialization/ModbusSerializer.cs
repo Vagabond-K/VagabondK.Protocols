@@ -64,19 +64,19 @@ namespace VagabondK.Protocols.Modbus.Serialization
             }
             catch (TimeoutException ex)
             {
-                throw new ModbusCommException(ModbusCommErrorCode.ResponseTimeout, buffer, ex, request);
+                throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseTimeout, buffer, ex, request);
             }
-            catch (ModbusCommException ex)
+            catch (RequestException<ModbusCommErrorCode> ex)
             {
-                throw new ModbusCommException(ex.Code, buffer, ex.InnerException, request);
+                throw new RequestException<ModbusCommErrorCode>(ex.Code, buffer, ex.InnerException, request);
             }
             catch (Exception ex)
             {
-                throw new ModbusCommException(buffer, ex, request);
+                throw new RequestException<ModbusCommErrorCode>(buffer, ex, request);
             }
 
             if (result is ModbusCommErrorResponse commErrorResponse)
-                throw new ModbusCommException(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
+                throw new RequestException<ModbusCommErrorCode>(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
 
             return result;
         }

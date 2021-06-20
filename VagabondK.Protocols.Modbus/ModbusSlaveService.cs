@@ -250,28 +250,28 @@ namespace VagabondK.Protocols.Modbus
             try
             {
                 if (request.Address + request.Length > 0xffff)
-                    throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                    throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
 
                 switch (request.Function)
                 {
                     case ModbusFunction.ReadCoils:
                         if (request.Length > 2008)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestReadCoils((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadDiscreteInputs:
                         if (request.Length > 2008)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestReadDiscreteInputs((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadHoldingRegisters:
                         if (request.Length > 125)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestReadHoldingRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadInputRegisters:
                         if (request.Length > 125)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestReadInputRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.WriteSingleCoil:
@@ -286,7 +286,7 @@ namespace VagabondK.Protocols.Modbus
                         break;
                 }
             }
-            catch (ModbusException modbusException)
+            catch (ErrorCodeException<ModbusExceptionCode> modbusException)
             {
                 response = new ModbusExceptionResponse(modbusException.Code, request);
             }
@@ -343,25 +343,25 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="e">Coil 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestReadCoils(RequestReadBooleanEventArgs e) 
-            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null ? modbusSlave.Coils.GetData(e.Address, e.Length) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null ? modbusSlave.Coils.GetData(e.Address, e.Length) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Discrete Input 읽기 요청 처리
         /// </summary>
         /// <param name="e">Discrete Input 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestReadDiscreteInputs(RequestReadBooleanEventArgs e)
-            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.DiscreteInputs != null ? modbusSlave.DiscreteInputs.GetData(e.Address, e.Length) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.DiscreteInputs != null ? modbusSlave.DiscreteInputs.GetData(e.Address, e.Length) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Holding Register 읽기 요청 처리
         /// </summary>
         /// <param name="e">Holding Register 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestReadHoldingRegisters(RequestReadRegisterEventArgs e)
-            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null ? modbusSlave.HoldingRegisters.GetRawData(e.Address, e.Length * 2) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null ? modbusSlave.HoldingRegisters.GetRawData(e.Address, e.Length * 2) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Input Register 읽기 요청 처리
         /// </summary>
         /// <param name="e">Input Register 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestReadInputRegisters(RequestReadRegisterEventArgs e)
-            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.InputRegisters != null ? modbusSlave.InputRegisters.GetRawData(e.Address, e.Length * 2) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.InputRegisters != null ? modbusSlave.InputRegisters.GetRawData(e.Address, e.Length * 2) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Coil 쓰기 요청 처리
         /// </summary>
@@ -371,7 +371,7 @@ namespace VagabondK.Protocols.Modbus
             if (modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null)
                 modbusSlave.Coils.SetData(e.Address, e.Values.ToArray());
             else
-                throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         }
         /// <summary>
         /// Holding Register 쓰기 요청 처리
@@ -382,7 +382,7 @@ namespace VagabondK.Protocols.Modbus
             if (modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null)
                 modbusSlave.HoldingRegisters.SetRawData(e.Address, e.Bytes.ToArray());
             else
-                throw new ModbusException(ModbusExceptionCode.IllegalFunction);
+                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
         }
 
 

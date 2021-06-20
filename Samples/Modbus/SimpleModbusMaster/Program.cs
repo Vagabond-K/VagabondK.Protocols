@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using VagabondK.Protocols;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
 using VagabondK.Protocols.Modbus;
@@ -43,7 +44,7 @@ namespace SimpleModbusMaster
                     var float200 = resposne.GetSingle(200);
                     Console.WriteLine(Math.Round(float200, 2));
                 }
-                catch (ModbusException ex)
+                catch (ErrorCodeException<ModbusExceptionCode> ex)
                 {
                     Console.WriteLine($"Catched exception: {ex.Message}");
                 }

@@ -9,7 +9,7 @@ namespace VagabondK.Protocols.Modbus
     /// <summary>
     /// Modbus 응답
     /// </summary>
-    public abstract class ModbusResponse : IModbusMessage
+    public abstract class ModbusResponse : IModbusMessage, IResponse
     {
         /// <summary>
         /// 생성자

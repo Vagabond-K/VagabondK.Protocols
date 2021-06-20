@@ -4,21 +4,20 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
-namespace VagabondK.Protocols.Modbus
+namespace VagabondK.Protocols
 {
     /// <summary>
-    /// Modbus 통신 오류 예외
+    /// 통신 요청 오류 예외
     /// </summary>
-    public class ModbusCommException : Exception
+    public class RequestException<TErrorCode> : ErrorCodeException<TErrorCode> where TErrorCode : Enum
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="errorCode">Modbus 통신 오류 코드</param>
+        /// <param name="errorCode">통신 요청 오류 코드</param>
         /// <param name="innerException">내부 예외</param>
-        public ModbusCommException(ModbusCommErrorCode errorCode, Exception innerException) : base(null, innerException)
+        public RequestException(TErrorCode errorCode, Exception innerException) : base(errorCode, innerException)
         {
-            Code = errorCode;
         }
 
         /// <summary>
@@ -26,9 +25,8 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="innerException">내부 예외</param>
         /// <param name="request">Modbus 요청</param>
-        public ModbusCommException(Exception innerException, ModbusRequest request) : base(null, innerException)
+        public RequestException(Exception innerException, IRequest<TErrorCode> request) : base(default(TErrorCode), innerException)
         {
-            Code = ModbusCommErrorCode.NotDefined;
             ReceivedBytes = new byte[0];
             Request = request;
         }
@@ -39,9 +37,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="receivedMessage">응답 메시지</param>
         /// <param name="innerException">내부 예외</param>
         /// <param name="request">Modbus 요청</param>
-        public ModbusCommException(IEnumerable<byte> receivedMessage, Exception innerException, ModbusRequest request) : base(null, innerException)
+        public RequestException(IEnumerable<byte> receivedMessage, Exception innerException, IRequest<TErrorCode> request) : base(default(TErrorCode), innerException)
         {
-            Code = ModbusCommErrorCode.NotDefined;
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
             Request = request;
         }
@@ -49,12 +46,11 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="errorCode">Modbus 통신 오류 코드</param>
+        /// <param name="errorCode">통신 요청 오류 코드</param>
         /// <param name="receivedMessage">응답 메시지</param>
         /// <param name="request">Modbus 요청</param>
-        public ModbusCommException(ModbusCommErrorCode errorCode, IEnumerable<byte> receivedMessage, ModbusRequest request)
+        public RequestException(TErrorCode errorCode, IEnumerable<byte> receivedMessage, IRequest<TErrorCode> request) : base(errorCode)
         {
-            Code = errorCode;
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
             Request = request;
         }
@@ -62,21 +58,16 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="errorCode">Modbus 통신 오류 코드</param>
+        /// <param name="errorCode">통신 요청 오류 코드</param>
         /// <param name="receivedMessage">받은 메시지</param>
         /// <param name="innerException">내부 예외</param>
         /// <param name="request">Modbus 요청</param>
-        public ModbusCommException(ModbusCommErrorCode errorCode, IEnumerable<byte> receivedMessage, Exception innerException, ModbusRequest request) : base(null, innerException)
+        public RequestException(TErrorCode errorCode, IEnumerable<byte> receivedMessage, Exception innerException, IRequest<TErrorCode> request) : base(errorCode, innerException)
         {
-            Code = errorCode;
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
             Request = request;
         }
 
-        /// <summary>
-        /// Modbus 통신 오류 코드
-        /// </summary>
-        public ModbusCommErrorCode Code { get; }
         /// <summary>
         /// 받은 메시지
         /// </summary>
@@ -84,18 +75,6 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// Modbus 요청
         /// </summary>
-        public ModbusRequest Request { get; }
-
-        /// <summary>
-        /// 예외 메시지
-        /// </summary>
-        public override string Message
-        {
-            get
-            {
-                var codeName = Code.ToString();
-                return (typeof(ModbusCommErrorCode).GetMember(codeName, BindingFlags.Static | BindingFlags.Public)?.FirstOrDefault()?.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? codeName;
-            }
-        }
+        public IRequest<TErrorCode> Request { get; }
     }
 }

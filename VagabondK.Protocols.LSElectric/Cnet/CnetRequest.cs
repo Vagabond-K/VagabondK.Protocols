@@ -9,7 +9,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// LS ELECTRIC Cnet 프로토콜 요청 메시지
     /// </summary>
-    public abstract class CnetRequest : CnetMessage, ICloneable
+    public abstract class CnetRequest : CnetMessage, IRequest<CnetCommErrorCode>, ICloneable
     {
         /// <summary>
         /// 생성자
