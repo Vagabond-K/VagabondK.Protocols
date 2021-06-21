@@ -62,7 +62,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public int Timeout { get; set; } = 1000;
 
         /// <summary>
-        /// Error Code에 대한 예외 발생 여부
+        /// NAK에 대한 예외 발생 여부
         /// </summary>
         public bool ThrowsExceptionFromNAK { get; set; } = true;
 
@@ -91,45 +91,62 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
 
             var requestMessage = request.Serialize().ToArray();
-            channel.ReadAllRemain().ToArray();
+
             channel.Write(requestMessage);
             channel?.Logger?.Log(new CnetMessageLog(channel, request, requestMessage));
 
             CnetResponse result;
             List<byte> buffer = new List<byte>();
+            List<byte> errorBuffer = new List<byte>();
 
             try
             {
-                result = Deserialize(channel, buffer, request, timeout);
+                result = DeserializeResponse(channel, buffer, request, timeout);
+
+                while (result is CnetCommErrorResponse responseCommErrorMessage
+                    && responseCommErrorMessage.ErrorCode != CnetCommErrorCode.ResponseTimeout)
+                {
+                    errorBuffer.Add(buffer[0]);
+                    buffer.RemoveAt(0);
+                    result = DeserializeResponse(channel, buffer, request, timeout);
+                }
+
+                if (result is CnetCommErrorResponse responseCommError)
+                {
+                    result = new CnetCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
+                }
+                else if (errorBuffer.Count > 0)
+                {
+                    channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
+                    errorBuffer.Clear();
+                }
             }
-            catch (TimeoutException ex)
-            {
-                throw new RequestException<CnetCommErrorCode>(CnetCommErrorCode.ResponseTimeout, buffer, ex, request);
-            }
-            catch (RequestException<CnetCommErrorCode> ex)
+            catch (Exception ex)
             {
                 channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
                 throw ex;
             }
-            catch (Exception ex)
+
+            if (result is CnetCommErrorResponse commErrorResponse)
             {
-                throw new RequestException<CnetCommErrorCode>(buffer, ex, request);
+                var ex = new RequestException<CnetCommErrorCode>(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
+                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
+                throw ex;
             }
 
-            if (result is CnetNAKResponse nakResponse)
+            if (result is CnetNAKResponse exceptionResponse)
             {
-                channel?.Logger?.Log(new CnetNAKLog(channel, nakResponse.NAKCode, buffer.ToArray()));
-                //if (ThrowsExceptionFromNAK)
-                //    throw new CnetException(nakResponse.ExceptionCode);
+                channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse.NAKCode, buffer.ToArray()));
+                if (ThrowsExceptionFromNAK)
+                    throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
             }
             else
-                channel?.Logger?.Log(new CnetMessageLog(channel, result, result is CnetCommErrorResponse ? null : buffer.ToArray()));
-
+                channel?.Logger?.Log(new CnetMessageLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray()));
 
             return result;
         }
 
-        private CnetResponse Deserialize(Channel channel, List<byte> buffer, CnetRequest request, int timeout)
+        private CnetResponse DeserializeResponse(Channel channel, List<byte> buffer, CnetRequest request, int timeout)
         {
             buffer.Add(channel.Read(timeout));
             if (buffer[0] != CnetMessage.ACK || buffer[0] != CnetMessage.NAK)
