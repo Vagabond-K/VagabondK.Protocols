@@ -7,14 +7,26 @@ using System.Threading.Tasks;
 
 namespace VagabondK.Protocols.Channels
 {
+    /// <summary>
+    /// 스트림 기반 채널
+    /// </summary>
     public class StreamChannel : Channel
     {
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="stream">입/출력에 사용할 스트림</param>
         public StreamChannel(Stream stream)
         {
             inputStream = stream ?? throw new ArgumentNullException(nameof(stream));
             outputStream = stream;
         }
 
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="inputStream">입력(읽기)에 사용할 스트림</param>
+        /// <param name="outputStream">출력(쓰기)에 사용할 스트림</param>
         public StreamChannel(Stream inputStream, Stream outputStream)
         {
             this.inputStream = inputStream ?? throw new ArgumentNullException(nameof(inputStream));
@@ -30,6 +42,17 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private bool isRunningReceive = false;
 
+        /// <summary>
+        /// 소멸자
+        /// </summary>
+        ~StreamChannel()
+        {
+            Dispose();
+        }
+
+        /// <summary>
+        /// 리소스 해제
+        /// </summary>
         public override void Dispose()
         {
             if (!IsDisposed)
@@ -89,6 +112,11 @@ namespace VagabondK.Protocols.Channels
                 return null;
         }
 
+        /// <summary>
+        /// 1 바이트 읽기
+        /// </summary>
+        /// <param name="timeout">제한시간(밀리초)</param>
+        /// <returns>읽은 바이트</returns>
         public override byte Read(int timeout)
         {
             lock (readLock)
@@ -97,6 +125,12 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        /// <summary>
+        /// 여러 개의 바이트 읽기
+        /// </summary>
+        /// <param name="count">읽을 개수</param>
+        /// <param name="timeout">제한시간(밀리초)</param>
+        /// <returns>읽은 바이트 열거</returns>
         public override IEnumerable<byte> Read(uint count, int timeout)
         {
             lock (readLock)
@@ -108,6 +142,10 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        /// <summary>
+        /// 채널에 남아있는 모든 바이트 읽기
+        /// </summary>
+        /// <returns>읽은 바이트 열거</returns>
         public override IEnumerable<byte> ReadAllRemain()
         {
             lock (readLock)
@@ -117,6 +155,10 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        /// <summary>
+        /// 바이트 배열 쓰기
+        /// </summary>
+        /// <param name="bytes">바이트 배열</param>
         public override void Write(byte[] bytes)
         {
             lock (writeLock)
@@ -125,6 +167,9 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        /// <summary>
+        /// 채널 설명
+        /// </summary>
         public override string Description { get => inputStream == outputStream ? inputStream.ToString() : $"{inputStream}/{outputStream}"; }
     }
 }

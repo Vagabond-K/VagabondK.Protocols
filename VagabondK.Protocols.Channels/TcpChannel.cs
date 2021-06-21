@@ -67,6 +67,7 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private bool isRunningReceive = false;
         private string description;
+
         /// <summary>
         /// 채널 설명
         /// </summary>
