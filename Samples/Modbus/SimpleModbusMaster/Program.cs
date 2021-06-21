@@ -44,7 +44,7 @@ namespace SimpleModbusMaster
                     var float200 = resposne.GetSingle(200);
                     Console.WriteLine(Math.Round(float200, 2));
                 }
-                catch (ErrorCodeException<ModbusExceptionCode> ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Catched exception: {ex.Message}");
                 }

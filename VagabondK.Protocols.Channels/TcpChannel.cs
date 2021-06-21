@@ -199,10 +199,10 @@ namespace VagabondK.Protocols.Channels
                     if (tcpClient?.Client?.Connected == true)
                         tcpClient?.Client?.Send(bytes);
                 }
-                catch
+                catch (Exception ex)
                 {
                     Close();
-                    throw new TimeoutException();
+                    throw ex;
                 }
             }
         }

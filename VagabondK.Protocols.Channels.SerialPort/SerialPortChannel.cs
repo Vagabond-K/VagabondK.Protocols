@@ -214,10 +214,10 @@ namespace VagabondK.Protocols.Channels
 #endif
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     Close();
-                    throw new TimeoutException();
+                    throw ex;
                 }
             }
         }

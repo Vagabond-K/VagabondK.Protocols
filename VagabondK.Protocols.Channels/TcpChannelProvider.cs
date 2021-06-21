@@ -94,20 +94,6 @@ namespace VagabondK.Protocols.Channels
                     {
                         var tcpClient = tcpListener.AcceptTcpClient();
 
-
-/* 'VagabondK.Protocols.Channels.Ethernet (net461)' 프로젝트에서 병합되지 않은 변경 내용
-이전:
-                        var channel = new TcpClientChannel(this, tcpClient)
-이후:
-                        var channel = new Channels.TcpClientChannel(this, tcpClient)
-*/
-
-/* 'VagabondK.Protocols.Channels.Ethernet (netcoreapp3.1)' 프로젝트에서 병합되지 않은 변경 내용
-이전:
-                        var channel = new TcpClientChannel(this, tcpClient)
-이후:
-                        var channel = new Channels.TcpClientChannel(this, tcpClient)
-*/
                         var channel = new TcpChannel(this, tcpClient)
                         {
                             Logger = Logger

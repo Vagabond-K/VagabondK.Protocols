@@ -327,19 +327,12 @@ namespace VagabondK.Protocols.Channels
             {
                 if (dataWriter != null)
                 {
-                    try
-                    {
-                        dataWriter?.WriteBytes(bytes);
-                        dataWriter.StoreAsync().AsTask().Wait();
-                    }
-                    catch
-                    {
-                        throw new TimeoutException();
-                    }
+                    dataWriter?.WriteBytes(bytes);
+                    dataWriter?.StoreAsync()?.AsTask()?.Wait();
                 }
                 else
                 {
-                    throw new TimeoutException();
+                    throw new ArgumentNullException(nameof(SerialDevice));
                 }
             }
         }

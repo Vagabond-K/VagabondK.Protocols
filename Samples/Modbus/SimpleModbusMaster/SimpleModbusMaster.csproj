@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VagabondK.Protocols.Channels.Ethernet\VagabondK.Protocols.Channels.Ethernet.csproj" />
+    <ProjectReference Include="..\..\..\VagabondK.Protocols.Channels\VagabondK.Protocols.Channels.csproj" />
     <ProjectReference Include="..\..\..\VagabondK.Protocols.Modbus\VagabondK.Protocols.Modbus.csproj" />
   </ItemGroup>
 
