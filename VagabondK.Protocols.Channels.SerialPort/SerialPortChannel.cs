@@ -274,5 +274,23 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        /// <summary>
+        /// 수신 버퍼에 있는 데이터의 바이트 수입니다.
+        /// </summary>
+        public override uint BytesToRead
+        {
+            get
+            {
+                uint available = 0;
+
+                try
+                {
+                    available = (uint)SerialPort.BytesToRead;
+                }
+                catch { }
+                return (uint)readBuffer.Count + available;
+            }
+        }
+
     }
 }

@@ -85,6 +85,19 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         int Count { get; }
     }
 
+    public static class CnetAddressBlockRequestExtensions
+    {
+        public static IEnumerable<DeviceAddress> ToDeviceAddresses(this ICnetAddressBlockRequest request)
+        {
+            var deviceAddress = request.DeviceAddress;
+            for (int i = 0; i < request.Count; i++)
+            {
+                yield return deviceAddress;
+                deviceAddress = deviceAddress.Increase();
+            }
+        }
+    }
+
     public abstract class CnetIncludeCommandTypeRequest : CnetRequest
     {
         protected CnetIncludeCommandTypeRequest(byte stationNumber, CnetCommand command, CnetCommandType commandType, bool useBCC)
@@ -591,9 +604,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 byteList.AddRange(deviceAddressBytes);
             }
         }
-
-        public CnetExecuteMonitorEachAddressRequest CreateExecuteMonitorRequest() => new CnetExecuteMonitorEachAddressRequest(this, UseBCC);
-        public CnetExecuteMonitorEachAddressRequest CreateExecuteMonitorRequest(bool useBCC) => new CnetExecuteMonitorEachAddressRequest(this, useBCC);
     }
 
     public class CnetRegisterMonitorAddressBlockRequest : CnetRegisterMonitorRequest, ICnetAddressBlockRequest
@@ -624,9 +634,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             byteList.AddRange(deviceAddressBytes);
             byteList.AddRange(ToAsciiBytes(count));
         }
-
-        public CnetExecuteMonitorAddressBlockRequest CreateExecuteMonitorRequest() => new CnetExecuteMonitorAddressBlockRequest(this, UseBCC);
-        public CnetExecuteMonitorAddressBlockRequest CreateExecuteMonitorRequest(bool useBCC) => new CnetExecuteMonitorAddressBlockRequest(this, useBCC);
     }
 
     public class CnetExecuteMonitorRequest : CnetIncludeCommandTypeRequest

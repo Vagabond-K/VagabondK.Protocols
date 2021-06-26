@@ -149,7 +149,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         private CnetResponse DeserializeResponse(Channel channel, List<byte> buffer, CnetRequest request, int timeout)
         {
             buffer.Add(channel.Read(timeout));
-            if (buffer[0] != CnetMessage.ACK || buffer[0] != CnetMessage.NAK)
+            if (buffer[0] != CnetMessage.ACK && buffer[0] != CnetMessage.NAK)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseHeaderError, buffer, request);
 
             var requestMessage = request.Serialize().ToArray();
@@ -180,7 +180,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 var tailErrorResponse = DeserializeTail(buffer, request, timeout);
                 if (tailErrorResponse != null) return tailErrorResponse;
 
-                if (!TryParseUint16(buffer, 6, out var errorCode))
+                if (!CnetMessage.TryParseUint16(buffer, 6, out var errorCode))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
 
                 return new CnetNAKResponse(errorCode, request);
@@ -201,9 +201,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                         switch (request.Command)
                         {
                             case CnetCommand.Read:
-                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetReadEachAddressRequest);
+                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetReadRequest);
                             case CnetCommand.ExecuteMonitor:
-                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetExecuteMonitorEachAddressRequest);
+                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetExecuteMonitorRequest);
                         }
                         break;
                     case CnetCommandType.Block:
@@ -227,7 +227,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             values = new List<DeviceValue>();
 
             buffer.AddRange(channel.Read(2, timeout));
-            if (!TryParseByte(buffer, 6, out var blockCount))
+            if (!CnetMessage.TryParseByte(buffer, 6, out var blockCount))
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
             if (blockCount != addresses.Length)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataBlockCountDoNotMatch, buffer, request);
@@ -235,7 +235,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             for (int i = 0; i < blockCount; i++)
             {
                 buffer.AddRange(channel.Read(2, timeout));
-                if (!TryParseByte(buffer, buffer.Count - 2, out byte dataCount))
+                if (!CnetMessage.TryParseByte(buffer, buffer.Count - 2, out byte dataCount))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
 
                 buffer.AddRange(channel.Read((uint)dataCount * 2, timeout));
@@ -244,23 +244,23 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 {
                     case DataType.Bit:
                         if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value != 0));
+                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value != 0));
                         break;
                     case DataType.Byte:
                         if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
                         break;
                     case DataType.Word:
                         if (dataCount != 2) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (TryParseUint16(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint16(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
                         break;
                     case DataType.DoubleWord:
                         if (dataCount != 4) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (TryParseUint32(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint32(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
                         break;
                     case DataType.LongWord:
                         if (dataCount != 8) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (TryParseUint64(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint64(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
                         break;
                     default:
                         values.Add(new DeviceValue());
@@ -294,7 +294,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             }
 
             buffer.AddRange(channel.Read(2, timeout));
-            if (!TryParseByte(buffer, 6, out var dataCount))
+            if (!CnetMessage.TryParseByte(buffer, 6, out var dataCount))
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
             if (dataCount != dataUnit * addressBlockRequest.Count)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
@@ -306,7 +306,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             for (int i = 0; i < dataCount; i++)
             {
-                if (!TryParseByte(buffer, 7 + i * 2, out var value))
+                if (!CnetMessage.TryParseByte(buffer, 7 + i * 2, out var value))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
                 bytes.Add(value);
             }
@@ -317,7 +317,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         private CnetResponse DeserializeTail(List<byte> buffer, CnetRequest request, int timeout)
         {
             buffer.Add(channel.Read(timeout));
-            if (buffer[10] != CnetMessage.ETX)
+            if (buffer[buffer.Count - 1] != CnetMessage.ETX)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseTailError, buffer, request);
 
             if (request.UseBCC)
@@ -330,14 +330,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             return null;
         }
 
-        private static bool TryParseByte(IList<byte> bytes, int index, out byte value)
-            => byte.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        private static bool TryParseUint16(IList<byte> bytes, int index, out ushort value)
-            => ushort.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        private static bool TryParseUint32(IList<byte> bytes, int index, out uint value)
-            => uint.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        private static bool TryParseUint64(IList<byte> bytes, int index, out ulong value)
-            => ulong.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}{(char)bytes[index + 8]}{(char)bytes[index + 9]}{(char)bytes[index + 10]}{(char)bytes[index + 11]}{(char)bytes[index + 12]}{(char)bytes[index + 13]}{(char)bytes[index + 14]}{(char)bytes[index + 15]}", System.Globalization.NumberStyles.HexNumber, null, out value);
 
         class CnetCommErrorResponse : CnetResponse
         {

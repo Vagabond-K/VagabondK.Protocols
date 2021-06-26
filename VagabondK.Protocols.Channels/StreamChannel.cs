@@ -43,6 +43,11 @@ namespace VagabondK.Protocols.Channels
         private bool isRunningReceive = false;
 
         /// <summary>
+        /// 채널 설명
+        /// </summary>
+        public override string Description { get => inputStream == outputStream ? inputStream.ToString() : $"{inputStream}/{outputStream}"; }
+
+        /// <summary>
         /// 소멸자
         /// </summary>
         ~StreamChannel()
@@ -168,8 +173,21 @@ namespace VagabondK.Protocols.Channels
         }
 
         /// <summary>
-        /// 채널 설명
+        /// 수신 버퍼에 있는 데이터의 바이트 수입니다.
         /// </summary>
-        public override string Description { get => inputStream == outputStream ? inputStream.ToString() : $"{inputStream}/{outputStream}"; }
+        public override uint BytesToRead
+        {
+            get
+            {
+                uint available = 0;
+
+                try
+                {
+                    available = (uint)(inputStream.CanSeek ? inputStream.Length : 0);
+                }
+                catch { }
+                return (uint)readBuffer.Count + available;
+            }
+        }
     }
 }

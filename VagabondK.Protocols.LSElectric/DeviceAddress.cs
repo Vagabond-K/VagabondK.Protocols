@@ -74,7 +74,7 @@ namespace VagabondK.Protocols.LSElectric
 
         public static bool TryParse(string s, out DeviceAddress deviceAddress) => TryParseCore(s, out deviceAddress) == null;
 
-        public static Exception TryParseCore(string s, out DeviceAddress deviceAddress)
+        private static Exception TryParseCore(string s, out DeviceAddress deviceAddress)
         {
             //TODO: U영역에 대한 고려 추가해야 함.
             if (s == null)

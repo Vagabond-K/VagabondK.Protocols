@@ -51,5 +51,10 @@ namespace VagabondK.Protocols.Channels
         /// </summary>
         /// <returns>읽은 바이트 열거</returns>
         IEnumerable<byte> ReadAllRemain();
+
+        /// <summary>
+        /// 수신 버퍼에 있는 데이터의 바이트 수입니다.
+        /// </summary>
+        uint BytesToRead { get; }
     }
 }

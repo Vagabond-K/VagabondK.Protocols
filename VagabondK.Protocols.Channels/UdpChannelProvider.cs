@@ -240,6 +240,15 @@ namespace VagabondK.Protocols.Channels
                         yield return readBuffer.Dequeue();
                 }
             }
+
+            public override uint BytesToRead
+            {
+                get
+                {
+                    return (uint)readBuffer.Count;
+                }
+            }
+
         }
 
     }

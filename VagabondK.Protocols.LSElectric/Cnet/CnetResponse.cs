@@ -59,18 +59,41 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     public class CnetACKResponse : CnetResponse
     {
-        internal CnetACKResponse(CnetRequest request) : base(request) { }
+        public CnetACKResponse(CnetRequest request) : base(request) { }
         public override byte Header { get => ACK; }
         protected override void OnCreateFrameData(List<byte> byteList) { }
     }
 
     public class CnetReadResponse : CnetACKResponse, IReadOnlyDictionary<DeviceAddress, DeviceValue>
     {
-        internal CnetReadResponse(IEnumerable<DeviceValue> values, CnetReadEachAddressRequest request) : base(request) => SetData(values, request);
-        internal CnetReadResponse(IEnumerable<DeviceValue> values, CnetExecuteMonitorEachAddressRequest request) : base(request) => SetData(values, request);
+        public CnetReadResponse(IEnumerable<DeviceValue> values, CnetReadRequest request) : base(request)
+        {
+            switch (request.CommandType)
+            {
+                case CnetCommandType.Each:
+                    SetData(values, (CnetReadEachAddressRequest)request);
+                    break;
+                case CnetCommandType.Block:
+                    SetData(values, ((CnetReadAddressBlockRequest)request).ToDeviceAddresses());
+                    break;
+            }
+        }
 
-        internal CnetReadResponse(IEnumerable<byte> bytes, CnetReadAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
-        internal CnetReadResponse(IEnumerable<byte> bytes, CnetExecuteMonitorAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
+        public CnetReadResponse(IEnumerable<DeviceValue> values, CnetExecuteMonitorRequest request) : base(request)
+        {
+            switch (request.CommandType)
+            {
+                case CnetCommandType.Each:
+                    SetData(values, (CnetExecuteMonitorEachAddressRequest)request);
+                    break;
+                case CnetCommandType.Block:
+                    SetData(values, ((CnetExecuteMonitorAddressBlockRequest)request).ToDeviceAddresses());
+                    break;
+            }
+        }
+
+        public CnetReadResponse(IEnumerable<byte> bytes, CnetReadAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
+        public CnetReadResponse(IEnumerable<byte> bytes, CnetExecuteMonitorAddressBlockRequest request) : base(request) => SetData(bytes, request?.DeviceAddress ?? new DeviceAddress(), request?.Count ?? 0);
 
         private void SetData(IEnumerable<DeviceValue> values, IEnumerable<DeviceAddress> deviceAddresses)
         {
@@ -127,12 +150,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             if (byteArray.Length != count * valueUnit) throw new ArgumentOutOfRangeException(nameof(bytes));
 
-            deviceValueList = Enumerable.Range(0, count).Select(i =>
+            deviceValueList = new List<KeyValuePair<DeviceAddress, DeviceValue>>();
+            for (int i = 0; i < count; i++)
             {
-                return new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Increase(), getValue(i));
-            }).ToList();
+                deviceValueList.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress, getValue(i)));
+                deviceAddress = deviceAddress.Increase();
+            }
             deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item => item.Value);
         }
+
 
         private DataType? dataType;
         private List<KeyValuePair<DeviceAddress, DeviceValue>> deviceValueList;
@@ -222,11 +248,17 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     public class CnetNAKResponse : CnetResponse
     {
-        internal CnetNAKResponse(ushort nakCode, CnetRequest request) : base(request)
+        public CnetNAKResponse(ushort nakCode, CnetRequest request) : base(request)
         {
             NAKCodeValue = nakCode;
             if (Enum.IsDefined(typeof(CnetNAKCode), nakCode))
                 NAKCode = (CnetNAKCode)nakCode;
+        }
+
+        public CnetNAKResponse(CnetNAKCode nakCode, CnetRequest request) : base(request)
+        {
+            NAKCode = nakCode;
+            NAKCodeValue = (ushort)nakCode;
         }
 
         public override byte Header { get => NAK; }

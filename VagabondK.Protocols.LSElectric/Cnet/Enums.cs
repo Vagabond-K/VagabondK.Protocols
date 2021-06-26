@@ -31,6 +31,11 @@
     public enum CnetCommandType : ushort
     {
         /// <summary>
+        /// 알 수 없음
+        /// </summary>
+        Unknown = 0x0000,
+
+        /// <summary>
         /// 개별 주소
         /// </summary>
         Each = 0x5353,
@@ -40,6 +45,9 @@
         Block = 0x5342,
     }
 
+    /// <summary>
+    /// NAK 에러 코드
+    /// </summary>
     public enum CnetNAKCode : ushort
     {
         /// <summary>
@@ -48,11 +56,69 @@
         Unknown = 0x0000,
 
         /// <summary>
-        /// 요청 블록 수 초과
+        /// 요청 블록 수 초과(최대 16개)
         /// </summary>
-        OverRequestDataCount = 0x0003,
+        OverDataCount = 0x0003,
 
-        //TODO: Cnet 에러 코드 상세 작성
+        /// <summary>
+        /// 변수 길이 초과(최대 12자리)
+        /// </summary>
+        OverVariableLength = 0x0004,
+
+        /// <summary>
+        /// 데이터 타입 오류
+        /// </summary>
+        DataTypeError = 0x0007,
+
+        /// <summary>
+        /// 데이터 오류
+        /// </summary>
+        DataError = 0x0011,
+
+        /// <summary>
+        /// 존재하지 않는 모니터 번호
+        /// </summary>
+        NotExistsMonitorNumber = 0x0090,
+
+        /// <summary>
+        /// 모니터 등록 번호 범위 초과
+        /// </summary>
+        OutOfRangeExecuteMonitorNumber = 0x0190,
+
+        /// <summary>
+        /// 모니터 실행 번호 범위 초과
+        /// </summary>
+        OutOfRangeRegisterMonitorNumber = 0x0290,
+
+        /// <summary>
+        /// 지원하지 않는 디바이스 메모리
+        /// </summary>
+        IlegalDeviceMemory = 0x1132,
+
+        /// <summary>
+        /// 데이터 길이 초과(최대 60워드)
+        /// </summary>
+        OverDataLength = 0x1232,
+
+        /// <summary>
+        /// 필요 없는 데이터가 프레임에 존재함
+        /// </summary>
+        UnnecessaryDataInFrame = 0x1234,
+
+        /// <summary>
+        /// 개별 데이터 주소들에 서로 다른 타입이 발견됨
+        /// </summary>
+        EachDataIsDifferentType = 0x1332,
+
+        /// <summary>
+        /// 16진수로 파싱할 수 없는 문자가 발견됨
+        /// </summary>
+        DataParsingError = 0x1432,
+
+        /// <summary>
+        /// 디바이스 요구 영역 초과
+        /// </summary>
+        OutOfRangeDevice = 0x7132,
     }
 
     /// <summary>

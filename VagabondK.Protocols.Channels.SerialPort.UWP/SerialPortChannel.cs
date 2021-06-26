@@ -381,5 +381,24 @@ namespace VagabondK.Protocols.Channels
                     dataReader.ReadBuffer(dataReader.UnconsumedBufferLength);
             }
         }
+
+        /// <summary>
+        /// 수신 버퍼에 있는 데이터의 바이트 수입니다.
+        /// </summary>
+        public override uint BytesToRead
+        {
+            get
+            {
+                uint available = 0;
+
+                try
+                {
+                    available = dataReader.UnconsumedBufferLength;
+                }
+                catch { }
+                return (uint)readBuffer.Count + available;
+            }
+        }
+
     }
 }

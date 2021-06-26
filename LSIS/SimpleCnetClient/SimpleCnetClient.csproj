@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\VagabondK.Protocols.Channels.SerialPort\VagabondK.Protocols.Channels.SerialPort.csproj" />
+    <ProjectReference Include="..\..\VagabondK.Protocols.Channels\VagabondK.Protocols.Channels.csproj" />
     <ProjectReference Include="..\..\VagabondK.Protocols.LSElectric\VagabondK.Protocols.LSElectric.csproj" />
   </ItemGroup>
 

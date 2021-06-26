@@ -54,5 +54,10 @@ namespace VagabondK.Protocols.Channels
         /// 채널 설명
         /// </summary>
         public abstract string Description { get; }
+
+        /// <summary>
+        /// 수신 버퍼에 있는 데이터의 바이트 수입니다.
+        /// </summary>
+        public abstract uint BytesToRead { get; }
     }
 }
