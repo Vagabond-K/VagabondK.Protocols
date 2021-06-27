@@ -24,15 +24,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleModbusMaster", "Sampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleModbusSlave", "Samples\Modbus\SimpleModbusSlave\SimpleModbusSlave.csproj", "{80592A25-79CF-4952-A6BD-24122B714688}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LSIS", "LSIS", "{4C581C92-6693-41A7-98D2-421A541712BE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LS ELECTRIC", "LS ELECTRIC", "{4C581C92-6693-41A7-98D2-421A541712BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.LSElectric", "VagabondK.Protocols.LSElectric\VagabondK.Protocols.LSElectric.csproj", "{F33BE375-6F84-4DCF-80D8-89A9E81E313A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VagabondK.Protocols.Channels", "VagabondK.Protocols.Channels\VagabondK.Protocols.Channels.csproj", "{EB4F349E-8E8E-4210-8BE4-07167D2D19AE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleCnetClient", "Samples\LSIS\SimpleCnetClient\SimpleCnetClient.csproj", "{EA3C20FB-B39A-4083-83C7-5E06084F4FBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleCnetClient", "Samples\LS ELECTRIC\SimpleCnetClient\SimpleCnetClient.csproj", "{EA3C20FB-B39A-4083-83C7-5E06084F4FBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCnetStationSimulation", "Samples\LSIS\SimpleCnetStationSimulation\SimpleCnetStationSimulation.csproj", "{A209D85B-09BB-44B7-92B6-F84C53FC893F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCnetStationSimulation", "Samples\LS ELECTRIC\SimpleCnetStationSimulation\SimpleCnetStationSimulation.csproj", "{A209D85B-09BB-44B7-92B6-F84C53FC893F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
