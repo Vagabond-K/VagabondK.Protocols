@@ -7,7 +7,7 @@ using VagabondK.Protocols.LSElectric.Cnet.Logging;
 namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
-    /// LS ELECTRIC Cnet 프로토콜 메시지
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 메시지
     /// </summary>
     public abstract class CnetMessage : IProtocolMessage
     {
@@ -48,12 +48,12 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
 
         /// <summary>
-        /// 프레임 시작 코드
+        /// 프레임 시작 헤더
         /// </summary>
         public abstract byte Header { get; }
 
         /// <summary>
-        /// 프레임 종료 코드
+        /// 프레임 종료 테일
         /// </summary>
         public abstract byte Tail { get; }
 
@@ -68,13 +68,13 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             }
         }
 
-        public static bool TryParseByte(IList<byte> bytes, int index, out byte value)
+        internal static bool TryParseByte(IList<byte> bytes, int index, out byte value)
             => byte.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        public static bool TryParseUint16(IList<byte> bytes, int index, out ushort value)
+        internal static bool TryParseUint16(IList<byte> bytes, int index, out ushort value)
             => ushort.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        public static bool TryParseUint32(IList<byte> bytes, int index, out uint value)
+        internal static bool TryParseUint32(IList<byte> bytes, int index, out uint value)
             => uint.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        public static bool TryParseUint64(IList<byte> bytes, int index, out ulong value)
+        internal static bool TryParseUint64(IList<byte> bytes, int index, out ulong value)
             => ulong.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}{(char)bytes[index + 8]}{(char)bytes[index + 9]}{(char)bytes[index + 10]}{(char)bytes[index + 11]}{(char)bytes[index + 12]}{(char)bytes[index + 13]}{(char)bytes[index + 14]}{(char)bytes[index + 15]}", System.Globalization.NumberStyles.HexNumber, null, out value);
 
         /// <summary>

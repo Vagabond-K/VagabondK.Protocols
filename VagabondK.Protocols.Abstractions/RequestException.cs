@@ -9,6 +9,7 @@ namespace VagabondK.Protocols
     /// <summary>
     /// 통신 요청 오류 예외
     /// </summary>
+    /// <typeparam name="TErrorCode">오류 코드</typeparam>
     public class RequestException<TErrorCode> : ErrorCodeException<TErrorCode> where TErrorCode : Enum
     {
         /// <summary>

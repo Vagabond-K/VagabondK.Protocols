@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Text;
 using VagabondK.Protocols.Channels;
 
 namespace VagabondK.Protocols.LSElectric.Cnet.Logging
 {
     /// <summary>
-    /// Cnet 메시지 Log
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 메시지 Log
     /// </summary>
     public class CnetMessageLog : CnetLog
     {
@@ -36,12 +37,44 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Logging
         public override string ToString()
         {
             if (Message is CnetRequest)
-                return $"({ChannelDescription}) Request: {BitConverter.ToString(RawMessage)}";
+                return $"({ChannelDescription}) Request: {RawMessageToString()}";
             else if (Message is CnetResponse)
-                return $"({ChannelDescription}) Response: {BitConverter.ToString(RawMessage)}";
+                return $"({ChannelDescription}) Response: {RawMessageToString()}";
             else
                 return base.ToString();
+        }
 
+        private string RawMessageToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var b in RawMessage)
+            {
+                switch (b)
+                {
+                    case CnetMessage.ENQ:
+                        stringBuilder.Append($"{{{nameof(CnetMessage.ENQ)}}}");
+                        break;
+                    case CnetMessage.EOT:
+                        stringBuilder.Append($"{{{nameof(CnetMessage.EOT)}}}");
+                        break;
+                    case CnetMessage.ACK:
+                        stringBuilder.Append($"{{{nameof(CnetMessage.ACK)}}}");
+                        break;
+                    case CnetMessage.NAK:
+                        stringBuilder.Append($"{{{nameof(CnetMessage.NAK)}}}");
+                        break;
+                    case CnetMessage.ETX:
+                        stringBuilder.Append($"{{{nameof(CnetMessage.ETX)}}}");
+                        break;
+                    default:
+                        if (b >= 33 && b <= 126)
+                            stringBuilder.Append((char)b);
+                        else
+                            stringBuilder.Append(b.ToString("X2"));
+                        break;
+                }
+            }
+            return stringBuilder.ToString();
         }
     }
 }

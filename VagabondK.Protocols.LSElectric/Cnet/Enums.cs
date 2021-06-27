@@ -1,7 +1,7 @@
 ﻿namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
-    /// LS ELECTRIC Cnet 프로토콜 커맨드
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 커맨드
     /// </summary>
     public enum CnetCommand : byte
     {
@@ -26,7 +26,7 @@
     }
 
     /// <summary>
-    /// LS ELECTRIC Cnet 프로토콜 커맨드 타입
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 커맨드 타입
     /// </summary>
     public enum CnetCommandType : ushort
     {
@@ -36,17 +36,17 @@
         Unknown = 0x0000,
 
         /// <summary>
-        /// 개별 주소
+        /// 개별 변수 액세스
         /// </summary>
-        Each = 0x5353,
+        Individual = 0x5353,
         /// <summary>
-        /// 연속 주소
+        /// 연속 변수 액세스
         /// </summary>
-        Block = 0x5342,
+        Continuous = 0x5342,
     }
 
     /// <summary>
-    /// NAK 에러 코드
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 NAK 에러 코드
     /// </summary>
     public enum CnetNAKCode : ushort
     {
@@ -58,7 +58,7 @@
         /// <summary>
         /// 요청 블록 수 초과(최대 16개)
         /// </summary>
-        OverDataCount = 0x0003,
+        OverRequestReadBlockCount = 0x0003,
 
         /// <summary>
         /// 변수 길이 초과(최대 12자리)
@@ -68,7 +68,7 @@
         /// <summary>
         /// 데이터 타입 오류
         /// </summary>
-        DataTypeError = 0x0007,
+        DeviceVariableTypeError = 0x0007,
 
         /// <summary>
         /// 데이터 오류
@@ -106,9 +106,9 @@
         UnnecessaryDataInFrame = 0x1234,
 
         /// <summary>
-        /// 개별 데이터 주소들에 서로 다른 타입이 발견됨
+        /// 개별 디바이스 변수들에 서로 다른 타입이 발견됨
         /// </summary>
-        EachDataIsDifferentType = 0x1332,
+        DeviceVariableTypeIsDifferent = 0x1332,
 
         /// <summary>
         /// 16진수로 파싱할 수 없는 문자가 발견됨
@@ -118,11 +118,11 @@
         /// <summary>
         /// 디바이스 요구 영역 초과
         /// </summary>
-        OutOfRangeDevice = 0x7132,
+        OutOfRangeDeviceVariable = 0x7132,
     }
 
     /// <summary>
-    /// Cnet 통신 오류 코드
+    /// LS ELECTRIC(구 LS산전) Cnet 통신 오류 코드
     /// </summary>
     public enum CnetCommErrorCode
     {

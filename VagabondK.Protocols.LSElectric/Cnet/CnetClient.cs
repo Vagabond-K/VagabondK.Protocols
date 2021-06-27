@@ -9,7 +9,7 @@ using VagabondK.Protocols.LSElectric.Cnet.Logging;
 namespace VagabondK.Protocols.LSElectric.Cnet
 {
     /// <summary>
-    /// LS ELECTRIC Cnet 프로토콜 기반 클라이언트입니다.
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 기반 클라이언트입니다.
     /// XGT 시리즈 제품의 Cnet I/F 모듈과 통신 가능합니다.
     /// </summary>
     public class CnetClient : IDisposable
@@ -190,29 +190,29 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 || request.Command == CnetCommand.RegisterMonitor)
                 return DeserializeTail(buffer, request, timeout) ?? new CnetACKResponse(request);
 
-            List<DeviceValue> values;
+            List<DeviceValue> deviceValues;
             List<byte> bytes;
 
             if (request is CnetIncludeCommandTypeRequest commandTypeRequest)
             {
                 switch (commandTypeRequest.CommandType)
                 {
-                    case CnetCommandType.Each:
+                    case CnetCommandType.Individual:
                         switch (request.Command)
                         {
                             case CnetCommand.Read:
-                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetReadRequest);
+                                return DeserializeIndividualDataResponse(buffer, request, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetReadIndividualRequest);
                             case CnetCommand.ExecuteMonitor:
-                                return DeserializeEachAddressDataResponse(buffer, request, timeout, out values) ?? new CnetReadResponse(values, request as CnetExecuteMonitorRequest);
+                                return DeserializeIndividualDataResponse(buffer, request, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetExecuteMonitorRequest);
                         }
                         break;
-                    case CnetCommandType.Block:
+                    case CnetCommandType.Continuous:
                         switch (request.Command)
                         {
                             case CnetCommand.Read:
-                                return DeserializeAddressBlockDataResponse(buffer, request, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetReadAddressBlockRequest);
+                                return DeserializeContinuousDataResponse(buffer, request, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetReadContinuousRequest);
                             case CnetCommand.ExecuteMonitor:
-                                return DeserializeAddressBlockDataResponse(buffer, request, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetExecuteMonitorAddressBlockRequest);
+                                return DeserializeContinuousDataResponse(buffer, request, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetExecuteMonitorContinuousRequest);
                         }
                         break;
                 }
@@ -221,15 +221,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             throw new NotImplementedException();
         }
 
-        private CnetResponse DeserializeEachAddressDataResponse(List<byte> buffer, CnetRequest request, int timeout, out List<DeviceValue> values)
+        private CnetResponse DeserializeIndividualDataResponse(List<byte> buffer, CnetRequest request, int timeout, out List<DeviceValue> deviceValues)
         {
-            var addresses = ((IEnumerable<DeviceAddress>)request).ToArray();
-            values = new List<DeviceValue>();
+            var deviceVariables = ((IEnumerable<DeviceVariable>)request).ToArray();
+            deviceValues = new List<DeviceValue>();
 
             buffer.AddRange(channel.Read(2, timeout));
             if (!CnetMessage.TryParseByte(buffer, 6, out var blockCount))
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
-            if (blockCount != addresses.Length)
+            if (blockCount != deviceVariables.Length)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataBlockCountDoNotMatch, buffer, request);
 
             for (int i = 0; i < blockCount; i++)
@@ -240,30 +240,30 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
                 buffer.AddRange(channel.Read((uint)dataCount * 2, timeout));
                 
-                switch (addresses[i].DataType)
+                switch (deviceVariables[i].DataType)
                 {
                     case DataType.Bit:
                         if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value != 0));
+                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value != 0));
                         break;
                     case DataType.Byte:
                         if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
                         break;
                     case DataType.Word:
                         if (dataCount != 2) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint16(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint16(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
                         break;
                     case DataType.DoubleWord:
                         if (dataCount != 4) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint32(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint32(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
                         break;
                     case DataType.LongWord:
                         if (dataCount != 8) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint64(buffer, buffer.Count - dataCount * 2, out var value)) values.Add(new DeviceValue(value));
+                        else if (CnetMessage.TryParseUint64(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
                         break;
                     default:
-                        values.Add(new DeviceValue());
+                        deviceValues.Add(new DeviceValue());
                         break;
                 }
             }
@@ -271,13 +271,13 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             return DeserializeTail(buffer, request, timeout);
         }
 
-        private CnetResponse DeserializeAddressBlockDataResponse(List<byte> buffer, CnetRequest request, int timeout, out List<byte> bytes)
+        private CnetResponse DeserializeContinuousDataResponse(List<byte> buffer, CnetRequest request, int timeout, out List<byte> bytes)
         {
-            ICnetAddressBlockRequest addressBlockRequest = (ICnetAddressBlockRequest)request;
+            ICnetContinuousAccessRequest continuousAccessRequest = (ICnetContinuousAccessRequest)request;
             bytes = new List<byte>();
 
             int dataUnit;
-            switch (addressBlockRequest.DeviceAddress.DataType)
+            switch (continuousAccessRequest.StartDeviceVariable.DataType)
             {
                 case DataType.Word:
                     dataUnit = 2;
@@ -296,17 +296,17 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             buffer.AddRange(channel.Read(2, timeout));
             if (!CnetMessage.TryParseByte(buffer, 6, out var dataCount))
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
-            if (dataCount != dataUnit * addressBlockRequest.Count)
+            if (dataCount != dataUnit * continuousAccessRequest.Count)
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
 
-            buffer.AddRange(channel.Read((uint)dataUnit * (uint)addressBlockRequest.Count * 2, timeout));
+            buffer.AddRange(channel.Read((uint)dataCount * 2, timeout));
 
             var tailErrorResponse = DeserializeTail(buffer, request, timeout);
             if (tailErrorResponse != null) return tailErrorResponse;
 
             for (int i = 0; i < dataCount; i++)
             {
-                if (!CnetMessage.TryParseByte(buffer, 7 + i * 2, out var value))
+                if (!CnetMessage.TryParseByte(buffer, 8 + i * 2, out var value))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
                 bytes.Add(value);
             }

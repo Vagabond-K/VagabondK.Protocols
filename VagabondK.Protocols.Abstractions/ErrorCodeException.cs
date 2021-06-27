@@ -6,8 +6,9 @@ using System.Reflection;
 namespace VagabondK.Protocols
 {
     /// <summary>
-    /// Error Code Exception
+    /// 오류 코드를 포함하는 예외
     /// </summary>
+    /// <typeparam name="TErrorCode">오류 코드 형식</typeparam>
     public class ErrorCodeException<TErrorCode> : Exception where TErrorCode : Enum
     {
         /// <summary>
@@ -30,7 +31,7 @@ namespace VagabondK.Protocols
         }
 
         /// <summary>
-        /// Error Code
+        /// 오류 코드
         /// </summary>
         public TErrorCode Code { get; }
 

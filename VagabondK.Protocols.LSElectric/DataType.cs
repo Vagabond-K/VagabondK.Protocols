@@ -1,7 +1,7 @@
 ﻿namespace VagabondK.Protocols.LSElectric
 {
     /// <summary>
-    /// LS ELECTRIC PLC 데이터 형식
+    /// LS ELECTRIC(구 LS산전) PLC 데이터 형식
     /// </summary>
     public enum DataType : byte
     {

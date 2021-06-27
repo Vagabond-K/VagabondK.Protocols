@@ -13,7 +13,7 @@ namespace VagabondK.Protocols.Modbus
     /// <summary>
     /// Modbus 슬레이브 서비스
     /// </summary>
-    public class ModbusSlaveService : IDisposable, IEnumerable<KeyValuePair<ushort, ModbusSlave>>
+    public class ModbusSlaveService : IDisposable, IEnumerable<KeyValuePair<byte, ModbusSlave>>
     {
         /// <summary>
         /// 생성자
@@ -72,14 +72,14 @@ namespace VagabondK.Protocols.Modbus
         }
 
         private ModbusSerializer serializer;
-        private readonly Dictionary<ushort, ModbusSlave> modbusSlaves = new Dictionary<ushort, ModbusSlave>();
+        private readonly Dictionary<byte, ModbusSlave> modbusSlaves = new Dictionary<byte, ModbusSlave>();
 
         /// <summary>
         /// Modbus 슬레이브 가져오기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <returns>Modbus 슬레이브</returns>
-        public ModbusSlave this[ushort slaveAddress]
+        public ModbusSlave this[byte slaveAddress]
         {
             get => modbusSlaves[slaveAddress];
             set => modbusSlaves[slaveAddress] = value;
@@ -88,7 +88,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// Modbus 슬레이브 주소 목록
         /// </summary>
-        public ICollection<ushort> SlaveAddresses { get => modbusSlaves.Keys; }
+        public ICollection<byte> SlaveAddresses { get => modbusSlaves.Keys; }
 
         /// <summary>
         /// Modbus 슬레이브 목록
@@ -100,7 +100,7 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="slaveAddress">Modbus 슬레이브 주소</param>
         /// <returns>Modbus 슬레이브 포함 여부</returns>
-        public bool ContainsSlaveAddress(ushort slaveAddress) => modbusSlaves.ContainsKey(slaveAddress);
+        public bool ContainsSlaveAddress(byte slaveAddress) => modbusSlaves.ContainsKey(slaveAddress);
 
         /// <summary>
         /// Modbus 슬레이브 가져오기
@@ -108,7 +108,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="modbusSlave">Modbus 슬레이브</param>
         /// <returns>Modbus 슬레이브 포함 여부</returns>
-        public bool TryGetValue(ushort slaveAddress, out ModbusSlave modbusSlave) => modbusSlaves.TryGetValue(slaveAddress, out modbusSlave);
+        public bool TryGetValue(byte slaveAddress, out ModbusSlave modbusSlave) => modbusSlaves.TryGetValue(slaveAddress, out modbusSlave);
 
         /// <summary>
         /// Modbus Serializer
@@ -181,6 +181,7 @@ namespace VagabondK.Protocols.Modbus
         /// 통신 채널 제거
         /// </summary>
         /// <param name="channel">통신 채널</param>
+        /// <returns>제거 여부</returns>
         public bool RemoveChannel(IChannel channel)
         {
             lock (channels)
@@ -446,7 +447,7 @@ namespace VagabondK.Protocols.Modbus
         /// Modbus 슬레이브 목록 열거
         /// </summary>
         /// <returns>Modbus 슬레이브 목록 열거</returns>
-        public IEnumerator<KeyValuePair<ushort, ModbusSlave>> GetEnumerator() => modbusSlaves.GetEnumerator();
+        public IEnumerator<KeyValuePair<byte, ModbusSlave>> GetEnumerator() => modbusSlaves.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         class ChannelTask
@@ -519,7 +520,7 @@ namespace VagabondK.Protocols.Modbus
     /// </summary>
     public sealed class ValidatingSlaveAddressEventArgs : EventArgs
     {
-        internal ValidatingSlaveAddressEventArgs(ushort slaveAddress, Channel channel)
+        internal ValidatingSlaveAddressEventArgs(byte slaveAddress, Channel channel)
         {
             SlaveAddress = slaveAddress;
             Channel = channel;
@@ -528,7 +529,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 슬레이브 주소
         /// </summary>
-        public ushort SlaveAddress { get; }
+        public byte SlaveAddress { get; }
 
         /// <summary>
         /// 통신 채널

@@ -4,7 +4,7 @@ using VagabondK.Protocols.Logging;
 namespace VagabondK.Protocols.LSElectric.Cnet.Logging
 {
     /// <summary>
-    /// Cnet Log
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 Log
     /// </summary>
     public abstract class CnetLog : ChannelLog
     {

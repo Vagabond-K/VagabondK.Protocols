@@ -39,6 +39,7 @@ namespace VagabondK.Protocols.Logging
         /// 통신 채널 Logger 제거
         /// </summary>
         /// <param name="channelLogger">통신 채널 Logger</param>
+        /// <returns>제거 여부</returns>
         public bool RemoveChannelLogger(IChannelLogger channelLogger)
         {
             lock (channelLoggers)

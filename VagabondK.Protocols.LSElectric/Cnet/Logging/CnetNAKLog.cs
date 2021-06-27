@@ -6,7 +6,7 @@ using VagabondK.Protocols.Channels;
 namespace VagabondK.Protocols.LSElectric.Cnet.Logging
 {
     /// <summary>
-    /// Cnet Error Log
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 오류 발생 Log
     /// </summary>
     public class CnetNAKLog : CnetLog
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,10 +11,10 @@ using VagabondK.Protocols.LSElectric.Cnet.Logging;
 namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 {
     /// <summary>
-    /// LS ELECTRIC Cnet 프로토콜 시뮬레이터입니다.
+    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 시뮬레이터 서비스입니다.
     /// Cnet 클라이언트를 테스트하는 용도로 사용 가능합니다.
     /// </summary>
-    public class CnetSimulationService : IDisposable
+    public class CnetSimulationService : IDisposable, IEnumerable<KeyValuePair<byte, CnetSimulationStation>>
     {
         /// <summary>
         /// 생성자
@@ -26,7 +27,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         /// <param name="channel">통신 채널</param>
         public CnetSimulationService(IChannel channel)
         {
-            this.channel = channel;
+            Channel = channel;
         }
 
         /// <summary>
@@ -50,7 +51,51 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
         private IChannel channel;
         private readonly Dictionary<Channel, ChannelTask> channelTasks = new Dictionary<Channel, ChannelTask>();
-        private readonly Dictionary<byte, Dictionary<byte, CnetMonitor>> monitors = new Dictionary<byte, Dictionary<byte, CnetMonitor>>();
+        private readonly Dictionary<byte, CnetSimulationStation> simulationStations = new Dictionary<byte, CnetSimulationStation>();
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 가져오기
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <returns>시뮬레이션 스테이션</returns>
+        public CnetSimulationStation this[byte stationNumber]
+        {
+            get => simulationStations[stationNumber];
+            set => simulationStations[stationNumber] = value;
+        }
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 국번 목록
+        /// </summary>
+        public ICollection<byte> StationsNumbers { get => simulationStations.Keys; }
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 목록
+        /// </summary>
+        public ICollection<CnetSimulationStation> SimulationStations { get => simulationStations.Values; }
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 포함 여부
+        /// </summary>
+        /// <param name="stationNumber">시뮬레이션 스테이션 국번</param>
+        /// <returns>시뮬레이션 스테이션 포함 여부</returns>
+        public bool ContainsStationsNumber(byte stationNumber) => simulationStations.ContainsKey(stationNumber);
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 가져오기
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="simulationStation">시뮬레이션 스테이션</param>
+        /// <returns>시뮬레이션 스테이션 포함 여부</returns>
+        public bool TryGetValue(byte stationNumber, out CnetSimulationStation simulationStation) => simulationStations.TryGetValue(stationNumber, out simulationStation);
+
+        /// <summary>
+        /// 시뮬레이션 스테이션 열거
+        /// </summary>
+        /// <returns>시뮬레이션 스테이션 목록 열거</returns>
+        public IEnumerator<KeyValuePair<byte, CnetSimulationStation>> GetEnumerator() => simulationStations.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
 
         /// <summary>
         /// 통신 채널
@@ -110,266 +155,360 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         }
 
 
-        /// <summary>
-        /// 슬레이브 주소 검증 이벤트
-        /// </summary>
-        public event EventHandler<ValidatingStationNumberEventArgs> ValidatingStationNumber;
-
-        public event EventHandler<RequestedReadEventArgs> RequestedRead;
-
-        public event EventHandler<RequestedWriteEventArgs> RequestedWrite;
 
 
         private void OnRequestedRead(CnetReadRequest request, Channel channel)
         {
-            var eventArgs = new RequestedReadEventArgs(request, channel);
-            RequestedRead?.Invoke(this, eventArgs);
-            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
+            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
             {
-                switch (request.CommandType)
+                CnetResponse response = null;
+
+                var eventArgs = new RequestedReadEventArgs(request, channel);
+                simulationStation.OnRequestedRead(eventArgs);
+                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
                 {
-                    case CnetCommandType.Each:
-                        channel.Write(new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadEachAddressRequest)request).Serialize().ToArray());
-                        break;
-                    case CnetCommandType.Block:
-                        channel.Write(new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadAddressBlockRequest)request).Serialize().ToArray());
-                        break;
+                    switch (request.CommandType)
+                    {
+                        case CnetCommandType.Individual:
+                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadIndividualRequest)request);
+                            break;
+                        case CnetCommandType.Continuous:
+                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadContinuousRequest)request);
+                            break;
+                    }
                 }
-            }
-            else
-            {
-                channel.Write(new CnetNAKResponse(eventArgs.NAKCode, request).Serialize().ToArray());
+                else
+                {
+                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
+                }
+
+                if (response != null)
+                {
+                    var responseMessage = response.Serialize().ToArray();
+                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
+                    channel.Write(responseMessage);
+                }
             }
         }
 
         private void OnRequestedWrite(CnetWriteRequest request, Channel channel)
         {
-            var eventArgs = new RequestedWriteEventArgs(request, channel);
-            RequestedWrite?.Invoke(this, eventArgs);
-            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
+            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
             {
-                channel.Write(new CnetACKResponse(request).Serialize().ToArray());
-            }
-            else
-            {
-                channel.Write(new CnetNAKResponse(eventArgs.NAKCode, request).Serialize().ToArray());
+                var eventArgs = new RequestedWriteEventArgs(request, channel);
+                simulationStation.OnRequestedWrite(eventArgs);
+
+                CnetResponse response;
+                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
+                {
+                    response = new CnetACKResponse(request);
+                }
+                else
+                {
+                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
+                }
+
+                if (response != null)
+                {
+                    var responseMessage = response.Serialize().ToArray();
+                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
+                    channel.Write(responseMessage);
+                }
             }
         }
 
         private void OnRequestedRegisterMonitor(CnetRegisterMonitorRequest request, Channel channel)
         {
-            CnetMonitor monitor = null;
-            switch (request.CommandType)
+            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
             {
-                case CnetCommandType.Each:
-                    monitor = new CnetMonitorByEachAddress(request.StationNumber, request.MonitorNumber, (CnetRegisterMonitorEachAddressRequest)request);
-                    break;
-                case CnetCommandType.Block:
-                    monitor = new CnetMonitorByAddressBlock(request.StationNumber, request.MonitorNumber)
-                    {
-                        DeviceAddress = ((CnetRegisterMonitorAddressBlockRequest)request).DeviceAddress,
-                        Count = ((CnetRegisterMonitorAddressBlockRequest)request).Count,
-                    };
-                    break;
+                CnetMonitor monitor = null;
+                switch (request.CommandType)
+                {
+                    case CnetCommandType.Individual:
+                        monitor = new CnetMonitorByIndividualAccess(request.StationNumber, request.MonitorNumber, (CnetRegisterMonitorIndividualRequest)request);
+                        break;
+                    case CnetCommandType.Continuous:
+                        monitor = new CnetMonitorByContinuousAccess(request.StationNumber, request.MonitorNumber, ((CnetRegisterMonitorContinuousRequest)request).StartDeviceVariable, ((CnetRegisterMonitorContinuousRequest)request).Count);
+                        break;
+                }
+                simulationStation.Monitors[request.MonitorNumber] = monitor;
+
+                var response = new CnetACKResponse(request);
+                var responseMessage = response.Serialize().ToArray();
+                channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
+                channel.Write(responseMessage);
             }
-            
-            
         }
 
         private void OnRequestedExecuteMonitor(CnetExecuteMonitorRequest request, Channel channel)
         {
-            var eventArgs = new RequestedReadEventArgs(request, channel);
-            RequestedRead?.Invoke(this, eventArgs);
-            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
+            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
             {
-                switch (request.CommandType)
+                CnetResponse response = null;
+
+                var eventArgs = new RequestedReadEventArgs(request, channel);
+                simulationStation.OnRequestedRead(eventArgs);
+                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
                 {
-                    case CnetCommandType.Each:
-                        channel.Write(new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorEachAddressRequest)request).Serialize().ToArray());
-                        break;
-                    case CnetCommandType.Block:
-                        channel.Write(new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorAddressBlockRequest)request).Serialize().ToArray());
-                        break;
+                    switch (request.CommandType)
+                    {
+                        case CnetCommandType.Individual:
+                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorIndividualRequest)request);
+                            break;
+                        case CnetCommandType.Continuous:
+                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorContinuousRequest)request);
+                            break;
+                    }
+                }
+                else
+                {
+                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
+                }
+
+                if (response != null)
+                {
+                    var responseMessage = response.Serialize().ToArray();
+                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
+                    channel.Write(responseMessage);
                 }
             }
-            else
-            {
-                channel.Write(new CnetNAKResponse(eventArgs.NAKCode, request).Serialize().ToArray());
-            }
         }
 
-        private bool IsValidStationNumber(byte stationNumber, Channel channel)
+        private void DeserializeRequest(Channel channel, List<byte> buffer)
         {
-            var eventArgs = new ValidatingStationNumberEventArgs(stationNumber, channel);
-            ValidatingStationNumber?.Invoke(this, eventArgs);
-            return eventArgs.IsValid;
-        }
-
-        private CnetRequest DeserializeRequest(Channel channel, List<byte> buffer)
-        {
-            CnetRequest result = null;
+            CnetRequest request = null;
 
             List<byte> errorBuffer = new List<byte>();
-            while (!channel.IsDisposed)
+
+            byte enq = 0;
+            do
             {
-                if (errorBuffer.Count >= 256)
+                enq = channel.Read(0);
+                if (enq == CnetMessage.ENQ)
+                    buffer.Add(enq);
+                else
+                    errorBuffer.Add(enq);
+            } while (enq != CnetMessage.ENQ);
+
+            if (errorBuffer.Count > 0)
+            {
+                channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
+                errorBuffer.Clear();
+            }
+
+            byte eot = 0;
+            do
+            {
+                eot = channel.Read(0);
+                buffer.Add(eot);
+            } while (eot != CnetMessage.EOT);
+
+            if (buffer.Count < 6)
+                throw new Exception();
+
+            if (CnetMessage.TryParseByte(buffer, 1, out var stationNumber)
+                && (Enum.IsDefined(typeof(CnetCommand), buffer[3]) || Enum.IsDefined(typeof(CnetCommand), (byte)(buffer[3] - 0x20))))
+            {
+                ushort commandTypeValue = (ushort)((buffer[4] << 8) | buffer[5]);
+                bool useBCC = buffer[3] > 0x60;
+                CnetCommand command = (CnetCommand)(useBCC ? buffer[3] - 0x20 : buffer[3]);
+                byte monitorNumber;
+
+                int frameLength = buffer.Count;
+
+                if (useBCC)
                 {
-                    channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
-                    errorBuffer.Clear();
+                    buffer.AddRange(channel.Read(2, 0));
+                    if (!buffer.Skip(buffer.Count - 2).Take(2).SequenceEqual(Encoding.ASCII.GetBytes((buffer.Take(buffer.Count - 2).Sum(b => b) % 256).ToString("X2"))))
+                    {
+                        channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+                        return;
+                    }
                 }
 
-                if (buffer.Count < 6 && !channel.IsDisposed)
-                    buffer.AddRange(channel.Read((uint)(6 - buffer.Count), 0));
+                int index = 6;
 
-                if (channel.IsDisposed) break;
-
-                if (buffer[0] == CnetMessage.ENQ
-                    && CnetMessage.TryParseByte(buffer, 1, out var stationNumber)
-                    && IsValidStationNumber(stationNumber, channel)
-                    && (Enum.IsDefined(typeof(CnetCommand), buffer[3]) || Enum.IsDefined(typeof(CnetCommand), (byte)(buffer[3] - 0x20))))
+                try
                 {
-                    ushort commandTypeValue = (ushort)((buffer[4] << 8) | buffer[5]);
-                    bool useBCC = buffer[3] > 0x60;
-                    CnetCommand command = (CnetCommand)(useBCC ? buffer[3] - 0x20 : buffer[3]);
-                    byte monitorNumber;
-
                     switch (command)
                     {
                         case CnetCommand.Read:
                             if (Enum.IsDefined(typeof(CnetCommandType), commandTypeValue))
-                                result = DeserializeReadRequest(channel, stationNumber, (CnetCommandType)commandTypeValue, buffer, useBCC);
+                                request = DeserializeReadRequest(stationNumber, (CnetCommandType)commandTypeValue, buffer, useBCC, ref index);
                             break;
                         case CnetCommand.Write:
                             if (Enum.IsDefined(typeof(CnetCommandType), commandTypeValue))
-                                result = DeserializeWriteRequest(channel, stationNumber, (CnetCommandType)commandTypeValue, buffer, useBCC);
+                                request = DeserializeWriteRequest(stationNumber, (CnetCommandType)commandTypeValue, buffer, useBCC, ref index);
                             break;
                         case CnetCommand.RegisterMonitor:
                             if (CnetMessage.TryParseByte(buffer, 4, out monitorNumber))
-                                result = DeserializeRegisterMonitorRequest(channel, stationNumber, monitorNumber, buffer, useBCC);
+                                request = DeserializeRegisterMonitorRequest(stationNumber, monitorNumber, buffer, useBCC, ref index);
                             break;
                         case CnetCommand.ExecuteMonitor:
                             if (CnetMessage.TryParseByte(buffer, 4, out monitorNumber))
-                                result = DeserializeExecuteMonitorRequest(channel, stationNumber, monitorNumber, buffer, useBCC);
+                                request = DeserializeExecuteMonitorRequest(stationNumber, monitorNumber, buffer, useBCC, ref index);
+                            break;
+                    }
+
+                    if (index < frameLength - 1)
+                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.UnnecessaryDataInFrame);
+                }
+                catch (ErrorCodeException<CnetNAKCode> ex)
+                {
+                    channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+
+                    var response = new CnetNAKResponse(ex.Code, stationNumber, command, commandTypeValue, useBCC);
+                    var message = response.Serialize().ToArray();
+                    channel.Write(message);
+                    channel.Logger.Log(new CnetMessageLog(channel, response, message));
+                }
+            }
+
+            if (request != null && simulationStations.ContainsKey(stationNumber))
+            {
+                try
+                {
+                    channel.Logger?.Log(new CnetMessageLog(channel, request, buffer.ToArray()));
+                    switch (request.Command)
+                    {
+                        case CnetCommand.Read:
+                            OnRequestedRead((CnetReadRequest)request, channel);
+                            break;
+                        case CnetCommand.Write:
+                            OnRequestedWrite((CnetWriteRequest)request, channel);
+                            break;
+                        case CnetCommand.RegisterMonitor:
+                            OnRequestedRegisterMonitor((CnetRegisterMonitorRequest)request, channel);
+                            break;
+                        case CnetCommand.ExecuteMonitor:
+                            OnRequestedExecuteMonitor((CnetExecuteMonitorRequest)request, channel);
                             break;
                     }
                 }
-
-                if (result != null)
+                catch (ErrorCodeException<CnetNAKCode> ex)
                 {
-                    if (errorBuffer.Count > 0)
-                    {
-                        channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
-                        errorBuffer.Clear();
-                    }
-                    return result;
-                }
-                else
-                {
-                    errorBuffer.Add(buffer[0]);
-                    buffer.RemoveAt(0);
-                    continue;
-                }
-            }
-            return null;
-        }
-
-        private DeviceAddress? DeserializeDeviceAddress(Channel channel, List<byte> buffer, ref int index)
-        {
-            if (buffer.Count < index + 2)
-                buffer.AddRange(channel.Read((uint)(index + 2 - buffer.Count), 0));
-            if (CnetMessage.TryParseByte(buffer, index, out var addressCount))
-            {
-                index += 2;
-
-                if (buffer.Count < index + addressCount)
-                    buffer.AddRange(channel.Read((uint)(index + addressCount - buffer.Count), 0));
-                if (DeviceAddress.TryParse(Encoding.ASCII.GetString(buffer.Skip(index).Take(addressCount).ToArray()), out var deviceAddress))
-                {
-                    index += addressCount;
-                    return deviceAddress;
-                }
-            }
-            return null;
-        }
-
-        private bool DeserializeTail(Channel channel, List<byte> buffer, ref int index, bool useBCC)
-        {
-            if (buffer.Count < index + 1)
-                buffer.AddRange(channel.Read((uint)(index + 1 - buffer.Count), 0));
-
-            if (buffer[index] == CnetMessage.EOT)
-            {
-                index++;
-                if (useBCC)
-                {
-                    if (buffer.Count < index + 2)
-                        buffer.AddRange(channel.Read((uint)(index + 2 - buffer.Count), 0));
-                    if (!buffer.Skip(index).Take(2).SequenceEqual(Encoding.ASCII.GetBytes((buffer.Take(index).Sum(b => b) % 256).ToString("X2"))))
-                        return true;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private CnetRequest DeserializeReadRequest(Channel channel, byte stationNumber, CnetCommandType commandType, List<byte> buffer, bool useBCC)
-        {
-            if (commandType == CnetCommandType.Each)
-            {
-                if (buffer.Count < 8 && !channel.IsDisposed)
-                    buffer.AddRange(channel.Read((uint)(8 - buffer.Count), 0));
-                if (CnetMessage.TryParseByte(buffer, 6, out var blockCount))
-                {
-                    List<DeviceAddress> deviceAddresses = new List<DeviceAddress>();
-                    int index = 8;
-                    for (int i = 0; i < blockCount; i++)
-                    {
-                        var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                        if (deviceAddress == null)
-                            return null;
-                        deviceAddresses.Add(deviceAddress.Value);
-                    }
-                    if (DeserializeTail(channel, buffer, ref index, useBCC))
-                        return new CnetReadEachAddressRequest(stationNumber, deviceAddresses, useBCC);
+                    var response = new CnetNAKResponse(ex.Code, request);
+                    var message = response.Serialize().ToArray();
+                    channel.Write(message);
+                    channel.Logger.Log(new CnetMessageLog(channel, response, message));
                 }
             }
             else
             {
-                int index = 6;
-                var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                if (deviceAddress != null)
+                channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+            }
+        }
+
+        private DeviceVariable? DeserializeDeviceVariable(List<byte> buffer, ref int index)
+        {
+            if (buffer.Count < index + 2)
+                throw new Exception();
+
+            if (CnetMessage.TryParseByte(buffer, index, out var byteCount))
+            {
+                index += 2;
+
+                if (byteCount < 4 || byteCount > 12)
+                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverVariableLength);
+
+                if (buffer.Count < index + byteCount)
+                    throw new Exception();
+
+                var s = Encoding.ASCII.GetString(buffer.Skip(index).Take(byteCount).ToArray());
+
+                if (!Enum.IsDefined(typeof(DeviceType), (byte)s[1]))
+                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.IlegalDeviceMemory);
+                if (!Enum.IsDefined(typeof(DataType), (byte)s[2]))
+                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeError);
+                if (s[0] != '%' || !uint.TryParse(s.Remove(0, 3), out _))
+                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
+
+                if (DeviceVariable.TryParse(s, out var deviceVariable))
                 {
-                    if (buffer.Count < index + 2)
-                        buffer.AddRange(channel.Read((uint)(index + 2 - buffer.Count), 0));
-                    if (CnetMessage.TryParseByte(buffer, index, out var count))
-                    {
-                        index += 2;
-                        if (DeserializeTail(channel, buffer, ref index, useBCC))
-                            return new CnetReadAddressBlockRequest(stationNumber, deviceAddress.Value, count, useBCC);
-                    }
+                    index += byteCount;
+                    return deviceVariable;
                 }
             }
             return null;
         }
 
-        private CnetRequest DeserializeWriteRequest(Channel channel, byte stationNumber, CnetCommandType commandType, List<byte> buffer, bool useBCC)
+        private CnetRequest DeserializeReadRequest(byte stationNumber, CnetCommandType commandType, List<byte> buffer, bool useBCC, ref int index)
         {
-            if (commandType == CnetCommandType.Each)
+            if (commandType == CnetCommandType.Individual)
             {
-                if (buffer.Count < 8 && !channel.IsDisposed)
-                    buffer.AddRange(channel.Read((uint)(8 - buffer.Count), 0));
+                if (buffer.Count < 8)
+                    throw new Exception();
                 if (CnetMessage.TryParseByte(buffer, 6, out var blockCount))
                 {
-                    List<KeyValuePair<DeviceAddress, DeviceValue>> deviceValues = new List<KeyValuePair<DeviceAddress, DeviceValue>>();
-                    int index = 8;
+                    index += 2;
+
+                    if (blockCount > 16)
+                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverRequestReadBlockCount);
+
+                    List<DeviceVariable> deviceVariables = new List<DeviceVariable>();
+                    for (int i = 0; i < blockCount; i++)
+                    {
+                        var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                        if (deviceVariable == null)
+                            return null;
+
+                        if (deviceVariables.Count > 0
+                            && (deviceVariables[0].DeviceType != deviceVariable.Value.DeviceType || deviceVariables[0].DataType != deviceVariable.Value.DataType))
+                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeIsDifferent);
+
+                        deviceVariables.Add(deviceVariable.Value);
+                    }
+                    return new CnetReadIndividualRequest(stationNumber, deviceVariables, useBCC);
+                }
+            }
+            else
+            {
+                var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                if (deviceVariable != null)
+                {
+                    if (buffer.Count < index + 2)
+                        throw new Exception();
+                    if (CnetMessage.TryParseByte(buffer, index, out var count))
+                    {
+                        index += 2;
+
+                        if (count > 60)
+                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverDataLength);
+
+                        return new CnetReadContinuousRequest(stationNumber, deviceVariable.Value, count, useBCC);
+                    }
+                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
+                }
+            }
+            return null;
+        }
+
+        private CnetRequest DeserializeWriteRequest(byte stationNumber, CnetCommandType commandType, List<byte> buffer, bool useBCC, ref int index)
+        {
+            if (commandType == CnetCommandType.Individual)
+            {
+                if (buffer.Count < 8)
+                    throw new Exception();
+                if (CnetMessage.TryParseByte(buffer, 6, out var blockCount))
+                {
+                    index += 2;
+
+                    if (blockCount > 16)
+                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverRequestReadBlockCount);
+
+                    List<KeyValuePair<DeviceVariable, DeviceValue>> deviceValues = new List<KeyValuePair<DeviceVariable, DeviceValue>>();
 
                     for (int i = 0; i < blockCount; i++)
                     {
-                        var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                        if (deviceAddress != null)
+                        var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                        if (deviceVariable != null)
                         {
+                            if (deviceValues.Count > 0
+                                && (deviceValues[0].Key.DeviceType != deviceVariable.Value.DeviceType || deviceValues[0].Key.DataType != deviceVariable.Value.DataType))
+                                throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeIsDifferent);
+
                             int dataUnit;
-                            switch (deviceAddress.Value.DataType)
+                            switch (deviceVariable.Value.DataType)
                             {
                                 case DataType.Bit:
                                 case DataType.Byte:
@@ -389,29 +528,29 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                             }
 
                             if (buffer.Count < index + dataUnit * 2)
-                                buffer.AddRange(channel.Read((uint)(index + dataUnit * 2 - buffer.Count), 0));
+                                throw new Exception();
 
-                            switch (deviceAddress.Value.DataType)
+                            switch (deviceVariable.Value.DataType)
                             {
                                 case DataType.Bit:
-                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue)) return null;
-                                    else deviceValues.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Value, new DeviceValue(bitValue != 0)));
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(bitValue != 0)));
                                     break;
                                 case DataType.Byte:
-                                    if (!CnetMessage.TryParseByte(buffer, index, out var byteValue)) return null;
-                                    else deviceValues.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Value, new DeviceValue(byteValue)));
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var byteValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(byteValue)));
                                     break;
                                 case DataType.Word:
-                                    if (!CnetMessage.TryParseUint16(buffer, index, out var wordValue)) return null; 
-                                    else deviceValues.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Value, new DeviceValue(wordValue)));
+                                    if (!CnetMessage.TryParseUint16(buffer, index, out var wordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(wordValue)));
                                     break;
                                 case DataType.DoubleWord:
-                                    if (!CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) return null; 
-                                    else deviceValues.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Value, new DeviceValue(doubleWordValue)));
+                                    if (!CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(doubleWordValue)));
                                     break;
                                 case DataType.LongWord:
-                                    if (!CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) return null;
-                                    else deviceValues.Add(new KeyValuePair<DeviceAddress, DeviceValue>(deviceAddress.Value, new DeviceValue(longWordValue)));
+                                    if (!CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(longWordValue)));
                                     break;
                             }
                             index += dataUnit * 2;
@@ -419,24 +558,25 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         else return null;
                     }
 
-                    if (DeserializeTail(channel, buffer, ref index, useBCC))
-                        return new CnetWriteEachAddressRequest(stationNumber, deviceValues, useBCC);
+                    return new CnetWriteIndividualRequest(stationNumber, deviceValues, useBCC);
                 }
             }
             else
             {
-                int index = 6;
-                var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                if (deviceAddress != null)
+                var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                if (deviceVariable != null)
                 {
                     if (buffer.Count < index + 2)
-                        buffer.AddRange(channel.Read((uint)(index + 2 - buffer.Count), 0));
+                        throw new Exception();
                     if (CnetMessage.TryParseByte(buffer, index, out var count))
                     {
                         index += 2;
 
+                        if (count > 60)
+                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverDataLength);
+
                         int dataUnit;
-                        switch (deviceAddress.Value.DataType)
+                        switch (deviceVariable.Value.DataType)
                         {
                             case DataType.Bit:
                             case DataType.Byte:
@@ -460,84 +600,84 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         for (int i = 0; i < count; i++)
                         {
                             if (buffer.Count < index + dataUnit * 2)
-                                buffer.AddRange(channel.Read((uint)(index + dataUnit * 2 - buffer.Count), 0));
+                                throw new Exception();
 
-                            switch (deviceAddress.Value.DataType)
+                            switch (deviceVariable.Value.DataType)
                             {
                                 case DataType.Bit:
-                                    if (CnetMessage.TryParseByte(buffer, index, out var bitValue)) deviceValues.Add(new DeviceValue(bitValue != 0));
-                                    else return null;
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else deviceValues.Add(new DeviceValue(bitValue != 0));
                                     break;
                                 case DataType.Byte:
                                     if (CnetMessage.TryParseByte(buffer, index, out var byteValue)) deviceValues.Add(new DeviceValue(byteValue));
-                                    else return null;
+                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.Word:
                                     if (CnetMessage.TryParseUint16(buffer, index, out var wordValue)) deviceValues.Add(new DeviceValue(wordValue));
-                                    else return null;
+                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.DoubleWord:
                                     if (CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) deviceValues.Add(new DeviceValue(doubleWordValue));
-                                    else return null;
+                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.LongWord:
                                     if (CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) deviceValues.Add(new DeviceValue(longWordValue));
-                                    else return null;
+                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
                                     break;
                             }
 
                             index += dataUnit * 2;
                         }
 
-                        if (DeserializeTail(channel, buffer, ref index, useBCC))
-                            return new CnetWriteAddressBlockRequest(stationNumber, deviceAddress.Value, deviceValues, useBCC);
+                        return new CnetWriteContinuousRequest(stationNumber, deviceVariable.Value, deviceValues, useBCC);
                     }
+                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
                 }
             }
             return null;
         }
 
-        private CnetRequest DeserializeRegisterMonitorRequest(Channel channel, byte stationNumber, byte monitorNumber, List<byte> buffer, bool useBCC)
+        private CnetRequest DeserializeRegisterMonitorRequest(byte stationNumber, byte monitorNumber, List<byte> buffer, bool useBCC, ref int index)
         {
-            if (buffer.Count < 9 && !channel.IsDisposed)
-                buffer.AddRange(channel.Read((uint)(9 - buffer.Count), 0));
+            if (buffer.Count < 9)
+                throw new Exception();
 
-            if (buffer[6] == 'R' && Enum.IsDefined(typeof(CnetCommandType), (ushort)(buffer[7] << 8) | buffer[8]))
+            if (buffer[6] == 'R' && Enum.IsDefined(typeof(CnetCommandType), (ushort)((buffer[7] << 8) | buffer[8])))
             {
+                index += 3;
+
                 var commandType = (CnetCommandType)(ushort)((buffer[7] << 8) | buffer[8]);
 
-                if (commandType == CnetCommandType.Each)
+                if (commandType == CnetCommandType.Individual)
                 {
-                    if (buffer.Count < 11 && !channel.IsDisposed)
-                        buffer.AddRange(channel.Read((uint)(11 - buffer.Count), 0));
+                    if (buffer.Count < 11)
+                        throw new Exception();
                     if (CnetMessage.TryParseByte(buffer, 9, out var blockCount))
                     {
-                        List<DeviceAddress> deviceAddresses = new List<DeviceAddress>();
-                        int index = 11;
+                        index += 2;
+
+                        List<DeviceVariable> deviceVariables = new List<DeviceVariable>();
                         for (int i = 0; i < blockCount; i++)
                         {
-                            var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                            if (deviceAddress == null)
+                            var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                            if (deviceVariable == null)
                                 return null;
-                            deviceAddresses.Add(deviceAddress.Value);
+                            deviceVariables.Add(deviceVariable.Value);
                         }
-                        if (DeserializeTail(channel, buffer, ref index, useBCC))
-                            return new CnetRegisterMonitorEachAddressRequest(stationNumber, monitorNumber, deviceAddresses, useBCC);
+                        return new CnetRegisterMonitorIndividualRequest(stationNumber, monitorNumber, deviceVariables, useBCC);
                     }
                 }
                 else
                 {
-                    int index = 9;
-                    var deviceAddress = DeserializeDeviceAddress(channel, buffer, ref index);
-                    if (deviceAddress != null)
+                    var deviceVariable = DeserializeDeviceVariable(buffer, ref index);
+                    if (deviceVariable != null)
                     {
                         if (buffer.Count < index + 2)
-                            buffer.AddRange(channel.Read((uint)(index + 2 - buffer.Count), 0));
+                            throw new Exception();
                         if (CnetMessage.TryParseByte(buffer, index, out var count))
                         {
                             index += 2;
-                            if (DeserializeTail(channel, buffer, ref index, useBCC))
-                                return new CnetReadAddressBlockRequest(stationNumber, deviceAddress.Value, count, useBCC);
+                            return new CnetRegisterMonitorContinuousRequest(stationNumber, monitorNumber, deviceVariable.Value, count, useBCC);
                         }
                     }
                 }
@@ -546,14 +686,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
             return null;
         }
 
-        private CnetRequest DeserializeExecuteMonitorRequest(Channel channel, byte stationNumber, byte monitorNumber, List<byte> buffer, bool useBCC)
+        private CnetRequest DeserializeExecuteMonitorRequest(byte stationNumber, byte monitorNumber, List<byte> buffer, bool useBCC, ref int index)
         {
-            int index = 6;
-            if (DeserializeTail(channel, buffer, ref index, useBCC)
-                && monitors.TryGetValue(stationNumber, out var stationMonitors)
-                && stationMonitors.TryGetValue(monitorNumber, out var monitor))
+            if (simulationStations.TryGetValue(stationNumber, out var simulationStation))
             {
-                return monitor.CreateExecuteRequest(useBCC);
+                if (simulationStation.Monitors.TryGetValue(monitorNumber, out var monitor))
+                {
+                    return monitor.CreateExecuteRequest(useBCC);
+                }
+                else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.NotExistsMonitorNumber);
             }
             return null;
         }
@@ -588,36 +729,21 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                                 List<byte> buffer = new List<byte>();
                                 if (!createdFromProvider || channelTimeout == 0)
                                 {
-                                    var request = cnetSimulator.DeserializeRequest(channel, buffer);
-                                    if (request != null)
-                                    {
-                                        channel.Logger?.Log(new CnetMessageLog(channel, request, buffer.ToArray()));
-                                        switch (request.Command)
-                                        {
-                                            case CnetCommand.Read:
-                                                cnetSimulator.OnRequestedRead((CnetReadRequest)request, channel);
-                                                break;
-                                            case CnetCommand.Write:
-                                                cnetSimulator.OnRequestedWrite((CnetWriteRequest)request, channel);
-                                                break;
-                                            case CnetCommand.RegisterMonitor:
-                                                cnetSimulator.OnRequestedRegisterMonitor((CnetRegisterMonitorRequest)request, channel);
-                                                break;
-                                            case CnetCommand.ExecuteMonitor:
-                                                cnetSimulator.OnRequestedExecuteMonitor((CnetExecuteMonitorRequest)request, channel);
-                                                break;
-                                        }
-                                    }
+                                    cnetSimulator.DeserializeRequest(channel, buffer);
                                 }
                                 else if (!Task.Run(() => cnetSimulator.DeserializeRequest(channel, buffer)).Wait(channelTimeout))
                                 {
                                     cnetSimulator.channelTasks.Remove(channel);
+                                    channel.Dispose();
                                 }
                             }
                             catch
                             {
                                 if (createdFromProvider)
+                                {
                                     cnetSimulator.channelTasks.Remove(channel);
+                                    channel.Dispose();
+                                }
                             }
                         }
                         if (!channel.IsDisposed)
@@ -636,49 +762,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
 
     /// <summary>
-    /// 요청 국번 검증 이벤트 매개변수
-    /// </summary>
-    public sealed class ValidatingStationNumberEventArgs : EventArgs
-    {
-        internal ValidatingStationNumberEventArgs(byte stationNumber, Channel channel)
-        {
-            StationNumber = stationNumber;
-            Channel = channel;
-        }
-
-        /// <summary>
-        /// 국번
-        /// </summary>
-        public ushort StationNumber { get; }
-
-        /// <summary>
-        /// 통신 채널
-        /// </summary>
-        public Channel Channel { get; }
-
-        /// <summary>
-        /// 유효한 국번 여부
-        /// </summary>
-        public bool IsValid { get; set; }
-    }
-
-    /// <summary>
     /// Cnet 요청 발생 이벤트 매개변수
     /// </summary>
     public abstract class RequestedEventArgs : EventArgs
     {
-        internal RequestedEventArgs(byte stationNumber, Channel channel)
+        internal RequestedEventArgs(Channel channel)
         {
-            StationNumber = stationNumber;
             Channel = channel;
         }
-
-        internal CnetRequest request;
-
-        /// <summary>
-        /// 국번
-        /// </summary>
-        public byte StationNumber { get; }
 
         /// <summary>
         /// 통신 채널
@@ -691,56 +782,68 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         public CnetNAKCode NAKCode { get; set; }
     }
 
+    /// <summary>
+    /// 읽기 요청 발생 이벤트 매개변수
+    /// </summary>
     public sealed class RequestedReadEventArgs : RequestedEventArgs
     {
-        internal RequestedReadEventArgs(CnetReadRequest request, Channel channel) : base(request.StationNumber, channel)
+        internal RequestedReadEventArgs(CnetReadRequest request, Channel channel) : base(channel)
         {
             switch (request.CommandType)
             {
-                case CnetCommandType.Each:
-                    ResponseValues = ((CnetReadEachAddressRequest)request).Select(deviceAddress => new DeviceAddressValue(deviceAddress)).ToArray();
+                case CnetCommandType.Individual:
+                    ResponseValues = ((CnetReadIndividualRequest)request).Select(deviceVariable => new DeviceVariableValue(deviceVariable)).ToArray();
                     break;
-                case CnetCommandType.Block:
-                    ResponseValues = ((CnetReadAddressBlockRequest)request).ToDeviceAddresses().Select(deviceAddress => new DeviceAddressValue(deviceAddress)).ToArray();
+                case CnetCommandType.Continuous:
+                    ResponseValues = ((CnetReadContinuousRequest)request).ToDeviceVariables().Select(deviceVariable => new DeviceVariableValue(deviceVariable)).ToArray();
                     break;
             }
         }
-        internal RequestedReadEventArgs(CnetExecuteMonitorRequest request, Channel channel) : base(request.StationNumber, channel)
+        internal RequestedReadEventArgs(CnetExecuteMonitorRequest request, Channel channel) : base(channel)
         {
             switch (request.CommandType)
             {
-                case CnetCommandType.Each:
-                    ResponseValues = ((CnetExecuteMonitorEachAddressRequest)request).Select(deviceAddress => new DeviceAddressValue(deviceAddress)).ToArray();
+                case CnetCommandType.Individual:
+                    ResponseValues = ((CnetExecuteMonitorIndividualRequest)request).Select(deviceVariable => new DeviceVariableValue(deviceVariable)).ToArray();
                     break;
-                case CnetCommandType.Block:
-                    ResponseValues = ((CnetExecuteMonitorAddressBlockRequest)request).ToDeviceAddresses().Select(deviceAddress => new DeviceAddressValue(deviceAddress)).ToArray();
+                case CnetCommandType.Continuous:
+                    ResponseValues = ((CnetExecuteMonitorContinuousRequest)request).ToDeviceVariables().Select(deviceVariable => new DeviceVariableValue(deviceVariable)).ToArray();
                     break;
             }
         }
 
-        public IReadOnlyList<DeviceAddressValue> ResponseValues { get; }
+        /// <summary>
+        /// 응답할 값 목록
+        /// </summary>
+        public IReadOnlyList<DeviceVariableValue> ResponseValues { get; }
     }
 
+    /// <summary>
+    /// 쓰기 요청 발생 이벤트 매개변수
+    /// </summary>
     public sealed class RequestedWriteEventArgs : RequestedEventArgs
     {
-        internal RequestedWriteEventArgs(CnetWriteRequest request, Channel channel) : base(request.StationNumber, channel)
+        internal RequestedWriteEventArgs(CnetWriteRequest request, Channel channel) : base(channel)
         {
             switch(request.CommandType)
             {
-                case CnetCommandType.Each:
-                    Values = new ReadOnlyDictionary<DeviceAddress, DeviceValue>((CnetWriteEachAddressRequest)request);
+                case CnetCommandType.Individual:
+                    Values = new ReadOnlyDictionary<DeviceVariable, DeviceValue>((CnetWriteIndividualRequest)request);
                     break;
-                case CnetCommandType.Block:
-                    CnetWriteAddressBlockRequest writeAddressBlockRequest = (CnetWriteAddressBlockRequest)request;
-                    var values = new Dictionary<DeviceAddress, DeviceValue>();
-                    foreach (var pair in writeAddressBlockRequest.ToDeviceAddresses().Zip(writeAddressBlockRequest, (address, value) => new { address, value }))
-                        values[pair.address] = pair.value;
-                    Values = new ReadOnlyDictionary<DeviceAddress, DeviceValue>(values);
+                case CnetCommandType.Continuous:
+                    CnetWriteContinuousRequest writeContinuousRequest = (CnetWriteContinuousRequest)request;
+                    var values = new Dictionary<DeviceVariable, DeviceValue>();
+                    foreach (var pair in writeContinuousRequest.ToDeviceVariables().Zip(writeContinuousRequest, (variable, value) => new { variable, value }))
+                        values[pair.variable] = pair.value;
+                    Values = new ReadOnlyDictionary<DeviceVariable, DeviceValue>(values);
                     break;
             }
         }
 
-        public IReadOnlyDictionary<DeviceAddress, DeviceValue> Values { get; }
+        /// <summary>
+        /// 쓰기 위해 받은 값 목록
+        /// </summary>
+        public IReadOnlyDictionary<DeviceVariable, DeviceValue> Values { get; }
     }
 
 
