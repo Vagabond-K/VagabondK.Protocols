@@ -24,5 +24,5 @@ Modbus RTU, TCP, ASCII 등의 직렬화 기능을 제공하고, Modbus Master와
 
 ## VagabondK.Protocols.LSElectric [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.LSElectric.svg)](https://www.nuget.org/packages/VagabondK.Protocols.LSElectric/)   
 LS ELECTRIC(구 LS산전)의 PLC 제품들과 Cnet 프로토콜 기반으로 통신하는 기능들을 제공합니다.   
-Cnet I/F 모듈, Master K PLC 등과 통신할 수 있습니다.   
+Cnet I/F 모듈, MASTER-K PLC 등과 통신할 수 있습니다.   
 통신 채널은 주로 시리얼 포트 채널을 사용하지만, Serial to Ethernet 컨버터 등의 장치를 이용해 통신할 경우를 대비하여 TCP 및 UDP 기반 채널로도 통신할 수 있습니다.
