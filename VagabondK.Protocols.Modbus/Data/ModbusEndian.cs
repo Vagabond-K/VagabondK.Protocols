@@ -57,6 +57,35 @@ namespace VagabondK.Protocols.Modbus.Data
         }
 
         /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 같은지를 확인합니다.
+        /// </summary>
+        /// <param name="endian1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="endian2">비교할 두 번째 개체입니다.</param>
+        /// <returns>endian1 및 endian2가 동일하면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator ==(ModbusEndian endian1, ModbusEndian endian2) => endian1.Equals(endian2);
+
+        /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 다른지를 확인합니다.
+        /// </summary>
+        /// <param name="endian1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="endian2">비교할 두 번째 개체입니다.</param>
+        /// <returns>endian1 및 endian2가 동일하지 않으면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator !=(ModbusEndian endian1, ModbusEndian endian2) => !endian1.Equals(endian2);
+
+        /// <summary>
+        /// 이 인스턴스와 지정된 개체가 같은지 여부를 나타냅니다.
+        /// </summary>
+        /// <param name="obj">현재 인스턴스와 비교할 개체입니다.</param>
+        /// <returns>true와 이 인스턴스가 동일한 형식이고 동일한 값을 나타내면 obj이고, 그렇지 않으면 false입니다.</returns>
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// 이 인스턴스의 해시 코드를 반환합니다.
+        /// </summary>
+        /// <returns>이 인스턴스의 해시 코드인 32비트 부호 있는 정수입니다.</returns>
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
         /// 전체 빅 엔디안
         /// </summary>
         public static readonly ModbusEndian AllBig = new ModbusEndian(true, true);
@@ -64,7 +93,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <summary>
         /// 전체 리틀 엔디안
         /// </summary>
-        public static readonly ModbusEndian AllLittle = new ModbusEndian(true, true);
+        public static readonly ModbusEndian AllLittle = new ModbusEndian(false, false);
 
         /// <summary>
         /// 엔디안 반전하기
