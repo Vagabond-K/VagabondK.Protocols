@@ -4,7 +4,6 @@ using System.Linq;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
 using VagabondK.Protocols.Modbus.Data;
-using VagabondK.Protocols.Modbus.Logging;
 using VagabondK.Protocols.Modbus.Serialization;
 
 namespace VagabondK.Protocols.Modbus
@@ -150,7 +149,8 @@ namespace VagabondK.Protocols.Modbus
             }
 
             channel.Write(requestMessage);
-            channel?.Logger?.Log(new ModbusMessageLog(channel, request, requestMessage));
+            var requestLog = new ChannelRequestLog(channel, request, requestMessage);
+            channel?.Logger?.Log(requestLog);
 
             ModbusResponse result;
             try
@@ -165,12 +165,12 @@ namespace VagabondK.Protocols.Modbus
 
             if (result is ModbusExceptionResponse exceptionResponse)
             {
-                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse.ExceptionCode, buffer.ToArray()));
+                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
                 if (ThrowsModbusExceptions)
                     throw new ErrorCodeException<ModbusExceptionCode>(exceptionResponse.ExceptionCode);
             }
             else
-                channel?.Logger?.Log(new ModbusMessageLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray()));
+                channel?.Logger?.Log(new ChannelResponseLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray(), requestLog));
 
 
             return result;

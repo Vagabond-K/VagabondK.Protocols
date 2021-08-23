@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
-using VagabondK.Protocols.Modbus.Logging;
 using VagabondK.Protocols.Modbus.Serialization;
 
 namespace VagabondK.Protocols.Modbus
@@ -71,6 +70,8 @@ namespace VagabondK.Protocols.Modbus
             this.serializer = serializer;
         }
 
+        private const int maxReadRegistersLength = 125;
+        private const int maxReadBooleansLength = 2008;
         private ModbusSerializer serializer;
         private readonly Dictionary<byte, ModbusSlave> modbusSlaves = new Dictionary<byte, ModbusSlave>();
 
@@ -244,7 +245,8 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="channel">통신 채널</param>
         /// <param name="request">Modbus 요청</param>
-        protected virtual void OnReceivedModbusRequest(Channel channel, ModbusRequest request)
+        /// <returns>Modbus 응답</returns>
+        protected virtual ModbusResponse OnReceivedModbusRequest(Channel channel, ModbusRequest request)
         {
             ModbusResponse response = null;
 
@@ -256,22 +258,22 @@ namespace VagabondK.Protocols.Modbus
                 switch (request.Function)
                 {
                     case ModbusFunction.ReadCoils:
-                        if (request.Length > 2008)
+                        if (request.Length > maxReadBooleansLength)
                             throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestedReadCoils((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadDiscreteInputs:
-                        if (request.Length > 2008)
+                        if (request.Length > maxReadBooleansLength)
                             throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestedReadDiscreteInputs((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadHoldingRegisters:
-                        if (request.Length > 125)
+                        if (request.Length > maxReadRegistersLength)
                             throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestedReadHoldingRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadInputRegisters:
-                        if (request.Length > 125)
+                        if (request.Length > maxReadRegistersLength)
                             throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestedReadInputRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
@@ -296,12 +298,7 @@ namespace VagabondK.Protocols.Modbus
                 response = new ModbusExceptionResponse(ModbusExceptionCode.SlaveDeviceFailure, request);
             }
 
-            if (response != null)
-            {
-                var responseMessage = Serializer.Serialize(response).ToArray();
-                channel.Write(responseMessage);
-                channel?.Logger?.Log(new ModbusMessageLog(channel, response, responseMessage));
-            }
+            return response;
         }
 
         /// <summary>
@@ -481,8 +478,20 @@ namespace VagabondK.Protocols.Modbus
                                     var request = modbusSlave.Serializer.Deserialize(buffer);
                                     if (request != null)
                                     {
-                                        channel.Logger?.Log(new ModbusMessageLog(channel, request, buffer.ToArray()));
-                                        modbusSlave.OnReceivedModbusRequest(channel, request);
+                                        var requestLog = new ChannelRequestLog(channel, request, buffer.ToArray());
+                                        channel.Logger?.Log(requestLog);
+                                        var response = modbusSlave.OnReceivedModbusRequest(channel, request);
+
+                                        if (response != null)
+                                        {
+                                            var responseMessage = modbusSlave.Serializer.Serialize(response).ToArray();
+                                            channel.Write(responseMessage);
+
+                                            if (response is ModbusExceptionResponse exceptionResponse)
+                                                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog));
+                                            else
+                                                channel?.Logger?.Log(new ChannelResponseLog(channel, response, responseMessage, requestLog));
+                                        }
                                     }
                                 }
 

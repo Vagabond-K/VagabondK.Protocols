@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using VagabondK.Protocols.Modbus.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -21,7 +20,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             return ReceivedBytes;
         }
 
-        public override ModbusLogCategory LogCategory { get => ModbusLogCategory.CommError; }
+        public override ModbusMessageCategory MessageCategory { get => ModbusMessageCategory.CommError; }
 
         public override string ToString()
         {

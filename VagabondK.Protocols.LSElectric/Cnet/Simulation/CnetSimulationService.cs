@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VagabondK.Protocols.Channels;
-using VagabondK.Protocols.LSElectric.Cnet.Logging;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 {
@@ -157,121 +157,91 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
 
 
-        private void OnRequestedRead(CnetReadRequest request, Channel channel)
+        private CnetResponse OnRequestedRead(CnetSimulationStation simulationStation, CnetReadRequest request, Channel channel)
         {
-            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
+            CnetResponse response = null;
+
+            var eventArgs = new RequestedReadEventArgs(request, channel);
+            simulationStation.OnRequestedRead(eventArgs);
+            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
             {
-                CnetResponse response = null;
-
-                var eventArgs = new RequestedReadEventArgs(request, channel);
-                simulationStation.OnRequestedRead(eventArgs);
-                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
-                {
-                    switch (request.CommandType)
-                    {
-                        case CnetCommandType.Individual:
-                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadIndividualRequest)request);
-                            break;
-                        case CnetCommandType.Continuous:
-                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadContinuousRequest)request);
-                            break;
-                    }
-                }
-                else
-                {
-                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
-                }
-
-                if (response != null)
-                {
-                    var responseMessage = response.Serialize().ToArray();
-                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
-                    channel.Write(responseMessage);
-                }
-            }
-        }
-
-        private void OnRequestedWrite(CnetWriteRequest request, Channel channel)
-        {
-            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
-            {
-                var eventArgs = new RequestedWriteEventArgs(request, channel);
-                simulationStation.OnRequestedWrite(eventArgs);
-
-                CnetResponse response;
-                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
-                {
-                    response = new CnetACKResponse(request);
-                }
-                else
-                {
-                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
-                }
-
-                if (response != null)
-                {
-                    var responseMessage = response.Serialize().ToArray();
-                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
-                    channel.Write(responseMessage);
-                }
-            }
-        }
-
-        private void OnRequestedRegisterMonitor(CnetRegisterMonitorRequest request, Channel channel)
-        {
-            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
-            {
-                CnetMonitor monitor = null;
                 switch (request.CommandType)
                 {
                     case CnetCommandType.Individual:
-                        monitor = new CnetMonitorByIndividualAccess(request.StationNumber, request.MonitorNumber, (CnetRegisterMonitorIndividualRequest)request);
+                        response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadIndividualRequest)request);
                         break;
                     case CnetCommandType.Continuous:
-                        monitor = new CnetMonitorByContinuousAccess(request.StationNumber, request.MonitorNumber, ((CnetRegisterMonitorContinuousRequest)request).StartDeviceVariable, ((CnetRegisterMonitorContinuousRequest)request).Count);
+                        response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetReadContinuousRequest)request);
                         break;
                 }
-                simulationStation.Monitors[request.MonitorNumber] = monitor;
-
-                var response = new CnetACKResponse(request);
-                var responseMessage = response.Serialize().ToArray();
-                channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
-                channel.Write(responseMessage);
             }
+            else
+            {
+                response = new CnetNAKResponse(eventArgs.NAKCode, request);
+            }
+
+            return response;
         }
 
-        private void OnRequestedExecuteMonitor(CnetExecuteMonitorRequest request, Channel channel)
+        private CnetResponse OnRequestedWrite(CnetSimulationStation simulationStation, CnetWriteRequest request, Channel channel)
         {
-            if (simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
+            var eventArgs = new RequestedWriteEventArgs(request, channel);
+            simulationStation.OnRequestedWrite(eventArgs);
+
+            CnetResponse response;
+            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
             {
-                CnetResponse response = null;
+                response = new CnetACKResponse(request);
+            }
+            else
+            {
+                response = new CnetNAKResponse(eventArgs.NAKCode, request);
+            }
 
-                var eventArgs = new RequestedReadEventArgs(request, channel);
-                simulationStation.OnRequestedRead(eventArgs);
-                if (eventArgs.NAKCode == CnetNAKCode.Unknown)
-                {
-                    switch (request.CommandType)
-                    {
-                        case CnetCommandType.Individual:
-                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorIndividualRequest)request);
-                            break;
-                        case CnetCommandType.Continuous:
-                            response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorContinuousRequest)request);
-                            break;
-                    }
-                }
-                else
-                {
-                    response = new CnetNAKResponse(eventArgs.NAKCode, request);
-                }
+            return response;
+        }
 
-                if (response != null)
+        private CnetResponse OnRequestedRegisterMonitor(CnetSimulationStation simulationStation, CnetRegisterMonitorRequest request, Channel channel)
+        {
+            CnetMonitor monitor = null;
+            switch (request.CommandType)
+            {
+                case CnetCommandType.Individual:
+                    monitor = new CnetMonitorByIndividualAccess(request.StationNumber, request.MonitorNumber, (CnetRegisterMonitorIndividualRequest)request);
+                    break;
+                case CnetCommandType.Continuous:
+                    monitor = new CnetMonitorByContinuousAccess(request.StationNumber, request.MonitorNumber, ((CnetRegisterMonitorContinuousRequest)request).StartDeviceVariable, ((CnetRegisterMonitorContinuousRequest)request).Count);
+                    break;
+            }
+            simulationStation.Monitors[request.MonitorNumber] = monitor;
+
+            return new CnetACKResponse(request);
+        }
+
+        private CnetResponse OnRequestedExecuteMonitor(CnetSimulationStation simulationStation, CnetExecuteMonitorRequest request, Channel channel)
+        {
+            CnetResponse response = null;
+
+            var eventArgs = new RequestedReadEventArgs(request, channel);
+            simulationStation.OnRequestedRead(eventArgs);
+            if (eventArgs.NAKCode == CnetNAKCode.Unknown)
+            {
+                switch (request.CommandType)
                 {
-                    var responseMessage = response.Serialize().ToArray();
-                    channel.Logger.Log(new CnetMessageLog(channel, response, responseMessage));
-                    channel.Write(responseMessage);
+                    case CnetCommandType.Individual:
+                        response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorIndividualRequest)request);
+                        break;
+                    case CnetCommandType.Continuous:
+                        response = new CnetReadResponse(eventArgs.ResponseValues.Select(v => v.DeviceValue), (CnetExecuteMonitorContinuousRequest)request);
+                        break;
                 }
             }
+            else
+            {
+                response = new CnetNAKResponse(eventArgs.NAKCode, request);
+            }
+
+            return response;
         }
 
         private void DeserializeRequest(Channel channel, List<byte> buffer)
@@ -360,37 +330,46 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     var response = new CnetNAKResponse(ex.Code, stationNumber, command, commandTypeValue, useBCC);
                     var message = response.Serialize().ToArray();
                     channel.Write(message);
-                    channel.Logger.Log(new CnetMessageLog(channel, response, message));
+                    channel.Logger.Log(new CnetNAKLog(channel, response, message, null));
                 }
             }
 
-            if (request != null && simulationStations.ContainsKey(stationNumber))
+            if (request != null && simulationStations.TryGetValue(request.StationNumber, out var simulationStation))
             {
+                var requestLog = new CnetRequestLog(channel, request, buffer.ToArray());
+                channel.Logger?.Log(requestLog);
+                CnetResponse response = null;
                 try
                 {
-                    channel.Logger?.Log(new CnetMessageLog(channel, request, buffer.ToArray()));
                     switch (request.Command)
                     {
                         case CnetCommand.Read:
-                            OnRequestedRead((CnetReadRequest)request, channel);
+                            response = OnRequestedRead(simulationStation, (CnetReadRequest)request, channel);
                             break;
                         case CnetCommand.Write:
-                            OnRequestedWrite((CnetWriteRequest)request, channel);
+                            response = OnRequestedWrite(simulationStation, (CnetWriteRequest)request, channel);
                             break;
                         case CnetCommand.RegisterMonitor:
-                            OnRequestedRegisterMonitor((CnetRegisterMonitorRequest)request, channel);
+                            response = OnRequestedRegisterMonitor(simulationStation, (CnetRegisterMonitorRequest)request, channel);
                             break;
                         case CnetCommand.ExecuteMonitor:
-                            OnRequestedExecuteMonitor((CnetExecuteMonitorRequest)request, channel);
+                            response = OnRequestedExecuteMonitor(simulationStation, (CnetExecuteMonitorRequest)request, channel);
                             break;
+                    }
+
+                    if (response != null)
+                    {
+                        var responseMessage = response.Serialize().ToArray();
+                        channel.Logger.Log(new CnetResponseLog(channel, response, responseMessage, requestLog));
+                        channel.Write(responseMessage);
                     }
                 }
                 catch (ErrorCodeException<CnetNAKCode> ex)
                 {
-                    var response = new CnetNAKResponse(ex.Code, request);
-                    var message = response.Serialize().ToArray();
+                    var nakResponse = new CnetNAKResponse(ex.Code, request);
+                    var message = nakResponse.Serialize().ToArray();
                     channel.Write(message);
-                    channel.Logger.Log(new CnetMessageLog(channel, response, message));
+                    channel.Logger.Log(new CnetNAKLog(channel, nakResponse, message, requestLog));
                 }
             }
             else

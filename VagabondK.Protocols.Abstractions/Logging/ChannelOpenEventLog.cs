@@ -17,7 +17,6 @@ namespace VagabondK.Protocols.Logging
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.
         /// </summary>
         /// <returns>정규화된 형식 이름입니다.</returns>
-        public override string ToString()
-            => $"({ChannelDescription}) Opened Channel";
+        public override string ToString() => "Opened Channel";
     }
 }

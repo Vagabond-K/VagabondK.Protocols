@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using VagabondK.Protocols.Modbus.Data;
-using VagabondK.Protocols.Modbus.Logging;
 
 namespace VagabondK.Protocols.Modbus
 {
@@ -34,12 +33,12 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 트랜잭션 ID (Modbus TCP에서 사용)
         /// </summary>
-        public ushort TransactionID { get => Request.TransactionID; set => Request.TransactionID = value; }
+        public ushort? TransactionID { get => Request.TransactionID; }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        public abstract ModbusLogCategory LogCategory { get; }
+        public abstract ModbusMessageCategory MessageCategory { get; }
     }
 
     /// <summary>
@@ -86,9 +85,9 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        public override ModbusLogCategory LogCategory { get => ModbusLogCategory.ResponseException; }
+        public override ModbusMessageCategory MessageCategory { get => ModbusMessageCategory.ResponseException; }
     }
 
     /// <summary>
@@ -168,13 +167,13 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        public override ModbusLogCategory LogCategory
+        public override ModbusMessageCategory MessageCategory
         {
             get => Request.ObjectType == ModbusObjectType.Coil
-                ? ModbusLogCategory.ResponseReadCoil
-                : ModbusLogCategory.ResponseReadDiscreteInput;
+                ? ModbusMessageCategory.ResponseReadCoil
+                : ModbusMessageCategory.ResponseReadDiscreteInput;
         }
     }
 
@@ -245,13 +244,13 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        public override ModbusLogCategory LogCategory
+        public override ModbusMessageCategory MessageCategory
         {
             get => Request.ObjectType == ModbusObjectType.HoldingRegister
-                ? ModbusLogCategory.ResponseReadHoldingRegister
-                : ModbusLogCategory.ResponseReadInputRegister;
+                ? ModbusMessageCategory.ResponseReadHoldingRegister
+                : ModbusMessageCategory.ResponseReadInputRegister;
         }
 
         private IEnumerable<byte> GetRawData(ushort address, int rawDataCount)
@@ -421,24 +420,24 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        public override ModbusLogCategory LogCategory
+        public override ModbusMessageCategory MessageCategory
         {
             get
             {
                 switch (Request.Function)
                 {
                     case ModbusFunction.WriteMultipleCoils:
-                        return ModbusLogCategory.ResponseWriteMultiCoil;
+                        return ModbusMessageCategory.ResponseWriteMultiCoil;
                     case ModbusFunction.WriteSingleCoil:
-                        return ModbusLogCategory.ResponseWriteSingleCoil;
+                        return ModbusMessageCategory.ResponseWriteSingleCoil;
                     case ModbusFunction.WriteMultipleHoldingRegisters:
-                        return ModbusLogCategory.ResponseWriteMultiHoldingRegister;
+                        return ModbusMessageCategory.ResponseWriteMultiHoldingRegister;
                     case ModbusFunction.WriteSingleHoldingRegister:
-                        return ModbusLogCategory.ResponseWriteSingleHoldingRegister;
+                        return ModbusMessageCategory.ResponseWriteSingleHoldingRegister;
                     default:
-                        return ModbusLogCategory.None;
+                        return ModbusMessageCategory.None;
                 }
             }
         }

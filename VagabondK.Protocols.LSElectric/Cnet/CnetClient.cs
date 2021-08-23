@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
-using VagabondK.Protocols.LSElectric.Cnet.Logging;
 
 namespace VagabondK.Protocols.LSElectric.Cnet
 {
@@ -93,7 +92,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             var requestMessage = request.Serialize().ToArray();
 
             channel.Write(requestMessage);
-            channel?.Logger?.Log(new CnetMessageLog(channel, request, requestMessage));
+            var requestLog = new CnetRequestLog(channel, request, requestMessage);
+            channel?.Logger?.Log(requestLog);
 
             CnetResponse result;
             List<byte> buffer = new List<byte>();
@@ -136,12 +136,12 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             if (result is CnetNAKResponse exceptionResponse)
             {
-                channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse.NAKCode, buffer.ToArray()));
+                channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
                 if (ThrowsExceptionFromNAK)
                     throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
             }
             else
-                channel?.Logger?.Log(new CnetMessageLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray()));
+                channel?.Logger?.Log(new CnetResponseLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray(), requestLog));
 
             return result;
         }

@@ -35,7 +35,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override IEnumerable<byte> OnSerialize(IModbusMessage message)
         {
-            if (message is ModbusRequest request)
+            if (message is ModbusRequest request && request.TransactionID == null)
                 request.TransactionID = transactionID++;
 
             var messageArray = message.Serialize().ToArray();
@@ -146,8 +146,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
                             readBuffer.Clear();
                             responseWaitHandle.Response = result;
+                            responseWaitHandles.Remove(transactionID);
                             responseWaitHandle.Set();
-                            this.responseWaitHandles.Remove(transactionID);
                         }
                     }
                     catch
@@ -160,7 +160,10 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
-            var responseWaitHandle = this.responseWaitHandles[request.TransactionID] = new ResponseWaitHandle(buffer, request, timeout);
+            if (responseWaitHandles.TryGetValue(request.TransactionID.Value, out var oldHandle))
+                oldHandle.WaitOne(timeout);
+
+            var responseWaitHandle = responseWaitHandles[request.TransactionID.Value] = new ResponseWaitHandle(buffer, request, timeout);
 
             Task.Run(() => RunReceive(buffer.Channel));
 
@@ -169,7 +172,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             var result = responseWaitHandle.Response;
             if (result == null)
             {
-                this.responseWaitHandles.Remove(request.TransactionID);
+                responseWaitHandles.Remove(request.TransactionID.Value);
                 return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseTimeout, new byte[0], request);
             }
 

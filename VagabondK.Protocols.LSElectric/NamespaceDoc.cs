@@ -31,10 +31,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     }
 }
 
-namespace VagabondK.Protocols.LSElectric.Cnet.Logging
+namespace VagabondK.Protocols.Logging
 {
     /// <summary>
-    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 라이브러리의 로깅 관련 기능들을 제공합니다.
+    /// 여러 프로토콜들의 통신 채널 로깅 관련 기능들을 제공합니다.
     /// </summary>
     [System.Runtime.CompilerServices.CompilerGenerated()]
     class NamespaceDoc

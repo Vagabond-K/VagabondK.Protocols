@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using VagabondK.Protocols.Modbus.Logging;
-
-namespace VagabondK.Protocols.Modbus
+﻿namespace VagabondK.Protocols.Modbus
 {
     /// <summary>
     /// Modbus 메시지
@@ -11,11 +8,11 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 트랜잭션 ID (Modbus TCP에서 사용)
         /// </summary>
-        ushort TransactionID { get; set; }
+        ushort? TransactionID { get; }
 
         /// <summary>
-        /// Modbus Log 카테고리
+        /// Modbus 메시지 카테고리
         /// </summary>
-        ModbusLogCategory LogCategory { get; }
+        ModbusMessageCategory MessageCategory { get; }
     }
 }
