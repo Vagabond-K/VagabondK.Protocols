@@ -52,7 +52,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 트랜잭션 ID (Modbus TCP에서 사용)
         /// </summary>
-        public ushort ?TransactionID { get; set; }
+        public ushort? TransactionID { get; set; }
 
         /// <summary>
         /// Modbus 메시지 카테고리

@@ -88,7 +88,7 @@ namespace VagabondK.Protocols.Channels
 
                 cancellationTokenSource = new CancellationTokenSource();
                 tcpListener.Start();
-                Task.Run((Action)(() =>
+                Task.Run(() =>
                 {
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
@@ -98,13 +98,13 @@ namespace VagabondK.Protocols.Channels
                         {
                             Logger = Logger
                         };
-                        Logger?.Log(new ChannelOpenEventLog((IChannel)channel));
-                        channels[(Guid)channel.Guid] = new WeakReference<TcpChannel>((TcpChannel)channel);
-                        RaiseCreatedEvent(new ChannelCreatedEventArgs((Channel)channel));
+                        Logger?.Log(new ChannelOpenEventLog(channel));
+                        channels[channel.Guid] = new WeakReference<TcpChannel>(channel);
+                        RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
                         foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
                             channels.Remove(disposed);
                     }
-                }), cancellationTokenSource.Token);
+                }, cancellationTokenSource.Token);
             }
         }
 
