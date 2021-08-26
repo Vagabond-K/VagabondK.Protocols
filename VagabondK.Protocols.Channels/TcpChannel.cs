@@ -67,6 +67,7 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private bool isRunningReceive = false;
         private string description;
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// 채널 설명
@@ -97,6 +98,12 @@ namespace VagabondK.Protocols.Channels
 
         private void Close()
         {
+            try
+            {
+                cancellationTokenSource?.Cancel();
+            }
+            catch { }
+            cancellationTokenSource = new CancellationTokenSource();
             lock (connectLock)
             {
                 if (tcpClient != null)
@@ -120,7 +127,7 @@ namespace VagabondK.Protocols.Channels
                     try
                     {
                         Task task = tcpClient.ConnectAsync(Host ?? string.Empty, Port);
-                        if (!task.Wait(ConnectTimeout))
+                        if (!task.Wait(ConnectTimeout, cancellationTokenSource.Token))
                             throw new SocketException(10060);
 
                         description = tcpClient.Client.RemoteEndPoint.ToString();
@@ -175,7 +182,7 @@ namespace VagabondK.Protocols.Channels
                             readEventWaitHandle.Set();
                             isRunningReceive = false;
                         }
-                    });
+                    }, cancellationTokenSource.Token);
                 }
                 else return readBuffer.Dequeue();
             }
