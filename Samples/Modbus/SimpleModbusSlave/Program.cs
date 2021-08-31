@@ -28,7 +28,7 @@ namespace SimpleModbusSlave
 
             var float100 = 1.23f;
             var float102 = 4.56f;
-
+            int boolIndex = 0;
             (channel as ChannelProvider)?.Start();
 
             while (true)
@@ -38,6 +38,11 @@ namespace SimpleModbusSlave
 
                 modbusSlave1.InputRegisters.SetValue(100, float100);
                 modbusSlave1.InputRegisters.SetValue(102, float102);
+
+                for (ushort i = 0; i < 10; i++)
+                    modbusSlave1.DiscreteInputs[i] = i == boolIndex;
+
+                boolIndex = (boolIndex + 1) % 10;
 
                 Thread.Sleep(1000);
             }
