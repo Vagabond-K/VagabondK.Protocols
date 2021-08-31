@@ -53,6 +53,7 @@ namespace VagabondK.Protocols.Logging
         {
             writer.Write($"({log.ChannelDescription}) ");
             writer.WriteLine(log);
+            writer.Flush();
         }
     }
 }
