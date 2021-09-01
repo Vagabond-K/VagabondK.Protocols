@@ -83,18 +83,44 @@ namespace VagabondK.Protocols.Modbus
         public ModbusSlave this[byte slaveAddress]
         {
             get => modbusSlaves[slaveAddress];
-            set => modbusSlaves[slaveAddress] = value;
+            set
+            {
+                modbusSlaves.TryGetValue(slaveAddress, out var modbusSlave);
+                if (modbusSlave != value)
+                {
+                    if (modbusSlave != null)
+                    {
+                        modbusSlave.SlaveAddress = null;
+                        modbusSlave.OwnerService = null;
+                    }
+
+                    modbusSlaves[slaveAddress] = value;
+
+                    if (value != null)
+                    {
+                        if (value.OwnerService != null && value.SlaveAddress != null)
+                            value.OwnerService.Remove(value.SlaveAddress.Value);
+
+                        value.SlaveAddress = slaveAddress;
+                        value.OwnerService = this;
+                    }
+                    else
+                    {
+                        modbusSlaves.Remove(slaveAddress);
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Modbus 슬레이브 주소 목록
         /// </summary>
-        public ICollection<byte> SlaveAddresses { get => modbusSlaves.Keys; }
+        public Dictionary<byte, ModbusSlave>.KeyCollection SlaveAddresses { get => modbusSlaves.Keys; }
 
         /// <summary>
         /// Modbus 슬레이브 목록
         /// </summary>
-        public ICollection<ModbusSlave> ModbusSlaves { get => modbusSlaves.Values; }
+        public Dictionary<byte, ModbusSlave>.ValueCollection ModbusSlaves { get => modbusSlaves.Values; }
 
         /// <summary>
         /// Modbus 슬레이브 포함 여부
@@ -110,6 +136,22 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="modbusSlave">Modbus 슬레이브</param>
         /// <returns>Modbus 슬레이브 포함 여부</returns>
         public bool TryGetModbusSlave(byte slaveAddress, out ModbusSlave modbusSlave) => modbusSlaves.TryGetValue(slaveAddress, out modbusSlave);
+
+        /// <summary>
+        /// Modbus 슬레이브 제거
+        /// </summary>
+        /// <param name="slaveAddress">슬레이브 주소</param>
+        /// <returns>제거 여부</returns>
+        public bool Remove(byte slaveAddress)
+        {
+            var result = modbusSlaves.TryGetValue(slaveAddress, out var modbusSlave) && modbusSlaves.Remove(slaveAddress);
+            if (modbusSlave != null)
+            {
+                modbusSlave.SlaveAddress = null;
+                modbusSlave.OwnerService = null;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Modbus Serializer
