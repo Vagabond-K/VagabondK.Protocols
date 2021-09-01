@@ -109,7 +109,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="modbusSlave">Modbus 슬레이브</param>
         /// <returns>Modbus 슬레이브 포함 여부</returns>
-        public bool TryGetValue(byte slaveAddress, out ModbusSlave modbusSlave) => modbusSlaves.TryGetValue(slaveAddress, out modbusSlave);
+        public bool TryGetModbusSlave(byte slaveAddress, out ModbusSlave modbusSlave) => modbusSlaves.TryGetValue(slaveAddress, out modbusSlave);
 
         /// <summary>
         /// Modbus Serializer
