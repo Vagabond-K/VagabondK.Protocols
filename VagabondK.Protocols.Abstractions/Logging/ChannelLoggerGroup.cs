@@ -12,6 +12,13 @@ namespace VagabondK.Protocols.Logging
         /// <summary>
         /// 생성자
         /// </summary>
+        public ChannelLoggerGroup()
+        {
+        }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
         /// <param name="channelLoggers">채널 Logger 열거</param>
         public ChannelLoggerGroup(IEnumerable<IChannelLogger> channelLoggers)
         {
