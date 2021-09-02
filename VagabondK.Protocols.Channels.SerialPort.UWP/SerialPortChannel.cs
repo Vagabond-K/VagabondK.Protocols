@@ -144,12 +144,12 @@ namespace VagabondK.Protocols.Channels
         /// <summary>
         /// DTR 활성화 여부
         /// </summary>
-        public bool DtrEnable { get => serialDevice.IsDataTerminalReadyEnabled; set => serialDevice.IsDataTerminalReadyEnabled = value; }
+        public bool DtrEnable { get => serialDevice?.IsDataTerminalReadyEnabled ?? false; set { if (serialDevice != null) serialDevice.IsDataTerminalReadyEnabled = value; } }
 
         /// <summary>
         /// RTS 활성화 여부
         /// </summary>
-        public bool RtsEnable { get => serialDevice.IsRequestToSendEnabled; set => serialDevice.IsRequestToSendEnabled = value; }
+        public bool RtsEnable { get => serialDevice?.IsRequestToSendEnabled ?? false; set { if (serialDevice != null) serialDevice.IsRequestToSendEnabled = value; } }
 
         private SerialDevice serialDevice = null;
         private DataReader dataReader = null;

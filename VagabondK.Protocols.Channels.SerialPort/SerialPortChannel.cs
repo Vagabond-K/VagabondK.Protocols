@@ -70,12 +70,12 @@ namespace VagabondK.Protocols.Channels
         /// <summary>
         /// Stop Bits
         /// </summary>
-        public StopBits StopBits { get; }
+        public StopBits StopBits { get => SerialPort.StopBits; }
 
         /// <summary>
         /// Parity
         /// </summary>
-        public Parity Parity { get; }
+        public Parity Parity { get => SerialPort.Parity; }
 
         /// <summary>
         /// DTR 활성화 여부
