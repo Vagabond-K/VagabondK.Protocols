@@ -182,7 +182,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 단일 논리값
         /// </summary>
-        public bool SingleBooleanValue => Values != null && Values.Count> 0 ? Values[0] : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
+        public bool SingleBooleanValue => Values != null && Values.Count> 0 ? Values[0] : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
         /// 다중 논리값 목록
         /// </summary>
@@ -190,7 +190,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 길이
         /// </summary>
-        public override ushort Length => (ushort)(Values?.Count ?? throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue));
+        public override ushort Length => (ushort)(Values?.Count ?? throw new ModbusException(ModbusExceptionCode.IllegalDataValue));
         private readonly byte byteLength = 0;
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace VagabondK.Protocols.Modbus
         /// 단일 Holding Register 값
         /// </summary>
         public ushort SingleRegisterValue => Bytes.Count >= 2 ?
-            (ushort)(Bytes[0] << 8 | Bytes[1]) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
+            (ushort)(Bytes[0] << 8 | Bytes[1]) : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
         /// Holding Register 값들의 Raw 바이트 목록
         /// </summary>
@@ -318,7 +318,7 @@ namespace VagabondK.Protocols.Modbus
         public override IEnumerable<byte> Serialize()
         {
             if (Bytes.Count < 2)
-                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataValue);
+                throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
 
             yield return SlaveAddress;
             yield return (byte)Function;

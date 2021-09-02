@@ -455,7 +455,7 @@ namespace VagabondK.Protocols.Modbus.Data
                     }
                     else
                     {
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                     }
                 }
                 set

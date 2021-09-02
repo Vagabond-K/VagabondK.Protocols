@@ -167,7 +167,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
                 if (ThrowsModbusExceptions)
-                    throw new ErrorCodeException<ModbusExceptionCode>(exceptionResponse.ExceptionCode);
+                    throw new ModbusException(exceptionResponse.ExceptionCode);
             }
             else
                 channel?.Logger?.Log(new ChannelResponseLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray(), requestLog));

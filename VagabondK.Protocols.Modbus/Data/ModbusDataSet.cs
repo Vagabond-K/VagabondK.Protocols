@@ -73,7 +73,7 @@ namespace VagabondK.Protocols.Modbus.Data
                         if (index >= 0 && index < dataBlocks.Count)
                             return dataBlocks[index][address];
                         else
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                     }
                 }
             }
@@ -102,7 +102,7 @@ namespace VagabondK.Protocols.Modbus.Data
                 {
                     dataBlock = dataBlocks[index];
                     if (dataBlock.Count < dataCount)
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                     return dataBlock.Take(dataCount);
                 }
                 else
@@ -113,11 +113,11 @@ namespace VagabondK.Protocols.Modbus.Data
                         dataBlock = dataBlocks[index];
                         var skipCount = (startAddress - dataBlock.StartAddress);
                         if (dataBlock.Count < skipCount + dataCount)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         return dataBlock.Skip(skipCount).Take(dataCount);
                     }
                     else
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace VagabondK.Protocols.Modbus.Data
                 {
                     dataBlock = dataBlocks[index];
                     if (dataBlock.rawData.Length < rawDataCount)
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                     return dataBlock.rawData.Take(rawDataCount);
                 }
                 else
@@ -156,11 +156,11 @@ namespace VagabondK.Protocols.Modbus.Data
                         dataBlock = dataBlocks[index];
                         var skipCount = (startAddress - dataBlock.StartAddress) * dataBlock.NumberOfUnit;
                         if (dataBlock.rawData.Length < skipCount + rawDataCount)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         return dataBlock.rawData.Skip(skipCount).Take(rawDataCount);
                     }
                     else
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                 }
             }
         }
@@ -273,7 +273,7 @@ namespace VagabondK.Protocols.Modbus.Data
                         }
                         else
                         {
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         }
                     }
                 }
@@ -308,7 +308,7 @@ namespace VagabondK.Protocols.Modbus.Data
                     }
                     else
                     {
-                        throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                     }
                 }
             }
