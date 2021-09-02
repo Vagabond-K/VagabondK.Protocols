@@ -612,6 +612,11 @@ namespace VagabondK.Protocols.Modbus
         public byte SlaveAddress { get => request.SlaveAddress; }
 
         /// <summary>
+        /// Function
+        /// </summary>
+        public ModbusFunction Function { get => request.Function; }
+
+        /// <summary>
         /// 데이터 주소
         /// </summary>
         public ushort Address { get => request.Address; }
