@@ -21,6 +21,7 @@ Modbus RTU, TCP, ASCII 등의 직렬화 기능을 제공하고, Modbus Master와
 
 또한 Modbus Master와 Modbus Slave 모두 VagabondK.Protocols.Channels 패키지의 TCP Server/Clinet 채널을 사용할 수 있으며, UDP 소켓 채널도 사용 가능합니다.
 그리고 VagabondK.Protocols.Channels.SerialPort 패키지를 이용하면, 시리얼 포트 기반으로도 통신이 가능해집니다.  
+  
 [Vagabond K의 .NET Modbus 라이브러리 사용법 [Part #1]](https://blog.naver.com/vagabond-k/222490531747)  
 [Vagabond K의 .NET Modbus 라이브러리 사용법 [Part #2]](https://blog.naver.com/vagabond-k/222493009718)  
 
