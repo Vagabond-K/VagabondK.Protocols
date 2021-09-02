@@ -91,7 +91,7 @@ namespace VagabondK.Protocols.Channels
             {
                 provider?.channels?.Remove(Guid);
                 IsDisposed = true;
-
+                readEventWaitHandle.Set();
                 Close();
             }
         }

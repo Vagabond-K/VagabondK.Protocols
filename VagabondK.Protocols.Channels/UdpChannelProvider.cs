@@ -75,7 +75,7 @@ namespace VagabondK.Protocols.Channels
                 if (!IsDisposed)
                 {
                     IsDisposed = true;
-                    udpClient.Close();
+                    Stop();
                 }
             }
         }
@@ -135,6 +135,16 @@ namespace VagabondK.Protocols.Channels
             lock (this)
             {
                 cancellationTokenSource?.Cancel();
+                udpClient.Close();
+
+                foreach (var reference in channels.Values)
+                {
+                    if (reference.TryGetTarget(out var channel))
+                    {
+                        channel.Dispose();
+                    }
+                }
+                channels.Clear();
             }
         }
 
@@ -179,6 +189,7 @@ namespace VagabondK.Protocols.Channels
                     provider?.channels?.Remove(Description);
                     IsDisposed = true;
                     Logger?.Log(new ChannelCloseEventLog(this));
+                    readEventWaitHandle.Set();
                 }
             }
 

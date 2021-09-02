@@ -92,17 +92,21 @@ namespace VagabondK.Protocols.Channels
                 {
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
-                        var tcpClient = tcpListener.AcceptTcpClient();
-
-                        var channel = new TcpChannel(this, tcpClient)
+                        try
                         {
-                            Logger = Logger
-                        };
-                        Logger?.Log(new ChannelOpenEventLog(channel));
-                        channels[channel.Guid] = new WeakReference<TcpChannel>(channel);
-                        RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
-                        foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
-                            channels.Remove(disposed);
+                            var tcpClient = tcpListener.AcceptTcpClient();
+
+                            var channel = new TcpChannel(this, tcpClient)
+                            {
+                                Logger = Logger
+                            };
+                            Logger?.Log(new ChannelOpenEventLog(channel));
+                            channels[channel.Guid] = new WeakReference<TcpChannel>(channel);
+                            RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                            foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
+                                channels.Remove(disposed);
+                        }
+                        catch { }
                     }
                 }, cancellationTokenSource.Token);
             }
@@ -117,6 +121,15 @@ namespace VagabondK.Protocols.Channels
             {
                 cancellationTokenSource?.Cancel();
                 tcpListener?.Stop();
+
+                foreach (var reference in channels.Values)
+                {
+                    if (reference.TryGetTarget(out var channel))
+                    {
+                        channel.Dispose();
+                    }
+                }
+                channels.Clear();
             }
         }
     }

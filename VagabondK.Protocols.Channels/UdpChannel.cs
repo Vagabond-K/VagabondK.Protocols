@@ -93,6 +93,7 @@ namespace VagabondK.Protocols.Channels
             if (!IsDisposed)
             {
                 IsDisposed = true;
+                readEventWaitHandle?.Set();
 
                 Close();
             }
