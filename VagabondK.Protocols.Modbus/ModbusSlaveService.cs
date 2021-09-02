@@ -295,28 +295,28 @@ namespace VagabondK.Protocols.Modbus
             try
             {
                 if (request.Address + request.Length > 0xffff)
-                    throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                    throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
 
                 switch (request.Function)
                 {
                     case ModbusFunction.ReadCoils:
                         if (request.Length > maxReadBooleansLength)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestedReadCoils((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadDiscreteInputs:
                         if (request.Length > maxReadBooleansLength)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadBooleanResponse(OnRequestedReadDiscreteInputs((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadHoldingRegisters:
                         if (request.Length > maxReadRegistersLength)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestedReadHoldingRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.ReadInputRegisters:
                         if (request.Length > maxReadRegistersLength)
-                            throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalDataAddress);
+                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
                         response = new ModbusReadRegisterResponse(OnRequestedReadInputRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
                         break;
                     case ModbusFunction.WriteSingleCoil:
@@ -331,7 +331,7 @@ namespace VagabondK.Protocols.Modbus
                         break;
                 }
             }
-            catch (ErrorCodeException<ModbusExceptionCode> modbusException)
+            catch (ModbusException modbusException)
             {
                 response = new ModbusExceptionResponse(modbusException.Code, request);
             }
@@ -383,25 +383,25 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="e">Coil 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestedReadCoils(RequestedReadBooleanEventArgs e) 
-            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null ? modbusSlave.Coils.GetData(e.Address, e.Length) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null ? modbusSlave.Coils.GetData(e.Address, e.Length) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Discrete Input 읽기 요청 처리
         /// </summary>
         /// <param name="e">Discrete Input 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestedReadDiscreteInputs(RequestedReadBooleanEventArgs e)
-            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.DiscreteInputs != null ? modbusSlave.DiscreteInputs.GetData(e.Address, e.Length) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+            => e.Values = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.DiscreteInputs != null ? modbusSlave.DiscreteInputs.GetData(e.Address, e.Length) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Holding Register 읽기 요청 처리
         /// </summary>
         /// <param name="e">Holding Register 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestedReadHoldingRegisters(RequestedReadRegisterEventArgs e)
-            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null ? modbusSlave.HoldingRegisters.GetRawData(e.Address, e.Length * 2) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null ? modbusSlave.HoldingRegisters.GetRawData(e.Address, e.Length * 2) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Input Register 읽기 요청 처리
         /// </summary>
         /// <param name="e">Input Register 읽기 요청 발생 이벤트 매개변수</param>
         protected virtual void OnRequestedReadInputRegisters(RequestedReadRegisterEventArgs e)
-            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.InputRegisters != null ? modbusSlave.InputRegisters.GetRawData(e.Address, e.Length * 2) : throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+            => e.Bytes = modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.InputRegisters != null ? modbusSlave.InputRegisters.GetRawData(e.Address, e.Length * 2) : throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         /// <summary>
         /// Coil 쓰기 요청 처리
         /// </summary>
@@ -411,7 +411,7 @@ namespace VagabondK.Protocols.Modbus
             if (modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.Coils != null)
                 modbusSlave.Coils.SetData(e.Address, e.Values.ToArray());
             else
-                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+                throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         }
         /// <summary>
         /// Holding Register 쓰기 요청 처리
@@ -422,7 +422,7 @@ namespace VagabondK.Protocols.Modbus
             if (modbusSlaves.TryGetValue(e.SlaveAddress, out var modbusSlave) && modbusSlave.HoldingRegisters != null)
                 modbusSlave.HoldingRegisters.SetRawData(e.Address, e.Bytes.ToArray());
             else
-                throw new ErrorCodeException<ModbusExceptionCode>(ModbusExceptionCode.IllegalFunction);
+                throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         }
 
 
@@ -491,14 +491,14 @@ namespace VagabondK.Protocols.Modbus
 
         class ChannelTask
         {
-            public ChannelTask(ModbusSlaveService modbusSlave, Channel channel, bool createdFromProvider)
+            public ChannelTask(ModbusSlaveService modbusSlaveService, Channel channel, bool createdFromProvider)
             {
-                this.modbusSlave = modbusSlave;
+                this.modbusSlaveService = modbusSlaveService;
                 this.channel = channel;
                 this.createdFromProvider = createdFromProvider;
             }
 
-            private readonly ModbusSlaveService modbusSlave;
+            private readonly ModbusSlaveService modbusSlaveService;
             private readonly Channel channel;
             private readonly bool createdFromProvider;
             private bool isRunning = false;
@@ -516,17 +516,17 @@ namespace VagabondK.Protocols.Modbus
                             {
                                 void receive()
                                 {
-                                    RequestBuffer buffer = new RequestBuffer(modbusSlave, channel);
-                                    var request = modbusSlave.Serializer.Deserialize(buffer);
+                                    RequestBuffer buffer = new RequestBuffer(modbusSlaveService, channel);
+                                    var request = modbusSlaveService.Serializer.Deserialize(buffer);
                                     if (request != null)
                                     {
                                         var requestLog = new ChannelRequestLog(channel, request, buffer.ToArray());
                                         channel.Logger?.Log(requestLog);
-                                        var response = modbusSlave.OnReceivedModbusRequest(channel, request);
+                                        var response = modbusSlaveService.OnReceivedModbusRequest(channel, request);
 
                                         if (response != null)
                                         {
-                                            var responseMessage = modbusSlave.Serializer.Serialize(response).ToArray();
+                                            var responseMessage = modbusSlaveService.Serializer.Serialize(response).ToArray();
                                             channel.Write(responseMessage);
 
                                             if (response is ModbusExceptionResponse exceptionResponse)
@@ -537,20 +537,20 @@ namespace VagabondK.Protocols.Modbus
                                     }
                                 }
 
-                                var channelTimeout = modbusSlave.ChannelTimeout;
+                                var channelTimeout = modbusSlaveService.ChannelTimeout;
                                 if (!createdFromProvider || channelTimeout == 0)
                                 {
                                     receive();
                                 }
                                 else if (!Task.Run(receive).Wait(channelTimeout))
                                 {
-                                    modbusSlave.RemoveChannel(channel);
+                                    modbusSlaveService.RemoveChannel(channel);
                                 }
                             }
                             catch
                             {
                                 if (createdFromProvider)
-                                    modbusSlave.RemoveChannel(channel);
+                                    modbusSlaveService.RemoveChannel(channel);
                             }
                         }
                         if (!channel.IsDisposed)
