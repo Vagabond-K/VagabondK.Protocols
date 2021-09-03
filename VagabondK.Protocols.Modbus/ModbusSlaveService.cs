@@ -290,57 +290,38 @@ namespace VagabondK.Protocols.Modbus
         /// <returns>Modbus 응답</returns>
         protected virtual ModbusResponse OnReceivedModbusRequest(Channel channel, ModbusRequest request)
         {
-            ModbusResponse response = null;
+            if (request.Address + request.Length > 0xffff)
+                throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
 
-            try
+            switch (request.Function)
             {
-                if (request.Address + request.Length > 0xffff)
-                    throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
-
-                switch (request.Function)
-                {
-                    case ModbusFunction.ReadCoils:
-                        if (request.Length > maxReadBooleansLength)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
-                        response = new ModbusReadBooleanResponse(OnRequestedReadCoils((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
-                        break;
-                    case ModbusFunction.ReadDiscreteInputs:
-                        if (request.Length > maxReadBooleansLength)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
-                        response = new ModbusReadBooleanResponse(OnRequestedReadDiscreteInputs((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
-                        break;
-                    case ModbusFunction.ReadHoldingRegisters:
-                        if (request.Length > maxReadRegistersLength)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
-                        response = new ModbusReadRegisterResponse(OnRequestedReadHoldingRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
-                        break;
-                    case ModbusFunction.ReadInputRegisters:
-                        if (request.Length > maxReadRegistersLength)
-                            throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
-                        response = new ModbusReadRegisterResponse(OnRequestedReadInputRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
-                        break;
-                    case ModbusFunction.WriteSingleCoil:
-                    case ModbusFunction.WriteMultipleCoils:
-                        OnRequestedWriteCoil((ModbusWriteCoilRequest)request, channel);
-                        response = new ModbusWriteResponse((ModbusWriteCoilRequest)request);
-                        break;
-                    case ModbusFunction.WriteSingleHoldingRegister:
-                    case ModbusFunction.WriteMultipleHoldingRegisters:
-                        OnRequestedWriteHoldingRegister((ModbusWriteHoldingRegisterRequest)request, channel);
-                        response = new ModbusWriteResponse((ModbusWriteHoldingRegisterRequest)request);
-                        break;
-                }
-            }
-            catch (ModbusException modbusException)
-            {
-                response = new ModbusExceptionResponse(modbusException.Code, request);
-            }
-            catch
-            {
-                response = new ModbusExceptionResponse(ModbusExceptionCode.SlaveDeviceFailure, request);
+                case ModbusFunction.ReadCoils:
+                    if (request.Length > maxReadBooleansLength)
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                    return new ModbusReadBooleanResponse(OnRequestedReadCoils((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
+                case ModbusFunction.ReadDiscreteInputs:
+                    if (request.Length > maxReadBooleansLength)
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                    return new ModbusReadBooleanResponse(OnRequestedReadDiscreteInputs((ModbusReadRequest)request, channel).Take(request.Length).ToArray(), (ModbusReadRequest)request);
+                case ModbusFunction.ReadHoldingRegisters:
+                    if (request.Length > maxReadRegistersLength)
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                    return new ModbusReadRegisterResponse(OnRequestedReadHoldingRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
+                case ModbusFunction.ReadInputRegisters:
+                    if (request.Length > maxReadRegistersLength)
+                        throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                    return new ModbusReadRegisterResponse(OnRequestedReadInputRegisters((ModbusReadRequest)request, channel).Take(request.Length * 2).ToArray(), (ModbusReadRequest)request);
+                case ModbusFunction.WriteSingleCoil:
+                case ModbusFunction.WriteMultipleCoils:
+                    OnRequestedWriteCoil((ModbusWriteCoilRequest)request, channel);
+                    return new ModbusWriteResponse((ModbusWriteCoilRequest)request);
+                case ModbusFunction.WriteSingleHoldingRegister:
+                case ModbusFunction.WriteMultipleHoldingRegisters:
+                    OnRequestedWriteHoldingRegister((ModbusWriteHoldingRegisterRequest)request, channel);
+                    return new ModbusWriteResponse((ModbusWriteHoldingRegisterRequest)request);
             }
 
-            return response;
+            throw new ModbusException(ModbusExceptionCode.IllegalFunction);
         }
 
         /// <summary>
@@ -522,7 +503,20 @@ namespace VagabondK.Protocols.Modbus
                                     {
                                         var requestLog = new ChannelRequestLog(channel, request, buffer.ToArray());
                                         channel.Logger?.Log(requestLog);
-                                        var response = modbusSlaveService.OnReceivedModbusRequest(channel, request);
+                                        ModbusResponse response = null;
+
+                                        try
+                                        {
+                                            response = modbusSlaveService.OnReceivedModbusRequest(channel, request);
+                                        }
+                                        catch (ModbusException modbusException)
+                                        {
+                                            response = new ModbusExceptionResponse(modbusException.Code, request);
+                                        }
+                                        catch
+                                        {
+                                            response = new ModbusExceptionResponse(ModbusExceptionCode.SlaveDeviceFailure, request);
+                                        }
 
                                         if (response != null)
                                         {

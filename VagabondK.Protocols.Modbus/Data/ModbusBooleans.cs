@@ -33,6 +33,20 @@ namespace VagabondK.Protocols.Modbus.Data
             AllocateCore(new ModbusBooleanDataBlock(startAddress, data));
         }
 
+        /// <summary>
+        /// 반복 할당
+        /// </summary>
+        /// <param name="startAddress">시작 주소</param>
+        /// <param name="count">개수</param>
+        /// <param name="value">반복할 값</param>
+        public void AllocateRepeat(ushort startAddress, ushort count, bool value) => Allocate(startAddress, Enumerable.Repeat(value, count).ToArray());
+
+        /// <summary>
+        /// 전체 주소 할당
+        /// </summary>
+        /// <param name="value">전체 주소에 할당할 값</param>
+        public void AllocateAll(bool value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue).ToArray());
+
         internal override ModbusDataBlock<bool, bool> CreateDataBlock(ushort startAddress, bool[] values)
             => new ModbusBooleanDataBlock(startAddress, values);
 

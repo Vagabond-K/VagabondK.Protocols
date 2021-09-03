@@ -44,25 +44,47 @@ namespace VagabondK.Protocols.Modbus.Data
         }
 
         /// <summary>
+        /// Raw 데이터 기반 반복 할당
+        /// </summary>
+        /// <param name="startAddress">시작 주소</param>
+        /// <param name="rawDataCount">Raw 데이터 개수</param>
+        /// <param name="value">반복할 값</param>
+        public void AllocateRepeatRawData(ushort startAddress, int rawDataCount, byte value) => Allocate(startAddress, Enumerable.Repeat(value, rawDataCount).ToArray());
+
+        /// <summary>
+        /// 레지스터(2 바이트) 기반 반복 할당
+        /// </summary>
+        /// <param name="startAddress">시작 주소</param>
+        /// <param name="registerCount">레지스터 개수</param>
+        /// <param name="value">반복할 값</param>
+        public void AllocateRepeat(ushort startAddress, ushort registerCount, ushort value) => Allocate(startAddress, Enumerable.Repeat(value, registerCount).ToArray());
+
+        /// <summary>
+        /// Raw 데이터 전체 주소 할당
+        /// </summary>
+        /// <param name="value">전체 주소에 할당할 값</param>
+        public void AllocateAllRawData(byte value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue * 2).ToArray());
+
+        /// <summary>
+        /// 레지스터(2 바이트) 기반 전체 주소 할당
+        /// </summary>
+        /// <param name="value">전체 주소에 할당할 값</param>
+        public void AllocateAll(ushort value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue).ToArray());
+
+        /// <summary>
         /// 연속 Raw 데이터 가져오기
         /// </summary>
         /// <param name="startAddress">시작 주소</param>
         /// <param name="rawDataCount">Raw 데이터 개수</param>
         /// <returns>Raw 데이터 열거</returns>
-        public IEnumerable<byte> GetRawData(ushort startAddress, int rawDataCount)
-        {
-            return GetRawDataCore(startAddress, rawDataCount);
-        }
+        public IEnumerable<byte> GetRawData(ushort startAddress, int rawDataCount) => GetRawDataCore(startAddress, rawDataCount);
 
         /// <summary>
         /// 연속 Raw 데이터 설정하기
         /// </summary>
         /// <param name="startAddress">시작 주소</param>
         /// <param name="bytes">Raw 데이터 배열</param>
-        public void SetRawData(ushort startAddress, byte[] bytes)
-        {
-            SetDataBlock(new ModbusRegisterDataBlock(startAddress, bytes));
-        }
+        public void SetRawData(ushort startAddress, byte[] bytes) => SetDataBlock(new ModbusRegisterDataBlock(startAddress, bytes));
 
         /// <summary>
         /// 특정 주소에 부호 있는 2바이트 정수 값 할당
