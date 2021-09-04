@@ -133,9 +133,12 @@ namespace VagabondK.Protocols.Channels
                 {
                     try
                     {
-                        SerialPort.Open();
-                        ReadAllRemain();
-                        Logger?.Log(new ChannelOpenEventLog(this));
+                        if (!SerialPort.IsOpen)
+                        {
+                            SerialPort.Open();
+                            ReadAllRemain();
+                            Logger?.Log(new ChannelOpenEventLog(this));
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -167,12 +170,15 @@ namespace VagabondK.Protocols.Channels
                                     byte[] buffer = new byte[8192];
                                     while (true)
                                     {
-                                        int received = SerialPort.Read(buffer, 0, buffer.Length);
-                                        lock (readBuffer)
+                                        if (SerialPort.BytesToRead > 0)
                                         {
-                                            for (int i = 0; i < received; i++)
-                                                readBuffer.Enqueue(buffer[i]);
-                                            readEventWaitHandle.Set();
+                                            int received = SerialPort.Read(buffer, 0, buffer.Length);
+                                            lock (readBuffer)
+                                            {
+                                                for (int i = 0; i < received; i++)
+                                                    readBuffer.Enqueue(buffer[i]);
+                                                readEventWaitHandle.Set();
+                                            }
                                         }
                                     }
                                 }
