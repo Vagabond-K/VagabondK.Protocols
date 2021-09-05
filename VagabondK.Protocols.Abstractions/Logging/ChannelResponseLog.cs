@@ -14,12 +14,12 @@ namespace VagabondK.Protocols.Logging
         /// 생성자
         /// </summary>
         /// <param name="channel">통신 채널</param>
-        /// <param name="message">응답 메시지 인스턴스</param>
+        /// <param name="response">응답 메시지 인스턴스</param>
         /// <param name="rawMessage">원본 메시지</param>
         /// <param name="requestLog">관련 요청 메시지에 대한 Log</param>
-        public ChannelResponseLog(IChannel channel, IResponse message, byte[] rawMessage, ChannelRequestLog requestLog) : base(channel, message, rawMessage)
+        public ChannelResponseLog(IChannel channel, IResponse response, byte[] rawMessage, ChannelRequestLog requestLog) : base(channel, response, rawMessage)
         {
-            Message = message;
+            Response = response;
             RequestLog = requestLog;
         }
 
@@ -31,7 +31,7 @@ namespace VagabondK.Protocols.Logging
         /// <summary>
         /// 응답 메시지 인스턴스
         /// </summary>
-        public new IResponse Message { get; }
+        public IResponse Response { get; }
 
         /// <summary>
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>VagabondK.Protocols.Channels.SerialPort</id>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
     <authors>Vagabond K</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">LGPL-2.1-only</license>
@@ -12,18 +12,18 @@
     <repository type="git" url="https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Channels.SerialPort" />
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.3" exclude="Build,Analyzers" />
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.4" exclude="Build,Analyzers" />
         <dependency id="SerialPortStream" version="2.2.2" exclude="Build,Analyzers" />
       </group>
       <group targetFramework=".NETFramework4.6.1">
-        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.3" exclude="Build,Analyzers" />
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.4" exclude="Build,Analyzers" />
       </group>
       <group targetFramework=".NETCoreApp3.1">
-        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.3" exclude="Build,Analyzers" />
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.4" exclude="Build,Analyzers" />
         <dependency id="System.IO.Ports" version="5.0.0" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="UAP10.0.16299">
-        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.3" exclude="Build,Analyzers" />
+        <dependency id="VagabondK.Protocols.Abstractions" version="1.0.4" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>

@@ -14,11 +14,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="command">커맨드</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        protected CnetRequest(byte stationNumber, CnetCommand command, bool useBCC)
+        protected CnetRequest(byte stationNumber, CnetCommand command)
         {
             this.stationNumber = stationNumber;
-            this.useBCC = useBCC;
             Command = command;
         }
 
@@ -29,7 +27,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public abstract object Clone();
 
         private byte stationNumber;
-        private bool useBCC;
 
 
         /// <summary>
@@ -41,11 +38,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 국번
         /// </summary>
         public byte StationNumber { get => stationNumber; set => SetProperty(ref stationNumber, value); }
-
-        /// <summary>
-        /// BCC 사용 여부
-        /// </summary>
-        public bool UseBCC { get => useBCC; set => SetProperty(ref useBCC, value); }
 
         /// <summary>
         /// 커맨드
@@ -62,12 +54,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="byteList">프레임 데이터를 추가할 바이트 리스트</param>
         /// <param name="useBCC">BCC 사용 여부</param>
-        protected override void OnCreateFrame(List<byte> byteList, out bool useBCC)
+        protected override void OnCreateFrame(List<byte> byteList, bool useBCC)
         {
             byteList.AddRange(ToAsciiBytes(StationNumber));
-            byteList.Add(UseBCC ? (byte)((byte)Command + 0x20) : (byte)Command);
+            byteList.Add(useBCC ? (byte)((byte)Command + 0x20) : (byte)Command);
             OnCreateFrameData(byteList);
-            useBCC = this.useBCC;
         }
 
         /// <summary>
@@ -125,9 +116,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="command">커맨드</param>
         /// <param name="commandType">커맨드 타입</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        protected CnetIncludeCommandTypeRequest(byte stationNumber, CnetCommand command, CnetCommandType commandType, bool useBCC)
-            : base(stationNumber, command, useBCC)
+        protected CnetIncludeCommandTypeRequest(byte stationNumber, CnetCommand command, CnetCommandType commandType) : base(stationNumber, command)
         {
             CommandType = commandType;
         }
@@ -158,9 +147,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="commandType">커맨드</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        protected CnetReadRequest(byte stationNumber, CnetCommandType commandType, bool useBCC)
-            : base(stationNumber, CnetCommand.Read, commandType, useBCC) { }
+        protected CnetReadRequest(byte stationNumber, CnetCommandType commandType) : base(stationNumber, CnetCommand.Read, commandType) { }
     }
 
     /// <summary>
@@ -172,28 +159,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 생성자
         /// </summary>
         /// <param name="stationNumber">국번</param>
-        public CnetReadIndividualRequest(byte stationNumber) : this(stationNumber, null, true) { }
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetReadIndividualRequest(byte stationNumber, bool useBCC) : this(stationNumber, null, useBCC) { }
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="deviceVariables">디바이스 변수 목록</param>
-        public CnetReadIndividualRequest(byte stationNumber, IEnumerable<DeviceVariable> deviceVariables) : this(stationNumber, deviceVariables, true) { }
+        public CnetReadIndividualRequest(byte stationNumber) : this(stationNumber, null) { }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="deviceVariables">디바이스 변수 목록</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetReadIndividualRequest(byte stationNumber, IEnumerable<DeviceVariable> deviceVariables, bool useBCC)
-            : base(stationNumber, CnetCommandType.Individual, useBCC)
+        public CnetReadIndividualRequest(byte stationNumber, IEnumerable<DeviceVariable> deviceVariables) : base(stationNumber, CnetCommandType.Individual)
         {
             if (deviceVariables == null)
                 this.deviceVariables = new List<DeviceVariable>();
@@ -205,7 +178,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetReadIndividualRequest(StationNumber, deviceVariables, UseBCC);
+        public override object Clone() => new CnetReadIndividualRequest(StationNumber, deviceVariables);
 
         private readonly List<DeviceVariable> deviceVariables;
 
@@ -345,17 +318,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="startDeviceVariable">시작 디바이스 변수</param>
         /// <param name="count">읽을 개수</param>
-        public CnetReadContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, int count) : this(stationNumber, startDeviceVariable, count, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="startDeviceVariable">시작 디바이스 변수</param>
-        /// <param name="count">읽을 개수</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetReadContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, int count, bool useBCC)
-            : base(stationNumber, CnetCommandType.Continuous, useBCC)
+        public CnetReadContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, int count)
+            : base(stationNumber, CnetCommandType.Continuous)
         {
             this.startDeviceVariable = startDeviceVariable;
             this.count = count;
@@ -365,7 +329,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetReadContinuousRequest(StationNumber, startDeviceVariable, count, UseBCC);
+        public override object Clone() => new CnetReadContinuousRequest(StationNumber, startDeviceVariable, count);
 
         private DeviceVariable startDeviceVariable;
         private int count;
@@ -407,9 +371,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="commandType">커맨드 타입</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        protected CnetWriteRequest(byte stationNumber, CnetCommandType commandType, bool useBCC)
-            : base(stationNumber, CnetCommand.Write, commandType, useBCC)
+        protected CnetWriteRequest(byte stationNumber, CnetCommandType commandType)
+            : base(stationNumber, CnetCommand.Write, commandType)
         {
         }
     }
@@ -423,30 +386,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 생성자
         /// </summary>
         /// <param name="stationNumber">국번</param>
-        public CnetWriteIndividualRequest(byte stationNumber) : this(stationNumber, null, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetWriteIndividualRequest(byte stationNumber, bool useBCC) : this(stationNumber, null, useBCC) { }
+        public CnetWriteIndividualRequest(byte stationNumber) : this(stationNumber, null) { }
 
         /// <summary>
         /// 생성자
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="values">디바이스 변수에 쓸 값들</param>
-        public CnetWriteIndividualRequest(byte stationNumber, IEnumerable<KeyValuePair<DeviceVariable, DeviceValue>> values) : this(stationNumber, values, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="values">디바이스 변수에 쓸 값들</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetWriteIndividualRequest(byte stationNumber, IEnumerable<KeyValuePair<DeviceVariable, DeviceValue>> values, bool useBCC)
-            : base(stationNumber, CnetCommandType.Individual, useBCC)
+        public CnetWriteIndividualRequest(byte stationNumber, IEnumerable<KeyValuePair<DeviceVariable, DeviceValue>> values)
+            : base(stationNumber, CnetCommandType.Individual)
         {
             if (values != null)
                 foreach (var value in values)
@@ -457,7 +405,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetWriteIndividualRequest(StationNumber, valueDictionary, UseBCC);
+        public override object Clone() => new CnetWriteIndividualRequest(StationNumber, valueDictionary);
 
         private readonly Dictionary<DeviceVariable, DeviceValue> valueDictionary = new Dictionary<DeviceVariable, DeviceValue>();
 
@@ -638,15 +586,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="startDeviceVariable">시작 디바이스 변수</param>
-        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable) : this(stationNumber, startDeviceVariable, null, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="startDeviceVariable">시작 디바이스 변수</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, bool useBCC) : this(stationNumber, startDeviceVariable, null, useBCC) { }
+        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable) : this(stationNumber, startDeviceVariable, null) { }
 
         /// <summary>
         /// 생성자
@@ -654,17 +594,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="startDeviceVariable">시작 디바이스 변수</param>
         /// <param name="deviceValues">쓰기 요청할 디바이스 값들</param>
-        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, IEnumerable<DeviceValue> deviceValues) : this(stationNumber, startDeviceVariable, deviceValues, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="startDeviceVariable">시작 디바이스 변수</param>
-        /// <param name="deviceValues">쓰기 요청할 디바이스 값들</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, IEnumerable<DeviceValue> deviceValues, bool useBCC)
-            : base(stationNumber, CnetCommandType.Continuous, useBCC)
+        public CnetWriteContinuousRequest(byte stationNumber, DeviceVariable startDeviceVariable, IEnumerable<DeviceValue> deviceValues)
+            : base(stationNumber, CnetCommandType.Continuous)
         {
             this.startDeviceVariable = startDeviceVariable;
 
@@ -678,7 +609,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetWriteContinuousRequest(StationNumber, startDeviceVariable, deviceValues, UseBCC);
+        public override object Clone() => new CnetWriteContinuousRequest(StationNumber, startDeviceVariable, deviceValues);
 
         private readonly List<DeviceValue> deviceValues;
 
@@ -842,7 +773,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
 
     /// <summary>
-    /// 모니터 변수 등록 요청
+    /// 모니터 등록 요청
     /// </summary>
     public abstract class CnetRegisterMonitorRequest : CnetIncludeCommandTypeRequest
     {
@@ -852,9 +783,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="commandType">커맨드 타입</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        protected CnetRegisterMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType, bool useBCC)
-            : base(stationNumber, CnetCommand.RegisterMonitor, commandType, useBCC)
+        protected CnetRegisterMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
+            : base(stationNumber, CnetCommand.RegisterMonitor, commandType)
         {
             this.monitorNumber = monitorNumber;
         }
@@ -880,7 +810,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     }
 
     /// <summary>
-    /// 개별 모니터 변수 등록 요청
+    /// 개별 변수 모니터 등록 요청
     /// </summary>
     public class CnetRegisterMonitorIndividualRequest : CnetRegisterMonitorRequest, IList<DeviceVariable>
     {
@@ -889,15 +819,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
-        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber) : this(stationNumber, monitorNumber, null, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="monitorNumber">모니터 번호</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber, bool useBCC) : this(stationNumber, monitorNumber, null, useBCC) { }
+        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber) : this(stationNumber, monitorNumber, null) { }
 
         /// <summary>
         /// 생성자
@@ -905,17 +827,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="deviceVariables">디바이스 변수 목록</param>
-        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber, IEnumerable<DeviceVariable> deviceVariables) : this(stationNumber, monitorNumber, deviceVariables, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="monitorNumber">모니터 번호</param>
-        /// <param name="deviceVariables">디바이스 변수 목록</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber, IEnumerable<DeviceVariable> deviceVariables, bool useBCC)
-            : base(stationNumber, monitorNumber, CnetCommandType.Individual, useBCC)
+        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber, IEnumerable<DeviceVariable> deviceVariables)
+            : base(stationNumber, monitorNumber, CnetCommandType.Individual)
         {
             if (deviceVariables == null)
                 this.deviceVariables = new List<DeviceVariable>();
@@ -927,7 +840,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetRegisterMonitorIndividualRequest(StationNumber, MonitorNumber, deviceVariables, UseBCC);
+        public override object Clone() => new CnetRegisterMonitorIndividualRequest(StationNumber, MonitorNumber, deviceVariables);
 
         private readonly List<DeviceVariable> deviceVariables;
 
@@ -1069,18 +982,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="startDeviceVariable">시작 디바이스 변수</param>
         /// <param name="count">읽을 개수</param>
-        public CnetRegisterMonitorContinuousRequest(byte stationNumber, byte monitorNumber, DeviceVariable startDeviceVariable, int count) : this(stationNumber, monitorNumber, startDeviceVariable, count, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="monitorNumber">모니터 번호</param>
-        /// <param name="startDeviceVariable">시작 디바이스 변수</param>
-        /// <param name="count">읽을 개수</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetRegisterMonitorContinuousRequest(byte stationNumber, byte monitorNumber, DeviceVariable startDeviceVariable, int count, bool useBCC)
-            : base(stationNumber, monitorNumber, CnetCommandType.Continuous, useBCC)
+        public CnetRegisterMonitorContinuousRequest(byte stationNumber, byte monitorNumber, DeviceVariable startDeviceVariable, int count)
+            : base(stationNumber, monitorNumber, CnetCommandType.Continuous)
         {
             this.startDeviceVariable = startDeviceVariable;
             this.count = count;
@@ -1090,7 +993,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetRegisterMonitorContinuousRequest(StationNumber, MonitorNumber, startDeviceVariable, count, UseBCC);
+        public override object Clone() => new CnetRegisterMonitorContinuousRequest(StationNumber, MonitorNumber, startDeviceVariable, count);
 
         private DeviceVariable startDeviceVariable;
         private int count;
@@ -1131,17 +1034,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="commandType">커맨드 타입</param>
-        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType) : this(stationNumber, monitorNumber, commandType, true) { }
-
-        /// <summary>
-        /// 생성자
-        /// </summary>
-        /// <param name="stationNumber">국번</param>
-        /// <param name="monitorNumber">모니터 번호</param>
-        /// <param name="commandType">커맨드 타입</param>
-        /// <param name="useBCC">BCC 사용 여부</param>
-        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType, bool useBCC)
-            : base(stationNumber, CnetCommand.ExecuteMonitor, commandType, useBCC)
+        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
+            : base(stationNumber, CnetCommand.ExecuteMonitor, commandType)
         {
             this.monitorNumber = monitorNumber;
         }
@@ -1150,7 +1044,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetExecuteMonitorRequest(StationNumber, MonitorNumber, CommandType, UseBCC);
+        public override object Clone() => new CnetExecuteMonitorRequest(StationNumber, MonitorNumber, CommandType);
 
         private byte monitorNumber;
 
@@ -1171,10 +1065,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     class CnetExecuteMonitorIndividualRequest : CnetExecuteMonitorRequest, IReadOnlyList<DeviceVariable>
     {
-        public CnetExecuteMonitorIndividualRequest(CnetRegisterMonitorIndividualRequest request) : this(request, true) { }
-
-        public CnetExecuteMonitorIndividualRequest(CnetRegisterMonitorIndividualRequest request, bool useBCC)
-            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Individual, useBCC)
+        public CnetExecuteMonitorIndividualRequest(CnetRegisterMonitorIndividualRequest request)
+            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Individual)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             this.request = (CnetRegisterMonitorIndividualRequest)request.Clone();
@@ -1184,7 +1076,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetExecuteMonitorIndividualRequest(request, UseBCC);
+        public override object Clone() => new CnetExecuteMonitorIndividualRequest(request);
 
         private readonly CnetRegisterMonitorIndividualRequest request;
 
@@ -1199,10 +1091,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
     class CnetExecuteMonitorContinuousRequest : CnetExecuteMonitorRequest, ICnetContinuousAccessRequest
     {
-        public CnetExecuteMonitorContinuousRequest(CnetRegisterMonitorContinuousRequest request) : this(request, true) { }
-
-        public CnetExecuteMonitorContinuousRequest(CnetRegisterMonitorContinuousRequest request, bool useBCC)
-            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Continuous, useBCC)
+        public CnetExecuteMonitorContinuousRequest(CnetRegisterMonitorContinuousRequest request)
+            : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Continuous)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             this.request = (CnetRegisterMonitorContinuousRequest)request.Clone();
@@ -1212,7 +1102,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetExecuteMonitorContinuousRequest(request, UseBCC);
+        public override object Clone() => new CnetExecuteMonitorContinuousRequest(request);
 
         private readonly CnetRegisterMonitorContinuousRequest request;
 

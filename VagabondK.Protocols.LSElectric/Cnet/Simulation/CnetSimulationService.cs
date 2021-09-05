@@ -262,7 +262,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
             if (errorBuffer.Count > 0)
             {
-                channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
+                channel.Logger.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
                 errorBuffer.Clear();
             }
 
@@ -276,11 +276,13 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
             if (buffer.Count < 6)
                 throw new Exception();
 
+            bool useBCC = true;
+
             if (CnetMessage.TryParseByte(buffer, 1, out var stationNumber)
                 && (Enum.IsDefined(typeof(CnetCommand), buffer[3]) || Enum.IsDefined(typeof(CnetCommand), (byte)(buffer[3] - 0x20))))
             {
                 ushort commandTypeValue = (ushort)((buffer[4] << 8) | buffer[5]);
-                bool useBCC = buffer[3] > 0x60;
+                useBCC = buffer[3] > 0x60;
                 CnetCommand command = (CnetCommand)(useBCC ? buffer[3] - 0x20 : buffer[3]);
                 byte monitorNumber;
 
@@ -291,7 +293,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     buffer.AddRange(channel.Read(2, 0));
                     if (!buffer.Skip(buffer.Count - 2).Take(2).SequenceEqual(Encoding.ASCII.GetBytes((buffer.Take(buffer.Count - 2).Sum(b => b) % 256).ToString("X2"))))
                     {
-                        channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+                        channel.Logger.Log(new UnrecognizedErrorLog(channel, buffer.ToArray()));
                         return;
                     }
                 }
@@ -325,10 +327,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 }
                 catch (ErrorCodeException<CnetNAKCode> ex)
                 {
-                    channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+                    channel.Logger.Log(new UnrecognizedErrorLog(channel, buffer.ToArray()));
 
-                    var response = new CnetNAKResponse(ex.Code, stationNumber, command, commandTypeValue, useBCC);
-                    var message = response.Serialize().ToArray();
+                    var response = new CnetNAKResponse(ex.Code, stationNumber, command, commandTypeValue);
+                    var message = response.Serialize(useBCC).ToArray();
                     channel.Write(message);
                     channel.Logger.Log(new CnetNAKLog(channel, response, message, null));
                 }
@@ -359,7 +361,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
                     if (response != null)
                     {
-                        var responseMessage = response.Serialize().ToArray();
+                        var responseMessage = response.Serialize(useBCC).ToArray();
                         channel.Logger.Log(new CnetResponseLog(channel, response, responseMessage, requestLog));
                         channel.Write(responseMessage);
                     }
@@ -367,14 +369,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 catch (ErrorCodeException<CnetNAKCode> ex)
                 {
                     var nakResponse = new CnetNAKResponse(ex.Code, request);
-                    var message = nakResponse.Serialize().ToArray();
+                    var message = nakResponse.Serialize(useBCC).ToArray();
                     channel.Write(message);
                     channel.Logger.Log(new CnetNAKLog(channel, nakResponse, message, requestLog));
                 }
             }
             else
             {
-                channel.Logger.Log(new Protocols.Logging.UnrecognizedErrorLog(channel, buffer.ToArray()));
+                channel.Logger.Log(new UnrecognizedErrorLog(channel, buffer.ToArray()));
             }
         }
 
@@ -437,7 +439,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
                         deviceVariables.Add(deviceVariable.Value);
                     }
-                    return new CnetReadIndividualRequest(stationNumber, deviceVariables, useBCC);
+                    return new CnetReadIndividualRequest(stationNumber, deviceVariables);
                 }
             }
             else
@@ -454,7 +456,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         if (count > 60)
                             throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverDataLength);
 
-                        return new CnetReadContinuousRequest(stationNumber, deviceVariable.Value, count, useBCC);
+                        return new CnetReadContinuousRequest(stationNumber, deviceVariable.Value, count);
                     }
                     else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
                 }
@@ -537,7 +539,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         else return null;
                     }
 
-                    return new CnetWriteIndividualRequest(stationNumber, deviceValues, useBCC);
+                    return new CnetWriteIndividualRequest(stationNumber, deviceValues);
                 }
             }
             else
@@ -608,7 +610,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                             index += dataUnit * 2;
                         }
 
-                        return new CnetWriteContinuousRequest(stationNumber, deviceVariable.Value, deviceValues, useBCC);
+                        return new CnetWriteContinuousRequest(stationNumber, deviceVariable.Value, deviceValues);
                     }
                     else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
                 }
@@ -643,7 +645,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                                 return null;
                             deviceVariables.Add(deviceVariable.Value);
                         }
-                        return new CnetRegisterMonitorIndividualRequest(stationNumber, monitorNumber, deviceVariables, useBCC);
+                        return new CnetRegisterMonitorIndividualRequest(stationNumber, monitorNumber, deviceVariables);
                     }
                 }
                 else
@@ -656,7 +658,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         if (CnetMessage.TryParseByte(buffer, index, out var count))
                         {
                             index += 2;
-                            return new CnetRegisterMonitorContinuousRequest(stationNumber, monitorNumber, deviceVariable.Value, count, useBCC);
+                            return new CnetRegisterMonitorContinuousRequest(stationNumber, monitorNumber, deviceVariable.Value, count);
                         }
                     }
                 }
@@ -671,7 +673,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
             {
                 if (simulationStation.Monitors.TryGetValue(monitorNumber, out var monitor))
                 {
-                    return monitor.CreateExecuteRequest(useBCC);
+                    return monitor.CreateExecuteRequest();
                 }
                 else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.NotExistsMonitorNumber);
             }

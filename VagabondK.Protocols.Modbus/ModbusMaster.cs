@@ -136,26 +136,28 @@ namespace VagabondK.Protocols.Modbus
             if (channel == null)
                 throw new ArgumentNullException(nameof(Channel));
 
-            if (Serializer == null)
+            var serializer = Serializer;
+
+            if (serializer == null)
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.NotDefinedModbusSerializer, new byte[0], request);
 
 
-            var requestMessage = Serializer.Serialize(request).ToArray();
+            var requestMessage = serializer.Serialize(request).ToArray();
             var buffer = new ResponseBuffer(channel);
 
-            if (!(Serializer is ModbusTcpSerializer))
+            if (!(serializer is ModbusTcpSerializer))
             {
                 channel.ReadAllRemain().ToArray();
             }
 
             channel.Write(requestMessage);
-            var requestLog = new ChannelRequestLog(channel, request, requestMessage);
+            var requestLog = new ModbusRequestLog(channel, request, requestMessage, serializer);
             channel?.Logger?.Log(requestLog);
 
             ModbusResponse result;
             try
             {
-                result = Serializer.Deserialize(buffer, request, timeout);
+                result = serializer.Deserialize(buffer, request, timeout);
             }
             catch (RequestException<ModbusCommErrorCode> ex)
             {
@@ -170,7 +172,7 @@ namespace VagabondK.Protocols.Modbus
                     throw new ModbusException(exceptionResponse.ExceptionCode);
             }
             else
-                channel?.Logger?.Log(new ChannelResponseLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray(), requestLog));
+                channel?.Logger?.Log(new ModbusResponseLog(channel, result, result is ModbusCommErrorResponse ? null : buffer.ToArray(), requestLog, serializer));
 
 
             return result;

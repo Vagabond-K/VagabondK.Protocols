@@ -498,10 +498,13 @@ namespace VagabondK.Protocols.Modbus
                                 void receive()
                                 {
                                     RequestBuffer buffer = new RequestBuffer(modbusSlaveService, channel);
-                                    var request = modbusSlaveService.Serializer.Deserialize(buffer);
+
+                                    var serializer = modbusSlaveService.Serializer;
+
+                                    var request = serializer.Deserialize(buffer);
                                     if (request != null)
                                     {
-                                        var requestLog = new ChannelRequestLog(channel, request, buffer.ToArray());
+                                        var requestLog = new ModbusRequestLog(channel, request, buffer.ToArray(), serializer);
                                         channel.Logger?.Log(requestLog);
                                         ModbusResponse response = null;
 
@@ -520,13 +523,13 @@ namespace VagabondK.Protocols.Modbus
 
                                         if (response != null)
                                         {
-                                            var responseMessage = modbusSlaveService.Serializer.Serialize(response).ToArray();
+                                            var responseMessage = serializer.Serialize(response).ToArray();
                                             channel.Write(responseMessage);
 
                                             if (response is ModbusExceptionResponse exceptionResponse)
                                                 channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog));
                                             else
-                                                channel?.Logger?.Log(new ChannelResponseLog(channel, response, responseMessage, requestLog));
+                                                channel?.Logger?.Log(new ModbusResponseLog(channel, response, responseMessage, requestLog, serializer));
                                         }
                                     }
                                 }

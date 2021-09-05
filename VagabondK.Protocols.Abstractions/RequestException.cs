@@ -25,7 +25,7 @@ namespace VagabondK.Protocols
         /// 생성자
         /// </summary>
         /// <param name="innerException">내부 예외</param>
-        /// <param name="request">Modbus 요청</param>
+        /// <param name="request">요청</param>
         public RequestException(Exception innerException, IRequest<TErrorCode> request) : base(default(TErrorCode), innerException)
         {
             ReceivedBytes = new byte[0];
@@ -37,7 +37,7 @@ namespace VagabondK.Protocols
         /// </summary>
         /// <param name="receivedMessage">응답 메시지</param>
         /// <param name="innerException">내부 예외</param>
-        /// <param name="request">Modbus 요청</param>
+        /// <param name="request">요청</param>
         public RequestException(IEnumerable<byte> receivedMessage, Exception innerException, IRequest<TErrorCode> request) : base(default(TErrorCode), innerException)
         {
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
@@ -49,7 +49,7 @@ namespace VagabondK.Protocols
         /// </summary>
         /// <param name="errorCode">통신 요청 오류 코드</param>
         /// <param name="receivedMessage">응답 메시지</param>
-        /// <param name="request">Modbus 요청</param>
+        /// <param name="request">요청</param>
         public RequestException(TErrorCode errorCode, IEnumerable<byte> receivedMessage, IRequest<TErrorCode> request) : base(errorCode)
         {
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
@@ -62,7 +62,7 @@ namespace VagabondK.Protocols
         /// <param name="errorCode">통신 요청 오류 코드</param>
         /// <param name="receivedMessage">받은 메시지</param>
         /// <param name="innerException">내부 예외</param>
-        /// <param name="request">Modbus 요청</param>
+        /// <param name="request">요청</param>
         public RequestException(TErrorCode errorCode, IEnumerable<byte> receivedMessage, Exception innerException, IRequest<TErrorCode> request) : base(errorCode, innerException)
         {
             ReceivedBytes = receivedMessage?.ToArray() ?? new byte[0];
@@ -74,7 +74,7 @@ namespace VagabondK.Protocols
         /// </summary>
         public IReadOnlyList<byte> ReceivedBytes { get; }
         /// <summary>
-        /// Modbus 요청
+        /// 요청
         /// </summary>
         public IRequest<TErrorCode> Request { get; }
     }

@@ -12,17 +12,17 @@ namespace VagabondK.Protocols.Logging
         /// 생성자
         /// </summary>
         /// <param name="channel">통신 채널</param>
-        /// <param name="message">Cnet 요청 메시지</param>
+        /// <param name="request">Cnet 요청 메시지</param>
         /// <param name="rawMessage">원본 메시지</param>
-        public CnetRequestLog(IChannel channel, CnetRequest message, byte[] rawMessage) : base(channel, message, rawMessage)
+        public CnetRequestLog(IChannel channel, CnetRequest request, byte[] rawMessage) : base(channel, request, rawMessage)
         {
-            Message = message;
+            CnetRequest = request;
         }
 
         /// <summary>
         /// Cnet 요청 메시지
         /// </summary>
-        public new CnetRequest Message { get; }
+        public CnetRequest CnetRequest { get; }
 
         /// <summary>
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.

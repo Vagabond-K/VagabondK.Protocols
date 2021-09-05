@@ -24,27 +24,48 @@ namespace SimpleCnetClient
             (channel as ChannelProvider)?.Start();
 
 
-            var read = new CnetReadIndividualRequest(1) { "%MW100" };
-            var readBlock = new CnetReadContinuousRequest(1, "%MW100", 5);
-            var write = new CnetWriteIndividualRequest(1) { ["%MW102"] = 30 };
-            var writeBlock = new CnetWriteContinuousRequest(1, "%MW100") { 10, 20 };
-            var monitor = new CnetMonitorByIndividualAccess(1, 1, new DeviceVariable[] { "%MW100" }).CreateRegisterRequest();
-            var monitorExe = new CnetMonitorByIndividualAccess(1, 1, new DeviceVariable[] { "%MW100" }).CreateExecuteRequest();
-            var monitorBlock = new CnetMonitorByContinuousAccess(1, 2, "%MW100", 3).CreateRegisterRequest();
-            var monitorBlockExe = new CnetMonitorByContinuousAccess(1, 2, "%MW100", 3).CreateExecuteRequest();
+            var readIndividual = new CnetReadIndividualRequest(1) { "%MW100" };
+            var readContinuous = new CnetReadContinuousRequest(1, "%MW100", 5);
+            var writeIndividual = new CnetWriteIndividualRequest(1) { ["%MW102"] = 30 };
+            var writeContinuous = new CnetWriteContinuousRequest(1, "%MW100") { 10, 20 };
+
+            var monitorIndividual = new CnetMonitorByIndividualAccess(1, 1, "%MW100");
+            var monitorRegisterIndividual = monitorIndividual.CreateRegisterRequest();
+            var monitorExecuteIndividual = monitorIndividual.CreateExecuteRequest();
+
+            var monitorContinuous = new CnetMonitorByContinuousAccess(1, 2, "%MW100", 3);
+            var monitorRegisterContinuous = monitorContinuous.CreateRegisterRequest();
+            var monitorExecuteContinuous = monitorContinuous.CreateExecuteRequest();
 
             while (true)
             {
                 try
                 {
-                    var readResponse = client.Request(read);
-                    var readBlockResponse = client.Request(readBlock);
-                    var writeResponse = client.Request(write);
-                    var writeBlockResponse = client.Request(writeBlock);
-                    var monitorResponse = client.Request(monitor);
-                    var monitorExeResponse = client.Request(monitorExe);
-                    var monitorBlockResponse = client.Request(monitorBlock);
-                    var monitorBlockExeResponse = client.Request(monitorBlockExe);
+                    var readIndividualResponse = client.Request(readIndividual);
+                    var valuesIndividual = client.Read(1, "%MW100");
+
+                    var readContinuousResponse = client.Request(readContinuous);
+                    var valuesContinuous = client.Read(1, "%MW100", 5);
+
+                    var writeIndividualResponse = client.Request(writeIndividual);
+                    client.Write(1, ("%MW102", 30));
+
+                    var writeContinuousResponse = client.Request(writeContinuous);
+                    client.Write(1, "%MW100", 10, 20);
+
+
+                    var monitorRegisterIndividualResponse = client.Request(monitorRegisterIndividual);
+                    var monitorExecuteIndividual2 = client.RegisterMonitor(1, 1, "%MW100");
+
+                    var monitorExeResponse = client.Request(monitorExecuteIndividual);
+                    var valuesMonitorIndividual = client.Read(monitorExecuteIndividual2);
+
+
+                    var monitorContinuousResponse = client.Request(monitorRegisterContinuous);
+                    var monitorExecuteContinuous2 = client.RegisterMonitor(1, 2, "%MW100", 3);
+
+                    var monitorContinuousExeResponse = client.Request(monitorExecuteContinuous);
+                    var valuesMonitorContinuous = client.Read(monitorExecuteContinuous2);
                 }
                 catch (Exception ex)
                 {

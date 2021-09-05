@@ -102,13 +102,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="byteList">프레임 데이터를 추가할 바이트 리스트</param>
         /// <param name="useBCC">BCC 사용 여부</param>
-        protected abstract void OnCreateFrame(List<byte> byteList, out bool useBCC);
+        protected abstract void OnCreateFrame(List<byte> byteList, bool useBCC);
 
         /// <summary>
         /// 직렬화
         /// </summary>
+        /// <param name="useBCC">BCC 사용 여부</param>
         /// <returns>직렬화 된 바이트 열거</returns>
-        public virtual IEnumerable<byte> Serialize()
+        public virtual IEnumerable<byte> Serialize(bool useBCC)
         {
             lock (this)
             {
@@ -116,7 +117,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 {
                     List<byte> byteList = new List<byte> { Header };
 
-                    OnCreateFrame(byteList, out var useBCC);
+                    OnCreateFrame(byteList, useBCC);
 
                     byteList.Add(Tail);
 

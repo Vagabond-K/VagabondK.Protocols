@@ -40,11 +40,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="byteList">프레임 데이터를 추가할 바이트 리스트</param>
         /// <param name="useBCC">BCC 사용 여부</param>
-        protected override void OnCreateFrame(List<byte> byteList, out bool useBCC)
+        protected override void OnCreateFrame(List<byte> byteList, bool useBCC)
         {
-            byteList.AddRange(Request.Serialize().Skip(1).Take(5));
+            byteList.AddRange(Request.Serialize(useBCC).Skip(1).Take(5));
             OnCreateFrameData(byteList);
-            useBCC = Request.UseBCC;
         }
 
         /// <summary>
@@ -313,8 +312,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             NAKCodeValue = (ushort)nakCode;
         }
 
-        internal CnetNAKResponse(CnetNAKCode nakCode, byte stationNumber, CnetCommand command, ushort commandType, bool useBCC) 
-            : base(new CnetRequestError(stationNumber, command, commandType, useBCC))
+        internal CnetNAKResponse(CnetNAKCode nakCode, byte stationNumber, CnetCommand command, ushort commandType) 
+            : base(new CnetRequestError(stationNumber, command, commandType))
         {
             NAKCode = nakCode;
             NAKCodeValue = (ushort)nakCode;
@@ -346,7 +345,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
         class CnetRequestError : CnetRequest
         {
-            public CnetRequestError(byte stationNumber, CnetCommand command, ushort commandType, bool useBCC) : base(stationNumber, command, useBCC)
+            public CnetRequestError(byte stationNumber, CnetCommand command, ushort commandType) : base(stationNumber, command)
             {
                 CommandType = commandType;
             }
@@ -355,7 +354,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             /// 요청 메시지 복제
             /// </summary>
             /// <returns>복제된 요청 메시지</returns>
-            public override object Clone() => new CnetRequestError(StationNumber, Command, CommandType, UseBCC);
+            public override object Clone() => new CnetRequestError(StationNumber, Command, CommandType);
 
             public ushort CommandType { get; }
 

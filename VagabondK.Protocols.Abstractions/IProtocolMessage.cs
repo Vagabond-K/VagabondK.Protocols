@@ -7,10 +7,5 @@ namespace VagabondK.Protocols
     /// </summary>
     public interface IProtocolMessage
     {
-        /// <summary>
-        /// 직렬화
-        /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
-        IEnumerable<byte> Serialize();
     }
 }
