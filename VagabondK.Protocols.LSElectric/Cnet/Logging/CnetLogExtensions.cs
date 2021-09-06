@@ -32,7 +32,11 @@ namespace VagabondK.Protocols.Logging
                         if (b >= 33 && b <= 126)
                             stringBuilder.Append((char)b);
                         else
+                        {
+                            stringBuilder.Append("{0x");
                             stringBuilder.Append(b.ToString("X2"));
+                            stringBuilder.Append("}");
+                        }
                         break;
                 }
             }
