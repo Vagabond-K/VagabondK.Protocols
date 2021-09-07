@@ -257,5 +257,34 @@ namespace VagabondK.Protocols.LSElectric
         /// <param name="value">ulong 형식 값</param>
         /// <returns>디바이스 값</returns>
         public static implicit operator DeviceValue(ulong value) => new DeviceValue(value);
+
+        /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 같은지를 확인합니다.
+        /// </summary>
+        /// <param name="value1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="value2">비교할 두 번째 개체입니다.</param>
+        /// <returns>value1 및 value2가 동일하면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator ==(DeviceValue value1, DeviceValue value2) => value1.Equals(value2);
+
+        /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 다른지를 확인합니다.
+        /// </summary>
+        /// <param name="value1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="value2">비교할 두 번째 개체입니다.</param>
+        /// <returns>value1 및 value2가 동일하지 않으면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator !=(DeviceValue value1, DeviceValue value2) => !value1.Equals(value2);
+
+        /// <summary>
+        /// 이 인스턴스와 지정된 개체가 같은지 여부를 나타냅니다.
+        /// </summary>
+        /// <param name="obj">현재 인스턴스와 비교할 개체입니다.</param>
+        /// <returns>true와 이 인스턴스가 동일한 형식이고 동일한 값을 나타내면 obj이고, 그렇지 않으면 false입니다.</returns>
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// 이 인스턴스의 해시 코드를 반환합니다.
+        /// </summary>
+        /// <returns>이 인스턴스의 해시 코드인 32비트 부호 있는 정수입니다.</returns>
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

@@ -170,7 +170,35 @@ namespace VagabondK.Protocols.LSElectric
         /// <returns>디바이스 변수</returns>
         public static implicit operator DeviceVariable(string text) => Parse(text);
 
-        
+        /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 같은지를 확인합니다.
+        /// </summary>
+        /// <param name="variable1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="variable2">비교할 두 번째 개체입니다.</param>
+        /// <returns>variable1 및 variable2가 동일하면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator ==(DeviceVariable variable1, DeviceVariable variable2) => variable1.Equals(variable2);
+
+        /// <summary>
+        /// ModbusEndian의 지정된 두 인스턴스가 다른지를 확인합니다.
+        /// </summary>
+        /// <param name="variable1">비교할 첫 번째 개체입니다.</param>
+        /// <param name="variable2">비교할 두 번째 개체입니다.</param>
+        /// <returns>variable1 및 variable2가 동일하지 않으면 true이고, 그렇지 않으면 false입니다.</returns>
+        public static bool operator !=(DeviceVariable variable1, DeviceVariable variable2) => !variable1.Equals(variable2);
+
+        /// <summary>
+        /// 이 인스턴스와 지정된 개체가 같은지 여부를 나타냅니다.
+        /// </summary>
+        /// <param name="obj">현재 인스턴스와 비교할 개체입니다.</param>
+        /// <returns>true와 이 인스턴스가 동일한 형식이고 동일한 값을 나타내면 obj이고, 그렇지 않으면 false입니다.</returns>
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// 이 인스턴스의 해시 코드를 반환합니다.
+        /// </summary>
+        /// <returns>이 인스턴스의 해시 코드인 32비트 부호 있는 정수입니다.</returns>
+        public override int GetHashCode() => base.GetHashCode();
+
         internal DeviceVariable Increase()
         {
             if (SubIndices.Count == 0)

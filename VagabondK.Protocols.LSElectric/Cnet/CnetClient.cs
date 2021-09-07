@@ -146,7 +146,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             if (result is CnetCommErrorResponse commErrorResponse)
             {
-                var ex = new CnetRequestException(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
+                var ex = new RequestException<CnetCommErrorCode>(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
                 channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
                 throw ex;
             }
@@ -155,7 +155,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             {
                 channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
                 if (ThrowsExceptionFromNAK)
-                    throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                    throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             }
             else
                 channel?.Logger?.Log(new CnetResponseLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray(), requestLog));
@@ -209,7 +209,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (response is CnetReadResponse readResponse)
                 return readResponse;
             else if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             return null;
         }
 
@@ -260,7 +260,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (response is CnetReadResponse readResponse)
                 return readResponse;
             else if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             return null;
         }
 
@@ -343,7 +343,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             var response = Request(useBCC, timeout, new CnetWriteIndividualRequest(stationNumber, values));
             if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
         }
 
 
@@ -389,7 +389,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         {
             var response = Request(useBCC, timeout, new CnetWriteContinuousRequest(stationNumber, startDeviceVariable, new DeviceValue[] { deviceValue }.Concat(moreDeviceValues)));
             if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
         }
 
 
@@ -442,7 +442,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             var response = Request(useBCC, timeout, monitor.CreateRegisterRequest());
             if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
 
             return monitor.CreateExecuteRequest();
         }
@@ -498,7 +498,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             var response = Request(useBCC, timeout, monitor.CreateRegisterRequest());
             if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
 
             return monitor.CreateExecuteRequest();
         }
@@ -542,7 +542,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (response is CnetReadResponse readResponse)
                 return readResponse;
             else if (response is CnetNAKResponse exceptionResponse)
-                throw new ErrorCodeException<CnetNAKCode>(exceptionResponse.NAKCode);
+                throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             return null;
         }
 

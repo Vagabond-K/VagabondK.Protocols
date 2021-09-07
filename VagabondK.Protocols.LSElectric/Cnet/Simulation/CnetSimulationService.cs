@@ -323,9 +323,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     }
 
                     if (index < frameLength - 1)
-                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.UnnecessaryDataInFrame);
+                        throw new CnetNAKException(CnetNAKCode.UnnecessaryDataInFrame);
                 }
-                catch (ErrorCodeException<CnetNAKCode> ex)
+                catch (CnetNAKException ex)
                 {
                     channel.Logger.Log(new UnrecognizedErrorLog(channel, buffer.ToArray()));
 
@@ -366,7 +366,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         channel.Write(responseMessage);
                     }
                 }
-                catch (ErrorCodeException<CnetNAKCode> ex)
+                catch (CnetNAKException ex)
                 {
                     var nakResponse = new CnetNAKResponse(ex.Code, request);
                     var message = nakResponse.Serialize(useBCC).ToArray();
@@ -390,7 +390,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 index += 2;
 
                 if (byteCount < 4 || byteCount > 12)
-                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverVariableLength);
+                    throw new CnetNAKException(CnetNAKCode.OverVariableLength);
 
                 if (buffer.Count < index + byteCount)
                     throw new Exception();
@@ -398,11 +398,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 var s = Encoding.ASCII.GetString(buffer.Skip(index).Take(byteCount).ToArray());
 
                 if (!Enum.IsDefined(typeof(DeviceType), (byte)s[1]))
-                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.IlegalDeviceMemory);
+                    throw new CnetNAKException(CnetNAKCode.IlegalDeviceMemory);
                 if (!Enum.IsDefined(typeof(DataType), (byte)s[2]))
-                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeError);
+                    throw new CnetNAKException(CnetNAKCode.DeviceVariableTypeError);
                 if (s[0] != '%' || !uint.TryParse(s.Remove(0, 3), out _))
-                    throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
+                    throw new CnetNAKException(CnetNAKCode.DataError);
 
                 if (DeviceVariable.TryParse(s, out var deviceVariable))
                 {
@@ -424,7 +424,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     index += 2;
 
                     if (blockCount > 16)
-                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverRequestReadBlockCount);
+                        throw new CnetNAKException(CnetNAKCode.OverRequestReadBlockCount);
 
                     List<DeviceVariable> deviceVariables = new List<DeviceVariable>();
                     for (int i = 0; i < blockCount; i++)
@@ -435,7 +435,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
                         if (deviceVariables.Count > 0
                             && (deviceVariables[0].DeviceType != deviceVariable.Value.DeviceType || deviceVariables[0].DataType != deviceVariable.Value.DataType))
-                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeIsDifferent);
+                            throw new CnetNAKException(CnetNAKCode.DeviceVariableTypeIsDifferent);
 
                         deviceVariables.Add(deviceVariable.Value);
                     }
@@ -454,11 +454,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         index += 2;
 
                         if (count > 60)
-                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverDataLength);
+                            throw new CnetNAKException(CnetNAKCode.OverDataLength);
 
                         return new CnetReadContinuousRequest(stationNumber, deviceVariable.Value, count);
                     }
-                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
+                    else throw new CnetNAKException(CnetNAKCode.DataError);
                 }
             }
             return null;
@@ -475,7 +475,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     index += 2;
 
                     if (blockCount > 16)
-                        throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverRequestReadBlockCount);
+                        throw new CnetNAKException(CnetNAKCode.OverRequestReadBlockCount);
 
                     List<KeyValuePair<DeviceVariable, DeviceValue>> deviceValues = new List<KeyValuePair<DeviceVariable, DeviceValue>>();
 
@@ -486,7 +486,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         {
                             if (deviceValues.Count > 0
                                 && (deviceValues[0].Key.DeviceType != deviceVariable.Value.DeviceType || deviceValues[0].Key.DataType != deviceVariable.Value.DataType))
-                                throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DeviceVariableTypeIsDifferent);
+                                throw new CnetNAKException(CnetNAKCode.DeviceVariableTypeIsDifferent);
 
                             int dataUnit;
                             switch (deviceVariable.Value.DataType)
@@ -514,23 +514,23 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                             switch (deviceVariable.Value.DataType)
                             {
                                 case DataType.Bit:
-                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(bitValue != 0)));
                                     break;
                                 case DataType.Byte:
-                                    if (!CnetMessage.TryParseByte(buffer, index, out var byteValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var byteValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(byteValue)));
                                     break;
                                 case DataType.Word:
-                                    if (!CnetMessage.TryParseUint16(buffer, index, out var wordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseUint16(buffer, index, out var wordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(wordValue)));
                                     break;
                                 case DataType.DoubleWord:
-                                    if (!CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(doubleWordValue)));
                                     break;
                                 case DataType.LongWord:
-                                    if (!CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(longWordValue)));
                                     break;
                             }
@@ -554,7 +554,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         index += 2;
 
                         if (count > 60)
-                            throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.OverDataLength);
+                            throw new CnetNAKException(CnetNAKCode.OverDataLength);
 
                         int dataUnit;
                         switch (deviceVariable.Value.DataType)
@@ -586,24 +586,24 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                             switch (deviceVariable.Value.DataType)
                             {
                                 case DataType.Bit:
-                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseByte(buffer, index, out var bitValue) && bitValue <= 1) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new DeviceValue(bitValue != 0));
                                     break;
                                 case DataType.Byte:
                                     if (CnetMessage.TryParseByte(buffer, index, out var byteValue)) deviceValues.Add(new DeviceValue(byteValue));
-                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.Word:
                                     if (CnetMessage.TryParseUint16(buffer, index, out var wordValue)) deviceValues.Add(new DeviceValue(wordValue));
-                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.DoubleWord:
                                     if (CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) deviceValues.Add(new DeviceValue(doubleWordValue));
-                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.LongWord:
                                     if (CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) deviceValues.Add(new DeviceValue(longWordValue));
-                                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataParsingError);
+                                    else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                             }
 
@@ -612,7 +612,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
                         return new CnetWriteContinuousRequest(stationNumber, deviceVariable.Value, deviceValues);
                     }
-                    else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.DataError);
+                    else throw new CnetNAKException(CnetNAKCode.DataError);
                 }
             }
             return null;
@@ -675,7 +675,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 {
                     return monitor.CreateExecuteRequest();
                 }
-                else throw new ErrorCodeException<CnetNAKCode>(CnetNAKCode.NotExistsMonitorNumber);
+                else throw new CnetNAKException(CnetNAKCode.NotExistsMonitorNumber);
             }
             return null;
         }

@@ -783,7 +783,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="commandType">커맨드 타입</param>
-        protected CnetRegisterMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
+        internal CnetRegisterMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
             : base(stationNumber, CnetCommand.RegisterMonitor, commandType)
         {
             this.monitorNumber = monitorNumber;
@@ -812,7 +812,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 개별 변수 모니터 등록 요청
     /// </summary>
-    public class CnetRegisterMonitorIndividualRequest : CnetRegisterMonitorRequest, IList<DeviceVariable>
+    class CnetRegisterMonitorIndividualRequest : CnetRegisterMonitorRequest, IReadOnlyList<DeviceVariable>
     {
         /// <summary>
         /// 생성자
@@ -850,25 +850,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public int Count => deviceVariables.Count;
 
         /// <summary>
-        /// 디바이스 변수 컬렉션이 읽기 전용인지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        public bool IsReadOnly => ((ICollection<DeviceVariable>)deviceVariables).IsReadOnly;
-
-        /// <summary>
-        /// 디바이스 변수가 존재하는지 여부를 가져옵니다.
-        /// </summary>
-        /// <param name="deviceVariable">디바이스 변수</param>
-        /// <returns>디바이스 변수 존재 여부</returns>
-        public bool Contains(DeviceVariable deviceVariable) => deviceVariables.Contains(deviceVariable);
-
-        /// <summary>
-        /// 디바이스 변수의 순서상 위치를 가져옵니다.
-        /// </summary>
-        /// <param name="deviceVariable">디바이스 변수</param>
-        /// <returns>디바이스 변수의 순서상 위치</returns>
-        public int IndexOf(DeviceVariable deviceVariable) => deviceVariables.IndexOf(deviceVariable);
-
-        /// <summary>
         /// 디바이스 변수를 반복하는 열거자를 반환합니다.
         /// </summary>
         /// <returns>디바이스 변수를 반복하는 열거자</returns>
@@ -877,78 +858,13 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// 대상 배열의 지정된 인덱스에서 시작하여 전체 디바이스 변수들을 복사합니다.
-        /// </summary>
-        /// <param name="array">디바이스 변수 배열</param>
-        /// <param name="arrayIndex">시작 인덱스</param>
-        public void CopyTo(DeviceVariable[] array, int arrayIndex) => deviceVariables.CopyTo(array, arrayIndex);
-
-
-        /// <summary>
-        /// 모든 디바이스 변수들을 제거합니다.
-        /// </summary>
-        public void Clear()
-        {
-            deviceVariables.Clear();
-            InvalidateFrameData();
-        }
-
-        /// <summary>
-        /// 디바이스 변수를 지정된 인덱스에 지정하거나 제거합니다.
+        /// 지정된 인덱스의 디바이스 변수를 가져옵니다.
         /// </summary>
         /// <param name="index">인덱스</param>
         /// <returns>디바이스 변수</returns>
         public DeviceVariable this[int index]
         {
             get => deviceVariables[index];
-            set
-            {
-                deviceVariables[index] = value;
-                InvalidateFrameData();
-            }
-        }
-
-        /// <summary>
-        /// 디바이스 변수를 추가합니다.
-        /// </summary>
-        /// <param name="deviceVariable">디바이스 변수</param>
-        public void Add(DeviceVariable deviceVariable)
-        {
-            deviceVariables.Add(deviceVariable);
-            InvalidateFrameData();
-        }
-
-        /// <summary>
-        /// 지정된 인덱스에 디바이스 변수를 삽입합니다.
-        /// </summary>
-        /// <param name="index">인덱스</param>
-        /// <param name="deviceVariable">디바이스 변수</param>
-        public void Insert(int index, DeviceVariable deviceVariable)
-        {
-            deviceVariables.Insert(index, deviceVariable);
-            InvalidateFrameData();
-        }
-
-        /// <summary>
-        /// 맨 처음 발견되는 디바이스 변수를 제거합니다.
-        /// </summary>
-        /// <param name="deviceVariable">디바이스 변수</param>
-        /// <returns>제거 여부</returns>
-        public bool Remove(DeviceVariable deviceVariable)
-        {
-            var result = deviceVariables.Remove(deviceVariable);
-            if (result) InvalidateFrameData();
-            return result;
-        }
-
-        /// <summary>
-        /// 지정된 인덱스에 있는 디바이스 변수를 제거합니다.
-        /// </summary>
-        /// <param name="index">인덱스</param>
-        public void RemoveAt(int index)
-        {
-            deviceVariables.RemoveAt(index);
-            InvalidateFrameData();
         }
 
         /// <summary>
@@ -973,7 +889,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 연속 모니터 변수 등록 요청
     /// </summary>
-    public class CnetRegisterMonitorContinuousRequest : CnetRegisterMonitorRequest, ICnetContinuousAccessRequest
+    class CnetRegisterMonitorContinuousRequest : CnetRegisterMonitorRequest, ICnetContinuousAccessRequest
     {
         /// <summary>
         /// 생성자
@@ -1026,7 +942,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 모니터 실행 요청
     /// </summary>
-    public class CnetExecuteMonitorRequest : CnetIncludeCommandTypeRequest
+    public abstract class CnetExecuteMonitorRequest : CnetIncludeCommandTypeRequest
     {
         /// <summary>
         /// 생성자
@@ -1034,17 +950,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
         /// <param name="commandType">커맨드 타입</param>
-        public CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
+        internal CnetExecuteMonitorRequest(byte stationNumber, byte monitorNumber, CnetCommandType commandType)
             : base(stationNumber, CnetCommand.ExecuteMonitor, commandType)
         {
             this.monitorNumber = monitorNumber;
         }
-
-        /// <summary>
-        /// 요청 메시지 복제
-        /// </summary>
-        /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new CnetExecuteMonitorRequest(StationNumber, MonitorNumber, CommandType);
 
         private byte monitorNumber;
 
