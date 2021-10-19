@@ -290,7 +290,8 @@ namespace VagabondK.Protocols.Modbus.Data
                             var prev = dataBlocks[index];
                             if (prev.EndAddress + 1 >= newDataBlock.StartAddress)
                             {
-                                prev.EndAddress = newDataBlock.EndAddress;
+                                if (prev.EndAddress < newDataBlock.EndAddress)
+                                    prev.EndAddress = newDataBlock.EndAddress;
                                 newDataBlock.rawData.CopyTo(prev.rawData, (newDataBlock.StartAddress - prev.StartAddress) * numberOfUnit);
                                 newDataBlock = prev;
                                 merged = true;
