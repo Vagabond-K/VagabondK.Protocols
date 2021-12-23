@@ -48,7 +48,7 @@ Serial Port 기반 Communication Channel 관련 기능들을 제공합니다.
 
 #### Serial Port Channel 생성 예시
 ```csharp
-var serialPortChannel = new SerialPortChannel("COM3", 9600, 8, StopBits.One, Parity.None);
+var serialPortChannel = new SerialPortChannel("COM3", 9600, 8, StopBits.One, Parity.None, Handshake.None);
 ```
 
 참고로 UWP 앱에서 이 패키지를 사용할 경우에는 SerialDevice 클래스를 기반으로 구현된 기능을 사용할 수 있습니다.   
@@ -160,7 +160,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        CnetClient client = new CnetClient(new SerialPortChannel("COM4", 9600, 8, StopBits.One, Parity.None));
+        CnetClient client = new CnetClient(new SerialPortChannel("COM4", 9600, 8, StopBits.One, Parity.None, Handshake.None));
 
         foreach (var item in client.Read(1, "%MW100", "%MW200"))
             Console.WriteLine($"변수: {item.Key}, 값: {item.Value.WordValue}");
