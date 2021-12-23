@@ -147,7 +147,8 @@ namespace VagabondK.Protocols.Modbus
 
             if (!(serializer is ModbusTcpSerializer))
             {
-                channel.ReadAllRemain().ToArray();
+                var remainMessage = channel.ReadAllRemain().ToArray();
+                serializer.RaiseUnrecognized(channel, remainMessage);
             }
 
             channel.Write(requestMessage);
