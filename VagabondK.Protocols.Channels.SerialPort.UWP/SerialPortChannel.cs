@@ -73,13 +73,6 @@ namespace VagabondK.Protocols.Channels
             {
                 serialDeviceIDs.Remove(args.Id);
             }
-            foreach (var instance in instances.Values.ToArray())
-            {
-                if (instance.TryGetTarget(out var channelSerial))
-                {
-                    channelSerial.serialDevice = null;
-                }
-            }
         }
 
 
@@ -151,12 +144,12 @@ namespace VagabondK.Protocols.Channels
         /// <summary>
         /// DTR 활성화 여부
         /// </summary>
-        public bool DtrEnable { get => serialDevice?.IsDataTerminalReadyEnabled ?? dtrEnable; set { if (serialDevice != null) serialDevice.IsDataTerminalReadyEnabled = value; dtrEnable = value; } }
+        public bool DtrEnable { get => serialDevice?.IsDataTerminalReadyEnabled ?? false; set { if (serialDevice != null) serialDevice.IsDataTerminalReadyEnabled = value; } }
 
         /// <summary>
         /// RTS 활성화 여부
         /// </summary>
-        public bool RtsEnable { get => serialDevice?.IsRequestToSendEnabled ?? dtrEnable; set { if (serialDevice != null) serialDevice.IsRequestToSendEnabled = value; rtsEnable = value; } }
+        public bool RtsEnable { get => serialDevice?.IsRequestToSendEnabled ?? false; set { if (serialDevice != null) serialDevice.IsRequestToSendEnabled = value; } }
 
         private SerialDevice serialDevice = null;
         private DataReader dataReader = null;
@@ -169,9 +162,6 @@ namespace VagabondK.Protocols.Channels
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private readonly string description;
         private bool isRunningReceive = false;
-        private bool dtrEnable = false;
-        private bool rtsEnable = false;
-
 
         /// <summary>
         /// 채널 설명
@@ -212,15 +202,13 @@ namespace VagabondK.Protocols.Channels
             this.serialDevice?.Dispose();
             this.serialDevice = null;
 
-            serialDevice.BaudRate = (uint)BaudRate;
-            serialDevice.DataBits = (ushort)DataBits;
-            serialDevice.StopBits = StopBits;
-            serialDevice.Parity = Parity;
-            serialDevice.Handshake = Handshake;
-            serialDevice.IsDataTerminalReadyEnabled = DtrEnable;
-            serialDevice.IsRequestToSendEnabled = RtsEnable;
-
             this.serialDevice = serialDevice;
+
+            this.serialDevice.BaudRate = (uint)BaudRate;
+            this.serialDevice.DataBits = (ushort)DataBits;
+            this.serialDevice.StopBits = StopBits;
+            this.serialDevice.Parity = Parity;
+            this.serialDevice.Handshake = Handshake;
 
             dataReader = new DataReader(this.serialDevice.InputStream)
             {
@@ -389,7 +377,7 @@ namespace VagabondK.Protocols.Channels
             {
                 while (readBuffer.Count > 0)
                     yield return readBuffer.Dequeue();
-                if (dataReader != null && dataReader.UnconsumedBufferLength > 0)
+                if (dataReader.UnconsumedBufferLength > 0)
                     dataReader.ReadBuffer(dataReader.UnconsumedBufferLength);
             }
         }
