@@ -24,7 +24,8 @@ namespace VagabondK.Protocols.Channels
         /// <param name="dataBits">Data Bits</param>
         /// <param name="stopBits">Stop Bits</param>
         /// <param name="parity">Parity</param>
-        public SerialPortChannel(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        /// <param name="handshake">Handshake</param>
+        public SerialPortChannel(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity, Handshake handshake)
         {
             description = portName;
             SerialPort =
@@ -33,6 +34,7 @@ namespace VagabondK.Protocols.Channels
 #else
                 new SerialPort(portName, baudRate, parity, dataBits, stopBits);
 #endif
+            SerialPort.Handshake = handshake;
         }
 
         private readonly object openLock = new object();
@@ -76,6 +78,11 @@ namespace VagabondK.Protocols.Channels
         /// Parity
         /// </summary>
         public Parity Parity { get => SerialPort.Parity; }
+
+        /// <summary>
+        /// Handshake
+        /// </summary>
+        public Handshake Handshake { get => SerialPort.Handshake; }
 
         /// <summary>
         /// DTR 활성화 여부

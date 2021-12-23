@@ -122,8 +122,10 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\VagabondK.Protocols.Channels.SerialPort\SerialPortChannel.cs">
+      <Link>SerialPortChannel.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SerialPortChannel.cs" />
     <EmbeddedResource Include="Properties\VagabondK.Protocols.Channels.SerialPort.UWP.rd.xml" />
   </ItemGroup>
   <ItemGroup>
