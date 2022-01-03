@@ -231,6 +231,7 @@ namespace VagabondK.Protocols.Modbus
                         {
                             i = 0;
                             yield return (byte)byteValue;
+                            byteValue = 0;
                         }
                     }
 
