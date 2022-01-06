@@ -235,7 +235,7 @@ namespace VagabondK.Protocols.Modbus
                         }
                     }
 
-                    if (i < 8)
+                    if (i > 0)
                         yield return (byte)byteValue;
                     break;
             }

@@ -46,13 +46,13 @@ namespace VagabondK.Protocols.Modbus.Data
         {
             if (OuterBigEndian)
             {
-                if (InnerBigEndian) return "BADC";
-                else return "DCBA";
+                if (InnerBigEndian) return "ABCD";
+                else return "BADC";
             }
             else
             {
-                if (InnerBigEndian) return "ABCD";
-                else return "CDAB";
+                if (InnerBigEndian) return "CDAB";
+                else return "DCBA";
             }
         }
 
