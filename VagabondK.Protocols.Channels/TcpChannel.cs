@@ -172,6 +172,15 @@ namespace VagabondK.Protocols.Channels
                                                 readBuffer.Enqueue(buffer[i]);
                                             readEventWaitHandle.Set();
                                         }
+
+                                        if (received == 0)
+                                        {
+                                            var socket = tcpClient?.Client;
+                                            if (socket == null || socket.Available == 0 && socket.Poll(1000, SelectMode.SelectRead))
+                                            {
+                                                throw new Exception();
+                                            }
+                                        }
                                     }
                                 }
                             }
