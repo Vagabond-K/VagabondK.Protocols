@@ -8,23 +8,11 @@ namespace VagabondK.Protocols.Modbus
     /// </summary>
     public sealed class ModbusSlave : INotifyPropertyChanged
     {
-        private byte? slaveAddress;
-        private ModbusSlaveService ownerService;
         private ModbusBooleans coils = new ModbusBooleans();
         private ModbusBooleans discreteInputs = new ModbusBooleans();
         private ModbusRegisters holdingRegisters = new ModbusRegisters();
         private ModbusRegisters inputRegisters = new ModbusRegisters();
 
-        /// <summary>
-        /// 슬레이브 주소
-        /// </summary>
-        public byte? SlaveAddress { get => slaveAddress; internal set => this.Set(ref slaveAddress, value, PropertyChanged); }
-
-        /// <summary>
-        /// 현재 Modbus 슬레이브 서비스 중인 ModbusSlaveService 인스턴스
-        /// </summary>
-        public ModbusSlaveService OwnerService { get => ownerService; internal set => this.Set(ref ownerService, value, PropertyChanged); }
-       
         /// <summary>
         /// Coils
         /// </summary>

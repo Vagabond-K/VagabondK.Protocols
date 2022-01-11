@@ -74,6 +74,7 @@ namespace VagabondK.Protocols.Modbus
         private const int maxReadBooleansLength = 2008;
         private ModbusSerializer serializer;
         private readonly Dictionary<byte, ModbusSlave> modbusSlaves = new Dictionary<byte, ModbusSlave>();
+        private readonly Dictionary<ModbusSlave, byte> modbusSlaveKeyMap = new Dictionary<ModbusSlave, byte>();
 
         /// <summary>
         /// Modbus 슬레이브 가져오기
@@ -85,35 +86,26 @@ namespace VagabondK.Protocols.Modbus
             get => modbusSlaves[slaveAddress];
             set
             {
-                modbusSlaves.TryGetValue(slaveAddress, out var modbusSlave);
-                if (modbusSlave != value)
+                lock (this)
                 {
-                    if (modbusSlave != null)
-                    {
-                        modbusSlave.SlaveAddress = null;
-                        modbusSlave.OwnerService = null;
-                    }
-
-                    modbusSlaves[slaveAddress] = value;
-
                     if (value != null)
                     {
-                        if (value.OwnerService != null && value.SlaveAddress != null)
-                            value.OwnerService.Remove(value.SlaveAddress.Value);
+                        if (modbusSlaves.TryGetValue(slaveAddress, out var oldModbusSlave))
+                            modbusSlaveKeyMap.Remove(oldModbusSlave);
 
-                        value.SlaveAddress = slaveAddress;
-                        value.OwnerService = this;
+                        if (oldModbusSlave != value)
+                            modbusSlaves[slaveAddress] = value;
+
+                        modbusSlaveKeyMap[value] = slaveAddress;
                     }
                     else
-                    {
-                        modbusSlaves.Remove(slaveAddress);
-                    }
+                        Remove(slaveAddress);
                 }
             }
         }
 
         /// <summary>
-        /// Modbus 슬레이브 주소 목록
+        /// 슬레이브 주소 목록
         /// </summary>
         public Dictionary<byte, ModbusSlave>.KeyCollection SlaveAddresses { get => modbusSlaves.Keys; }
 
@@ -123,11 +115,26 @@ namespace VagabondK.Protocols.Modbus
         public Dictionary<byte, ModbusSlave>.ValueCollection ModbusSlaves { get => modbusSlaves.Values; }
 
         /// <summary>
+        /// 슬레이브 주소 포함 여부
+        /// </summary>
+        /// <param name="slaveAddress">슬레이브 주소</param>
+        /// <returns>Modbus 슬레이브 주소 포함 여부</returns>
+        public bool ContainsSlaveAddress(byte slaveAddress) => modbusSlaves.ContainsKey(slaveAddress);
+
+        /// <summary>
         /// Modbus 슬레이브 포함 여부
         /// </summary>
-        /// <param name="slaveAddress">Modbus 슬레이브 주소</param>
+        /// <param name="modbusSlave">Modbus 슬레이브</param>
         /// <returns>Modbus 슬레이브 포함 여부</returns>
-        public bool ContainsSlaveAddress(byte slaveAddress) => modbusSlaves.ContainsKey(slaveAddress);
+        public bool Contains(ModbusSlave modbusSlave) => modbusSlaveKeyMap.ContainsKey(modbusSlave);
+
+        /// <summary>
+        /// 슬레이브 주소 검색
+        /// </summary>
+        /// <param name="modbusSlave">Modbus 슬레이브</param>
+        /// <returns>슬레이브 주소</returns>
+        public byte? SlaveAddressOf(ModbusSlave modbusSlave)
+            => modbusSlaveKeyMap.TryGetValue(modbusSlave, out var slaveAddress) ? slaveAddress : null as byte?;
 
         /// <summary>
         /// Modbus 슬레이브 가져오기
@@ -143,15 +150,9 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <returns>제거 여부</returns>
         public bool Remove(byte slaveAddress)
-        {
-            var result = modbusSlaves.TryGetValue(slaveAddress, out var modbusSlave) && modbusSlaves.Remove(slaveAddress);
-            if (modbusSlave != null)
-            {
-                modbusSlave.SlaveAddress = null;
-                modbusSlave.OwnerService = null;
-            }
-            return result;
-        }
+            => modbusSlaves.TryGetValue(slaveAddress, out var oldModbusSlave)
+            && modbusSlaveKeyMap.Remove(oldModbusSlave)
+            && modbusSlaves.Remove(slaveAddress);
 
         /// <summary>
         /// Modbus Serializer
