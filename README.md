@@ -51,8 +51,6 @@ Serial Port 기반 Communication Channel 관련 기능들을 제공합니다.
 var serialPortChannel = new SerialPortChannel("COM3", 9600, 8, StopBits.One, Parity.None, Handshake.None);
 ```
 
-참고로 UWP 앱에서 이 패키지를 사용할 경우에는 SerialDevice 클래스를 기반으로 구현된 기능을 사용할 수 있습니다.   
-반드시 SerialPortChannel.StartSerialPortWatcher() 메서드를 호출한 후에 사용해야 합니다.
 
 # VagabondK.Protocols.Modbus [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Modbus.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Modbus/)   
 - [Modbus 라이브러리 사용법 [Part #1]](https://blog.naver.com/vagabond-k/222490531747)  
