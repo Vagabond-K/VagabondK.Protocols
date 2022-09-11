@@ -31,7 +31,7 @@ namespace VagabondK.Protocols.Logging
         /// <returns>정규화된 형식 이름입니다.</returns>
         public override string ToString()
         {
-            return $"Response: {RawMessage.CnetRawMessageToString()}";
+            return RawMessage.CnetRawMessageToString();
         }
     }
 }

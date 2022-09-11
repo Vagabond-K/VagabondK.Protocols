@@ -27,5 +27,10 @@ namespace VagabondK.Protocols.LSElectric
         /// 디바이스 값
         /// </summary>
         public DeviceValue DeviceValue { get; set; }
+
+        /// <summary>
+        /// 디바이스 값의 바이트 배열을 가져옵니다.
+        /// </summary>
+        public byte[] DeviceValueBytes => DeviceValue.GetBytes(DeviceVariable.DataType);
     }
 }

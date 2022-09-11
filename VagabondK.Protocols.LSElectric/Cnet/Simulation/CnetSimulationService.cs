@@ -161,7 +161,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         {
             CnetResponse response = null;
 
-            var eventArgs = new RequestedReadEventArgs(request, channel);
+            var eventArgs = new CnetRequestedReadEventArgs(request, channel);
             simulationStation.OnRequestedRead(eventArgs);
             if (eventArgs.NAKCode == CnetNAKCode.Unknown)
             {
@@ -185,7 +185,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
         private CnetResponse OnRequestedWrite(CnetSimulationStation simulationStation, CnetWriteRequest request, Channel channel)
         {
-            var eventArgs = new RequestedWriteEventArgs(request, channel);
+            var eventArgs = new CnetRequestedWriteEventArgs(request, channel);
             simulationStation.OnRequestedWrite(eventArgs);
 
             CnetResponse response;
@@ -222,7 +222,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         {
             CnetResponse response = null;
 
-            var eventArgs = new RequestedReadEventArgs(request, channel);
+            var eventArgs = new CnetRequestedReadEventArgs(request, channel);
             simulationStation.OnRequestedRead(eventArgs);
             if (eventArgs.NAKCode == CnetNAKCode.Unknown)
             {
@@ -522,15 +522,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(byteValue)));
                                     break;
                                 case DataType.Word:
-                                    if (!CnetMessage.TryParseUint16(buffer, index, out var wordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseWord(buffer, index, out var wordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(wordValue)));
                                     break;
                                 case DataType.DoubleWord:
-                                    if (!CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseDoubleWord(buffer, index, out var doubleWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(doubleWordValue)));
                                     break;
                                 case DataType.LongWord:
-                                    if (!CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
+                                    if (!CnetMessage.TryParseLongWord(buffer, index, out var longWordValue)) throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     else deviceValues.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable.Value, new DeviceValue(longWordValue)));
                                     break;
                             }
@@ -594,15 +594,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                                     else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.Word:
-                                    if (CnetMessage.TryParseUint16(buffer, index, out var wordValue)) deviceValues.Add(new DeviceValue(wordValue));
+                                    if (CnetMessage.TryParseWord(buffer, index, out var wordValue)) deviceValues.Add(new DeviceValue(wordValue));
                                     else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.DoubleWord:
-                                    if (CnetMessage.TryParseUint32(buffer, index, out var doubleWordValue)) deviceValues.Add(new DeviceValue(doubleWordValue));
+                                    if (CnetMessage.TryParseDoubleWord(buffer, index, out var doubleWordValue)) deviceValues.Add(new DeviceValue(doubleWordValue));
                                     else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                                 case DataType.LongWord:
-                                    if (CnetMessage.TryParseUint64(buffer, index, out var longWordValue)) deviceValues.Add(new DeviceValue(longWordValue));
+                                    if (CnetMessage.TryParseLongWord(buffer, index, out var longWordValue)) deviceValues.Add(new DeviceValue(longWordValue));
                                     else throw new CnetNAKException(CnetNAKCode.DataParsingError);
                                     break;
                             }
@@ -683,14 +683,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
 
         class ChannelTask
         {
-            public ChannelTask(CnetSimulationService cnetSimulator, Channel channel, bool createdFromProvider)
+            public ChannelTask(CnetSimulationService simulationService, Channel channel, bool createdFromProvider)
             {
-                this.cnetSimulator = cnetSimulator;
+                this.simulationService = simulationService;
                 this.channel = channel;
                 this.createdFromProvider = createdFromProvider;
             }
 
-            private readonly CnetSimulationService cnetSimulator;
+            private readonly CnetSimulationService simulationService;
             private readonly Channel channel;
             private readonly bool createdFromProvider;
             private bool isRunning = false;
@@ -706,15 +706,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         {
                             try
                             {
-                                var channelTimeout = cnetSimulator.ChannelTimeout;
+                                var channelTimeout = simulationService.ChannelTimeout;
                                 List<byte> buffer = new List<byte>();
                                 if (!createdFromProvider || channelTimeout == 0)
                                 {
-                                    cnetSimulator.DeserializeRequest(channel, buffer);
+                                    simulationService.DeserializeRequest(channel, buffer);
                                 }
-                                else if (!Task.Run(() => cnetSimulator.DeserializeRequest(channel, buffer)).Wait(channelTimeout))
+                                else if (!Task.Run(() => simulationService.DeserializeRequest(channel, buffer)).Wait(channelTimeout))
                                 {
-                                    cnetSimulator.channelTasks.Remove(channel);
+                                    simulationService.channelTasks.Remove(channel);
                                     channel.Dispose();
                                 }
                             }
@@ -722,7 +722,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                             {
                                 if (createdFromProvider)
                                 {
-                                    cnetSimulator.channelTasks.Remove(channel);
+                                    simulationService.channelTasks.Remove(channel);
                                     channel.Dispose();
                                 }
                             }
@@ -745,9 +745,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
     /// <summary>
     /// Cnet 요청 발생 이벤트 매개변수
     /// </summary>
-    public abstract class RequestedEventArgs : EventArgs
+    public abstract class CnetRequestedEventArgs : EventArgs
     {
-        internal RequestedEventArgs(Channel channel)
+        internal CnetRequestedEventArgs(Channel channel)
         {
             Channel = channel;
         }
@@ -766,9 +766,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
     /// <summary>
     /// 읽기 요청 발생 이벤트 매개변수
     /// </summary>
-    public sealed class RequestedReadEventArgs : RequestedEventArgs
+    public sealed class CnetRequestedReadEventArgs : CnetRequestedEventArgs
     {
-        internal RequestedReadEventArgs(CnetReadRequest request, Channel channel) : base(channel)
+        internal CnetRequestedReadEventArgs(CnetReadRequest request, Channel channel) : base(channel)
         {
             switch (request.CommandType)
             {
@@ -780,7 +780,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                     break;
             }
         }
-        internal RequestedReadEventArgs(CnetExecuteMonitorRequest request, Channel channel) : base(channel)
+        internal CnetRequestedReadEventArgs(CnetExecuteMonitorRequest request, Channel channel) : base(channel)
         {
             switch (request.CommandType)
             {
@@ -802,9 +802,9 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
     /// <summary>
     /// 쓰기 요청 발생 이벤트 매개변수
     /// </summary>
-    public sealed class RequestedWriteEventArgs : RequestedEventArgs
+    public sealed class CnetRequestedWriteEventArgs : CnetRequestedEventArgs
     {
-        internal RequestedWriteEventArgs(CnetWriteRequest request, Channel channel) : base(channel)
+        internal CnetRequestedWriteEventArgs(CnetWriteRequest request, Channel channel) : base(channel)
         {
             switch(request.CommandType)
             {
@@ -826,7 +826,4 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         /// </summary>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Values { get; }
     }
-
-
-
 }

@@ -157,7 +157,7 @@
         /// <summary>
         /// 요청과 응답의 데이터 개수가 일치하지 않음.
         /// </summary>
-        ResponseDataCountDoNotMatch,
+        ResponseDataCountNotMatch,
         /// <summary>
         /// 응답 종결이 EOT가 아님.
         /// </summary>
@@ -166,6 +166,10 @@
         /// 응답 메시지에서 16진수 문자열 파싱 중 오류 발생.
         /// </summary>
         ResponseParseHexError,
+        /// <summary>
+        /// 잘못된 데이터 개수.
+        /// </summary>
+        ErrorDataCount,
         /// <summary>
         /// BCC 오류
         /// </summary>

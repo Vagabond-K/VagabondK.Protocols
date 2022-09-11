@@ -18,14 +18,14 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
         /// <summary>
         /// 읽기 요청 이벤트
         /// </summary>
-        public event EventHandler<RequestedReadEventArgs> RequestedRead;
+        public event EventHandler<CnetRequestedReadEventArgs> RequestedRead;
 
         /// <summary>
         /// 쓰기 요청 이벤트
         /// </summary>
-        public event EventHandler<RequestedWriteEventArgs> RequestedWrite;
+        public event EventHandler<CnetRequestedWriteEventArgs> RequestedWrite;
 
-        internal void OnRequestedRead(RequestedReadEventArgs eventArgs) => RequestedRead?.Invoke(this, eventArgs);
-        internal void OnRequestedWrite(RequestedWriteEventArgs eventArgs) => RequestedWrite?.Invoke(this, eventArgs);
+        internal void OnRequestedRead(CnetRequestedReadEventArgs eventArgs) => RequestedRead?.Invoke(this, eventArgs);
+        internal void OnRequestedWrite(CnetRequestedWriteEventArgs eventArgs) => RequestedWrite?.Invoke(this, eventArgs);
     }
 }

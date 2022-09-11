@@ -10,10 +10,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
     /// </summary>
     public abstract class ModbusSerializer
     {
-        internal event EventHandler<UnrecognizedEventArgs> Unrecognized;
-
         internal void RaiseUnrecognized(IChannel channel, IReadOnlyList<byte> errorMessage)
-            => Unrecognized?.Invoke(this, new UnrecognizedEventArgs(channel, errorMessage));
+            => channel?.Logger?.Log(new Logging.UnrecognizedErrorLog(channel, errorMessage.ToArray()));
 
         /// <summary>
         /// Modbus 메시지 직렬화

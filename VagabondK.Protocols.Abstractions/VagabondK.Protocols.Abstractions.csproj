@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Abstractions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>프로토콜 관련 라이브러리들의 추상화 정의 라이브러리입니다.</Description>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <PackageProjectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Abstractions</PackageProjectUrl>
   </PropertyGroup>
 

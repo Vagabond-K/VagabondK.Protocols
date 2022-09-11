@@ -286,5 +286,29 @@ namespace VagabondK.Protocols.LSElectric
         /// </summary>
         /// <returns>이 인스턴스의 해시 코드인 32비트 부호 있는 정수입니다.</returns>
         public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// 디바이스 값의 바이트 배열을 가져옵니다.
+        /// </summary>
+        /// <param name="dataType">PLC 데이터 형식</param>
+        /// <returns>바이트 배열</returns>
+        public byte[] GetBytes(DataType dataType)
+        {
+            switch (dataType)
+            {
+                case DataType.Bit:
+                    return BitConverter.GetBytes(BitValue);
+                case DataType.Byte:
+                    return BitConverter.GetBytes(ByteValue);
+                case DataType.Word:
+                    return BitConverter.GetBytes(WordValue);
+                case DataType.DoubleWord:
+                    return BitConverter.GetBytes(DoubleWordValue);
+                case DataType.LongWord:
+                    return BitConverter.GetBytes(LongWordValue);
+                default:
+                    return null;
+            }
+        }
     }
 }

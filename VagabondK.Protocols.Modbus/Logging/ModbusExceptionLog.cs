@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Modbus;
+using VagabondK.Protocols.Modbus.Serialization;
 
 namespace VagabondK.Protocols.Logging
 {
@@ -18,10 +20,14 @@ namespace VagabondK.Protocols.Logging
         /// <param name="message">응답 메시지 인스턴스</param>
         /// <param name="rawMessage">원본 메시지</param>
         /// <param name="requestLog">관련 요청 메시지에 대한 Log</param>
-        public ModbusExceptionLog(IChannel channel, ModbusExceptionResponse message, byte[] rawMessage, ChannelRequestLog requestLog) : base(channel, message, rawMessage, requestLog)
+        /// <param name="serializer">Modbus Serializer</param>
+        public ModbusExceptionLog(IChannel channel, ModbusExceptionResponse message, byte[] rawMessage, ChannelRequestLog requestLog, ModbusSerializer serializer) : base(channel, message, rawMessage, requestLog)
         {
             ExceptionCode = message.ExceptionCode;
+            this.serializer = serializer;
         }
+
+        private readonly ModbusSerializer serializer;
 
         /// <summary>
         /// Modbus Exception 코드
@@ -34,8 +40,12 @@ namespace VagabondK.Protocols.Logging
         /// <returns>정규화된 형식 이름입니다.</returns>
         public override string ToString()
         {
+            var stringBuilder = new StringBuilder("RES: ");
+            stringBuilder.Append(RawMessage.ModbusRawMessageToString(serializer));
+            stringBuilder.Append(' ');
             var codeName = ExceptionCode.ToString();
-            return $"Exception: {(typeof(ModbusExceptionCode).GetMember(codeName, BindingFlags.Static | BindingFlags.Public)?.FirstOrDefault()?.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? codeName}";
+            stringBuilder.Append($"Error: {(typeof(ModbusExceptionCode).GetMember(codeName, BindingFlags.Static | BindingFlags.Public)?.FirstOrDefault()?.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? codeName}");
+            return stringBuilder.ToString();
         }
     }
 }

@@ -54,6 +54,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             }
         }
 
+        /// <summary>
+        /// 기본적으로 BCC를 사용할 것인지 여부, 기본값은 true
+        /// </summary>
+        public bool DefaultUseBCC { get; set; } = true;
 
         /// <summary>
         /// 응답 제한시간(밀리초)
@@ -71,7 +75,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="request">Cnet 요청</param>
         /// <returns>Cnet 응답</returns>
-        public CnetResponse Request(CnetRequest request) => Request(true, Timeout, request);
+        public CnetResponse Request(CnetRequest request) => Request(DefaultUseBCC, Timeout, request);
 
         /// <summary>
         /// Cnet 요청하기
@@ -87,7 +91,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="timeout">응답 제한시간(밀리초)</param>
         /// <param name="request">Cnet 요청</param>
         /// <returns>Cnet 응답</returns>
-        public CnetResponse Request(int timeout, CnetRequest request) => Request(true, timeout, request);
+        public CnetResponse Request(int timeout, CnetRequest request) => Request(DefaultUseBCC, timeout, request);
 
         /// <summary>
         /// Cnet 요청하기
@@ -173,7 +177,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="moreDeviceVariables">추가 디바이스 변수 목록</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(byte stationNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
-            => Read(true, Timeout, stationNumber, deviceVariable, moreDeviceVariables);
+            => Read(DefaultUseBCC, Timeout, stationNumber, deviceVariable, moreDeviceVariables);
         /// <summary>
         /// 개별 디바이스 변수 읽기
         /// </summary>
@@ -193,7 +197,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="moreDeviceVariables">추가 디바이스 변수 목록</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(int timeout, byte stationNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
-            => Read(true, timeout, stationNumber, deviceVariable, moreDeviceVariables);
+            => Read(DefaultUseBCC, timeout, stationNumber, deviceVariable, moreDeviceVariables);
         /// <summary>
         /// 개별 디바이스 변수 읽기
         /// </summary>
@@ -222,7 +226,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="count">읽을 개수</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(byte stationNumber, DeviceVariable startDeviceVariable, int count)
-            => Read(true, Timeout, stationNumber, startDeviceVariable, count);
+            => Read(DefaultUseBCC, Timeout, stationNumber, startDeviceVariable, count);
         /// <summary>
         /// 연속 디바이스 변수 읽기
         /// </summary>
@@ -242,7 +246,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="count">읽을 개수</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(int timeout, byte stationNumber, DeviceVariable startDeviceVariable, int count)
-            => Read(true, timeout, stationNumber, startDeviceVariable, count);
+            => Read(DefaultUseBCC, timeout, stationNumber, startDeviceVariable, count);
         /// <summary>
         /// 연속 디바이스 변수 읽기
         /// </summary>
@@ -265,6 +269,42 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         }
 
 
+        /// <summary>
+        /// 개별 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="deviceValue">디바이스 변수에 쓸 값</param>
+        public void Write(byte stationNumber, DeviceVariable deviceVariable, DeviceValue deviceValue)
+            => Write(DefaultUseBCC, Timeout, stationNumber, deviceVariable, deviceValue);
+        /// <summary>
+        /// 개별 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="useBCC">BCC 사용 여부</param>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="deviceValue">디바이스 변수에 쓸 값</param>
+        public void Write(bool useBCC, byte stationNumber, DeviceVariable deviceVariable, DeviceValue deviceValue)
+            => Write(useBCC, Timeout, stationNumber, deviceVariable, deviceValue);
+        /// <summary>
+        /// 개별 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="timeout">응답 제한시간(밀리초)</param>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="deviceValue">디바이스 변수에 쓸 값</param>
+        public void Write(int timeout, byte stationNumber, DeviceVariable deviceVariable, DeviceValue deviceValue)
+            => Write(DefaultUseBCC, timeout, stationNumber, deviceVariable, deviceValue);
+        /// <summary>
+        /// 개별 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="useBCC">BCC 사용 여부</param>
+        /// <param name="timeout">응답 제한시간(밀리초)</param>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="deviceValue">디바이스 변수에 쓸 값</param>
+        public void Write(bool useBCC, int timeout, byte stationNumber, DeviceVariable deviceVariable, DeviceValue deviceValue)
+            => Write(useBCC, timeout, stationNumber, new KeyValuePair<DeviceVariable, DeviceValue>[] { new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable, deviceValue) });
 
 
         /// <summary>
@@ -274,7 +314,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="valueTuple">디바이스 변수에 쓸 값</param>
         /// <param name="moreValueTuples">추가 디바이스 변수에 쓸 값들</param>
         public void Write(byte stationNumber, (DeviceVariable, DeviceValue) valueTuple, params (DeviceVariable, DeviceValue)[] moreValueTuples)
-            => Write(true, Timeout, stationNumber, valueTuple, moreValueTuples);
+            => Write(DefaultUseBCC, Timeout, stationNumber, valueTuple, moreValueTuples);
         /// <summary>
         /// 개별 디바이스 변수 쓰기
         /// </summary>
@@ -292,7 +332,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="valueTuple">디바이스 변수에 쓸 값</param>
         /// <param name="moreValueTuples">추가 디바이스 변수에 쓸 값들</param>
         public void Write(int timeout, byte stationNumber, (DeviceVariable, DeviceValue) valueTuple, params (DeviceVariable, DeviceValue)[] moreValueTuples)
-            => Write(true, timeout, stationNumber, valueTuple, moreValueTuples);
+            => Write(DefaultUseBCC, timeout, stationNumber, valueTuple, moreValueTuples);
         /// <summary>
         /// 개별 디바이스 변수 쓰기
         /// </summary>
@@ -302,9 +342,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="valueTuple">디바이스 변수에 쓸 값</param>
         /// <param name="moreValueTuples">추가 디바이스 변수에 쓸 값들</param>
         public void Write(bool useBCC, int timeout, byte stationNumber, (DeviceVariable, DeviceValue) valueTuple, params (DeviceVariable, DeviceValue)[] moreValueTuples)
-        {
-            Write(useBCC, timeout, stationNumber, new (DeviceVariable, DeviceValue)[] { valueTuple }.Concat(moreValueTuples).Select(item => new KeyValuePair<DeviceVariable, DeviceValue>(item.Item1, item.Item2)));
-        }
+            => Write(useBCC, timeout, stationNumber, new (DeviceVariable, DeviceValue)[] { valueTuple }.Concat(moreValueTuples).Select(item => new KeyValuePair<DeviceVariable, DeviceValue>(item.Item1, item.Item2)));
 
         /// <summary>
         /// 개별 디바이스 변수 쓰기
@@ -312,7 +350,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="values">디바이스 변수에 쓸 값들</param>
         public void Write(byte stationNumber, IEnumerable<KeyValuePair<DeviceVariable, DeviceValue>> values)
-            => Write(true, Timeout, stationNumber, values);
+            => Write(DefaultUseBCC, Timeout, stationNumber, values);
         /// <summary>
         /// 개별 디바이스 변수 쓰기
         /// </summary>
@@ -328,7 +366,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="stationNumber">국번</param>
         /// <param name="values">디바이스 변수에 쓸 값들</param>
         public void Write(int timeout, byte stationNumber, IEnumerable<KeyValuePair<DeviceVariable, DeviceValue>> values)
-            => Write(true, timeout, stationNumber, values);
+            => Write(DefaultUseBCC, timeout, stationNumber, values);
         /// <summary>
         /// 개별 디바이스 변수 쓰기
         /// </summary>
@@ -355,7 +393,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="deviceValue">쓰기 요청할 디바이스 값</param>
         /// <param name="moreDeviceValues">추가로 쓸 디바이스 값들</param>
         public void Write(byte stationNumber, DeviceVariable startDeviceVariable, DeviceValue deviceValue, params DeviceValue[] moreDeviceValues)
-            => Write(true, Timeout, stationNumber, startDeviceVariable, deviceValue, moreDeviceValues);
+            => Write(DefaultUseBCC, Timeout, stationNumber, startDeviceVariable, deviceValue, moreDeviceValues);
         /// <summary>
         /// 연속 디바이스 변수 쓰기
         /// </summary>
@@ -375,7 +413,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="deviceValue">쓰기 요청할 디바이스 값</param>
         /// <param name="moreDeviceValues">추가로 쓸 디바이스 값들</param>
         public void Write(int timeout, byte stationNumber, DeviceVariable startDeviceVariable, DeviceValue deviceValue, params DeviceValue[] moreDeviceValues)
-            => Write(true, timeout, stationNumber, startDeviceVariable, deviceValue, moreDeviceValues);
+            => Write(DefaultUseBCC, timeout, stationNumber, startDeviceVariable, deviceValue, moreDeviceValues);
         /// <summary>
         /// 연속 디바이스 변수 쓰기
         /// </summary>
@@ -403,7 +441,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="moreDeviceVariables">추가로 읽을 디바이스 변수 목록</param>
         /// <returns>모니터 실행 요청</returns>
         public CnetExecuteMonitorRequest RegisterMonitor(byte stationNumber, byte monitorNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
-            => RegisterMonitor(true, Timeout, stationNumber, monitorNumber, deviceVariable, moreDeviceVariables);
+            => RegisterMonitor(DefaultUseBCC, Timeout, stationNumber, monitorNumber, deviceVariable, moreDeviceVariables);
         /// <summary>
         /// 직접변수 개별 읽기 모니터 등록
         /// </summary>
@@ -425,7 +463,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="moreDeviceVariables">추가로 읽을 디바이스 변수 목록</param>
         /// <returns>모니터 실행 요청</returns>
         public CnetExecuteMonitorRequest RegisterMonitor(int timeout, byte stationNumber, byte monitorNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
-            => RegisterMonitor(true, timeout, stationNumber, monitorNumber, deviceVariable, moreDeviceVariables);
+            => RegisterMonitor(DefaultUseBCC, timeout, stationNumber, monitorNumber, deviceVariable, moreDeviceVariables);
         /// <summary>
         /// 직접변수 개별 읽기 모니터 등록
         /// </summary>
@@ -457,7 +495,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="count">읽을 개수</param>
         /// <returns>모니터 실행 요청</returns>
         public CnetExecuteMonitorRequest RegisterMonitor(byte stationNumber, byte monitorNumber, DeviceVariable startDeviceVariable, int count)
-            => RegisterMonitor(true, Timeout, stationNumber, monitorNumber, startDeviceVariable, count);
+            => RegisterMonitor(DefaultUseBCC, Timeout, stationNumber, monitorNumber, startDeviceVariable, count);
         /// <summary>
         /// 직접변수 연속 읽기 모니터 등록
         /// </summary>
@@ -479,7 +517,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="count">읽을 개수</param>
         /// <returns>모니터 실행 요청</returns>
         public CnetExecuteMonitorRequest RegisterMonitor(int timeout, byte stationNumber, byte monitorNumber, DeviceVariable startDeviceVariable, int count)
-            => RegisterMonitor(true, timeout, stationNumber, monitorNumber, startDeviceVariable, count);
+            => RegisterMonitor(DefaultUseBCC, timeout, stationNumber, monitorNumber, startDeviceVariable, count);
         /// <summary>
         /// 직접변수 연속 읽기 모니터 등록
         /// </summary>
@@ -510,7 +548,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="executeMonitorRequest">모니터 실행 요청</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(CnetExecuteMonitorRequest executeMonitorRequest)
-            => Read(true, Timeout, executeMonitorRequest);
+            => Read(DefaultUseBCC, Timeout, executeMonitorRequest);
         /// <summary>
         /// 모니터 변수 읽기
         /// </summary>
@@ -526,7 +564,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="executeMonitorRequest">모니터 실행 요청</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(int timeout, CnetExecuteMonitorRequest executeMonitorRequest)
-            => Read(true, timeout, executeMonitorRequest);
+            => Read(DefaultUseBCC, timeout, executeMonitorRequest);
         /// <summary>
         /// 모니터 변수 읽기
         /// </summary>
@@ -579,10 +617,10 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             {
                 buffer.AddRange(channel.Read(4, timeout));
 
-                var tailErrorResponse = DeserializeTail(buffer, request, useBCC, timeout);
+                var tailErrorResponse = DeserializeTail(channel, buffer, request, useBCC, timeout);
                 if (tailErrorResponse != null) return tailErrorResponse;
 
-                if (!CnetMessage.TryParseUint16(buffer, 6, out var errorCode))
+                if (!CnetMessage.TryParseWord(buffer, 6, out var errorCode))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
 
                 return new CnetNAKResponse(errorCode, request);
@@ -590,7 +628,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
             if (request.Command == CnetCommand.Write
                 || request.Command == CnetCommand.RegisterMonitor)
-                return DeserializeTail(buffer, request, useBCC, timeout) ?? new CnetACKResponse(request);
+                return DeserializeTail(channel, buffer, request, useBCC, timeout) ?? new CnetACKResponse(request);
 
             List<DeviceValue> deviceValues;
             List<byte> bytes;
@@ -603,18 +641,18 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                         switch (request.Command)
                         {
                             case CnetCommand.Read:
-                                return DeserializeIndividualDataResponse(buffer, request, useBCC, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetReadIndividualRequest);
+                                return DeserializeIndividualDataResponse(channel, buffer, request, useBCC, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetReadIndividualRequest);
                             case CnetCommand.ExecuteMonitor:
-                                return DeserializeIndividualDataResponse(buffer, request, useBCC, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetExecuteMonitorRequest);
+                                return DeserializeIndividualDataResponse(channel, buffer, request, useBCC, timeout, out deviceValues) ?? new CnetReadResponse(deviceValues, request as CnetExecuteMonitorRequest);
                         }
                         break;
                     case CnetCommandType.Continuous:
                         switch (request.Command)
                         {
                             case CnetCommand.Read:
-                                return DeserializeContinuousDataResponse(buffer, request, useBCC, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetReadContinuousRequest);
+                                return DeserializeContinuousDataResponse(channel, buffer, request, useBCC, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetReadContinuousRequest);
                             case CnetCommand.ExecuteMonitor:
-                                return DeserializeContinuousDataResponse(buffer, request, useBCC, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetExecuteMonitorContinuousRequest);
+                                return DeserializeContinuousDataResponse(channel, buffer, request, useBCC, timeout, out bytes) ?? new CnetReadResponse(bytes, request as CnetExecuteMonitorContinuousRequest);
                         }
                         break;
                 }
@@ -623,7 +661,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             throw new NotImplementedException();
         }
 
-        private CnetResponse DeserializeIndividualDataResponse(List<byte> buffer, CnetRequest request, bool useBCC, int timeout, out List<DeviceValue> deviceValues)
+        private CnetResponse DeserializeIndividualDataResponse(Channel channel, List<byte> buffer, CnetRequest request, bool useBCC, int timeout, out List<DeviceValue> deviceValues)
         {
             var deviceVariables = ((IEnumerable<DeviceVariable>)request).ToArray();
             deviceValues = new List<DeviceValue>();
@@ -640,42 +678,28 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 if (!CnetMessage.TryParseByte(buffer, buffer.Count - 2, out byte dataCount))
                     return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
 
-                buffer.AddRange(channel.Read((uint)dataCount * 2, timeout));
-                
-                switch (deviceVariables[i].DataType)
+                if (dataCount > 8)
+                    return new CnetCommErrorResponse(CnetCommErrorCode.ErrorDataCount, buffer, request);
+
+                ulong value = 0;
+                for (int j = dataCount - 1; j >= 0; j--)
                 {
-                    case DataType.Bit:
-                        if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value != 0));
-                        break;
-                    case DataType.Byte:
-                        if (dataCount != 1) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseByte(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
-                        break;
-                    case DataType.Word:
-                        if (dataCount != 2) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint16(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
-                        break;
-                    case DataType.DoubleWord:
-                        if (dataCount != 4) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint32(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
-                        break;
-                    case DataType.LongWord:
-                        if (dataCount != 8) return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
-                        else if (CnetMessage.TryParseUint64(buffer, buffer.Count - dataCount * 2, out var value)) deviceValues.Add(new DeviceValue(value));
-                        break;
-                    default:
-                        deviceValues.Add(new DeviceValue());
-                        break;
+                    buffer.AddRange(channel.Read(2, timeout));
+                    if (!CnetMessage.TryParseByte(buffer, buffer.Count - 2, out byte b))
+                        return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
+
+                    value |= (ulong)b << (8 * j);
                 }
+
+                deviceValues.Add(new DeviceValue(value));
             }
 
-            return DeserializeTail(buffer, request, useBCC, timeout);
+            return DeserializeTail(channel, buffer, request, useBCC, timeout);
         }
 
-        private CnetResponse DeserializeContinuousDataResponse(List<byte> buffer, CnetRequest request, bool useBCC, int timeout, out List<byte> bytes)
+        private CnetResponse DeserializeContinuousDataResponse(Channel channel, List<byte> buffer, CnetRequest request, bool useBCC, int timeout, out List<byte> bytes)
         {
-            ICnetContinuousAccessRequest continuousAccessRequest = (ICnetContinuousAccessRequest)request;
+            var continuousAccessRequest = (IContinuousAccessRequest)request;
             bytes = new List<byte>();
 
             int dataUnit;
@@ -699,11 +723,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (!CnetMessage.TryParseByte(buffer, 6, out var dataCount))
                 return new CnetCommErrorResponse(CnetCommErrorCode.ResponseParseHexError, buffer, request);
             if (dataCount != dataUnit * continuousAccessRequest.Count)
-                return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountDoNotMatch, buffer, request);
+                return new CnetCommErrorResponse(CnetCommErrorCode.ResponseDataCountNotMatch, buffer, request);
 
             buffer.AddRange(channel.Read((uint)dataCount * 2, timeout));
 
-            var tailErrorResponse = DeserializeTail(buffer, request, useBCC, timeout);
+            var tailErrorResponse = DeserializeTail(channel, buffer, request, useBCC, timeout);
             if (tailErrorResponse != null) return tailErrorResponse;
 
             for (int i = 0; i < dataCount; i++)
@@ -716,7 +740,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             return null;
         }
 
-        private CnetResponse DeserializeTail(List<byte> buffer, CnetRequest request, bool useBCC, int timeout)
+        private CnetResponse DeserializeTail(Channel channel, List<byte> buffer, CnetRequest request, bool useBCC, int timeout)
         {
             buffer.Add(channel.Read(timeout));
             if (buffer[buffer.Count - 1] != CnetMessage.ETX)

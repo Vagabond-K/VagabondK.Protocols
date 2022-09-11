@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VagabondK.Protocols.LSElectric.Cnet
 {
@@ -68,42 +69,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         protected abstract void OnCreateFrameData(List<byte> byteList);
     }
 
-    /// <summary>
-    /// 연속 디바이스 변수 액세스 요청 인터페이스
-    /// </summary>
-    public interface ICnetContinuousAccessRequest
-    {
-        /// <summary>
-        /// 시작 디바이스 변수
-        /// </summary>
-        DeviceVariable StartDeviceVariable { get; }
-
-        /// <summary>
-        /// 연속 액세스 개수
-        /// </summary>
-        int Count { get; }
-    }
-
-    /// <summary>
-    /// 연속 디바이스 변수 액세스 요청에 대한 확장 메서드 모음
-    /// </summary>
-    public static class CnetContinuousRequestExtensions
-    {
-        /// <summary>
-        /// 시작 디바이스 변수로부터 연속으로 읽을 변수들을 목록으로 변환
-        /// </summary>
-        /// <param name="request">연속 디바이스 변수 액세스 요청</param>
-        /// <returns>디바이스 변수 목록</returns>
-        public static IEnumerable<DeviceVariable> ToDeviceVariables(this ICnetContinuousAccessRequest request)
-        {
-            var deviceVariable = request.StartDeviceVariable;
-            for (int i = 0; i < request.Count; i++)
-            {
-                yield return deviceVariable;
-                deviceVariable = deviceVariable.Increase();
-            }
-        }
-    }
 
     /// <summary>
     /// 커맨드 타입을 포함하는 요청, 커맨드 타입은 개별 디바이스 변수 액세스와 연속 디바이스 변수 액세스가 있음.
@@ -159,7 +124,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// 생성자
         /// </summary>
         /// <param name="stationNumber">국번</param>
-        public CnetReadIndividualRequest(byte stationNumber) : this(stationNumber, null) { }
+        public CnetReadIndividualRequest(byte stationNumber) : this(stationNumber, null as IEnumerable<DeviceVariable>) { }
 
         /// <summary>
         /// 생성자
@@ -173,6 +138,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             else
                 this.deviceVariables = new List<DeviceVariable>(deviceVariables);
         }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="moreDeviceVariables">추가 디바이스 변수 목록</param>
+        public CnetReadIndividualRequest(byte stationNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
+            : this(stationNumber, new DeviceVariable[] { deviceVariable }.Concat(moreDeviceVariables)) { }
 
         /// <summary>
         /// 요청 메시지 복제
@@ -310,7 +284,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 연속 디바이스 변수 읽기 요청
     /// </summary>
-    public class CnetReadContinuousRequest : CnetReadRequest, ICnetContinuousAccessRequest
+    public class CnetReadContinuousRequest : CnetReadRequest, IContinuousAccessRequest
     {
         /// <summary>
         /// 생성자
@@ -400,6 +374,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 foreach (var value in values)
                     valueDictionary[value.Key] = value.Value;
         }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="valueTuple">디바이스 변수에 쓸 값</param>
+        /// <param name="moreValueTuples">추가 디바이스 변수에 쓸 값들</param>
+        public CnetWriteIndividualRequest(byte stationNumber, (DeviceVariable, DeviceValue) valueTuple, params (DeviceVariable, DeviceValue)[] moreValueTuples)
+            : this(stationNumber, new (DeviceVariable, DeviceValue)[] { valueTuple }.Concat(moreValueTuples).Select(item => new KeyValuePair<DeviceVariable, DeviceValue>(item.Item1, item.Item2))) { }
 
         /// <summary>
         /// 요청 메시지 복제
@@ -579,7 +562,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 연속 디바이스 변수 쓰기 요청
     /// </summary>
-    public class CnetWriteContinuousRequest : CnetWriteRequest, IList<DeviceValue>, ICnetContinuousAccessRequest
+    public class CnetWriteContinuousRequest : CnetWriteRequest, IList<DeviceValue>, IContinuousAccessRequest
     {
         /// <summary>
         /// 생성자
@@ -819,7 +802,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         /// <param name="stationNumber">국번</param>
         /// <param name="monitorNumber">모니터 번호</param>
-        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber) : this(stationNumber, monitorNumber, null) { }
+        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber) : this(stationNumber, monitorNumber, null as IEnumerable<DeviceVariable>) { }
 
         /// <summary>
         /// 생성자
@@ -835,6 +818,16 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             else
                 this.deviceVariables = new List<DeviceVariable>(deviceVariables);
         }
+
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="stationNumber">국번</param>
+        /// <param name="monitorNumber">모니터 번호</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <param name="moreDeviceVariables">추가 디바이스 변수 목록</param>
+        public CnetRegisterMonitorIndividualRequest(byte stationNumber, byte monitorNumber, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
+            : this(stationNumber, monitorNumber, new DeviceVariable[] { deviceVariable }.Concat(moreDeviceVariables)) { }
 
         /// <summary>
         /// 요청 메시지 복제
@@ -889,7 +882,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
     /// <summary>
     /// 연속 모니터 변수 등록 요청
     /// </summary>
-    class CnetRegisterMonitorContinuousRequest : CnetRegisterMonitorRequest, ICnetContinuousAccessRequest
+    class CnetRegisterMonitorContinuousRequest : CnetRegisterMonitorRequest, IContinuousAccessRequest
     {
         /// <summary>
         /// 생성자
@@ -999,7 +992,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class CnetExecuteMonitorContinuousRequest : CnetExecuteMonitorRequest, ICnetContinuousAccessRequest
+    class CnetExecuteMonitorContinuousRequest : CnetExecuteMonitorRequest, IContinuousAccessRequest
     {
         public CnetExecuteMonitorContinuousRequest(CnetRegisterMonitorContinuousRequest request)
             : base(request?.StationNumber ?? 0, request?.MonitorNumber ?? 0, CnetCommandType.Continuous)

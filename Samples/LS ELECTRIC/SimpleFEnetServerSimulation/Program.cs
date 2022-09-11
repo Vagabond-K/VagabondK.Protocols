@@ -1,27 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
 using VagabondK.Protocols.LSElectric;
-using VagabondK.Protocols.LSElectric.Cnet.Simulation;
+using VagabondK.Protocols.LSElectric.FEnet;
+using VagabondK.Protocols.LSElectric.FEnet.Simulation;
 
-namespace SimpleCnetStationSimulation
+namespace SimpleFEnetServerSimulation
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
             var logger = new ConsoleChannelLogger();
 
-            IChannel channel = new TcpChannelProvider(1234) { Logger = logger };        //TCP Server
-            //IChannel channel = new TcpChannel("127.0.0.1", 1234) { Logger = logger };   //TCP Client
-            //IChannel channel = new UdpChannelProvider(1234) { Logger = logger };        //UDP
+            IChannel channel = new TcpChannelProvider(2004) { Logger = logger };        //TCP Server
+            //IChannel channel = new UdpChannelProvider(2005) { Logger = logger };        //UDP
 
-            var cnetSimulationService = new CnetSimulationService(channel);
+            var fenetSimulationService = new FEnetSimulationService(channel);
 
-            var simulationStation1 = cnetSimulationService[1] = new CnetSimulationStation();
-            simulationStation1.RequestedRead += SimulationStation1_RequestedRead;
-            simulationStation1.RequestedWrite += SimulationStation1_RequestedWrite;
+            fenetSimulationService.RequestedReadIndividual += FenetSimulationService_RequestedReadIndividual;
+            fenetSimulationService.RequestedReadContinuous += FenetSimulationService_RequestedReadContinuous;
+
+            fenetSimulationService.RequestedWriteIndividual += FenetSimulationService_RequestedWriteIndividual;
+            fenetSimulationService.RequestedWriteContinuous += FenetSimulationService_RequestedWriteContinuous;
+
             (channel as ChannelProvider)?.Start();
 
             Console.ReadKey();
@@ -40,7 +45,7 @@ namespace SimpleCnetStationSimulation
             [DeviceType.S] = new byte[10000],
         };
 
-        private static void SimulationStation1_RequestedRead(object sender, CnetRequestedReadEventArgs e)
+        private static void FenetSimulationService_RequestedReadIndividual(object sender, FEnetRequestedReadIndividualEventArgs e)
         {
             foreach (var item in e.ResponseValues)
                 if (deviceMemories.TryGetValue(item.DeviceVariable.DeviceType, out var deviceMemory))
@@ -55,7 +60,13 @@ namespace SimpleCnetStationSimulation
                     };
         }
 
-        private static void SimulationStation1_RequestedWrite(object sender, CnetRequestedWriteEventArgs e)
+        private static void FenetSimulationService_RequestedReadContinuous(object sender, FEnetRequestedReadContinuousEventArgs e)
+        {
+            if (deviceMemories.TryGetValue(e.StartDeviceVariable.DeviceType, out var deviceMemory))
+                e.ResponseValues = deviceMemory.Skip((int)e.StartDeviceVariable.Index).Take(e.Count);
+        }
+
+        private static void FenetSimulationService_RequestedWriteIndividual(object sender, FEnetRequestedWriteIndividualEventArgs e)
         {
             foreach (var item in e.Values)
             {
@@ -75,6 +86,12 @@ namespace SimpleCnetStationSimulation
                     }
                 }
             }
+        }
+
+        private static void FenetSimulationService_RequestedWriteContinuous(object sender, FEnetRequestedWriteContinuousEventArgs e)
+        {
+            if (deviceMemories.TryGetValue(e.StartDeviceVariable.DeviceType, out var deviceMemory))
+                e.Values.ToArray().CopyTo(deviceMemory, e.StartDeviceVariable.Index);
         }
     }
 }

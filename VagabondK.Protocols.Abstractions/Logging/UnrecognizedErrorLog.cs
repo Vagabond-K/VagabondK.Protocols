@@ -29,6 +29,6 @@ namespace VagabondK.Protocols.Logging
         /// </summary>
         /// <returns>정규화된 형식 이름입니다.</returns>
         public override string ToString()
-            => RawMessage != null && RawMessage.Count > 0 ? $"Unrecognized: {BitConverter.ToString(RawMessage as byte[])}" : base.ToString();
+            => RawMessage != null && RawMessage.Count > 0 ? $"Error Message: {BitConverter.ToString(RawMessage as byte[]).Replace('-', ' ')}" : base.ToString();
     }
 }

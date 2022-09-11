@@ -52,8 +52,6 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         public void Dispose()
         {
-            if (serializer != null)
-                serializer.Unrecognized -= OnReceivedUnrecognizedMessage;
             channel?.Dispose();
         }
 
@@ -75,13 +73,7 @@ namespace VagabondK.Protocols.Modbus
             {
                 if (serializer != value)
                 {
-                    if (serializer != null)
-                        serializer.Unrecognized -= OnReceivedUnrecognizedMessage;
-
                     serializer = value;
-
-                    if (serializer != null)
-                        serializer.Unrecognized += OnReceivedUnrecognizedMessage;
                 }
             }
         }
@@ -110,11 +102,6 @@ namespace VagabondK.Protocols.Modbus
         /// Modbus Exception에 대한 예외 발생 여부
         /// </summary>
         public bool ThrowsModbusExceptions { get; set; } = true;
-
-        private void OnReceivedUnrecognizedMessage(object sender, UnrecognizedEventArgs e)
-        {
-            e?.Channel?.Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
-        }
 
         /// <summary>
         /// Modbus 요청하기
@@ -169,7 +156,7 @@ namespace VagabondK.Protocols.Modbus
 
             if (result is ModbusExceptionResponse exceptionResponse)
             {
-                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
+                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, buffer.ToArray(), requestLog, serializer));
                 if (ThrowsModbusExceptions)
                     throw new ModbusException(exceptionResponse.ExceptionCode);
             }

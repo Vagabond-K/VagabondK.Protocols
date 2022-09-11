@@ -68,11 +68,11 @@ namespace VagabondK.Protocols.LSElectric.Cnet
 
         internal static bool TryParseByte(IList<byte> bytes, int index, out byte value)
             => byte.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        internal static bool TryParseUint16(IList<byte> bytes, int index, out ushort value)
+        internal static bool TryParseWord(IList<byte> bytes, int index, out ushort value)
             => ushort.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        internal static bool TryParseUint32(IList<byte> bytes, int index, out uint value)
+        internal static bool TryParseDoubleWord(IList<byte> bytes, int index, out uint value)
             => uint.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}", System.Globalization.NumberStyles.HexNumber, null, out value);
-        internal static bool TryParseUint64(IList<byte> bytes, int index, out ulong value)
+        internal static bool TryParseLongWord(IList<byte> bytes, int index, out ulong value)
             => ulong.TryParse($"{(char)bytes[index]}{(char)bytes[index + 1]}{(char)bytes[index + 2]}{(char)bytes[index + 3]}{(char)bytes[index + 4]}{(char)bytes[index + 5]}{(char)bytes[index + 6]}{(char)bytes[index + 7]}{(char)bytes[index + 8]}{(char)bytes[index + 9]}{(char)bytes[index + 10]}{(char)bytes[index + 11]}{(char)bytes[index + 12]}{(char)bytes[index + 13]}{(char)bytes[index + 14]}{(char)bytes[index + 15]}", System.Globalization.NumberStyles.HexNumber, null, out value);
 
         /// <summary>

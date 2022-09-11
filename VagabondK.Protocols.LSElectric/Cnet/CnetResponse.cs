@@ -24,12 +24,6 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// </summary>
         public CnetRequest Request { get; private set; }
 
-
-        /// <summary>
-        /// 커맨드
-        /// </summary>
-        public CnetCommand Command { get; }
-
         /// <summary>
         /// 프레임 종료 테일
         /// </summary>
@@ -115,7 +109,8 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (valueArray.Length != deviceVariableArray.Length) throw new ArgumentOutOfRangeException(nameof(deviceValues));
 
             deviceValueList = valueArray.Zip(deviceVariableArray, (v, a) => new KeyValuePair<DeviceVariable, DeviceValue>(a, v)).ToList();
-            deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item =>item.Value);
+            foreach (var item in deviceValueList)
+                deviceValueDictionary[item.Key] = item.Value;
 
             if (deviceValueList.Count > 0)
                 dataType = deviceValueList[0].Key.DataType;
@@ -171,13 +166,15 @@ namespace VagabondK.Protocols.LSElectric.Cnet
                 deviceValueList.Add(new KeyValuePair<DeviceVariable, DeviceValue>(deviceVariable, getValue(i)));
                 deviceVariable = deviceVariable.Increase();
             }
-            deviceValueDictionary = deviceValueList.ToDictionary(item => item.Key, item => item.Value);
+
+            foreach (var item in deviceValueList)
+                deviceValueDictionary[item.Key] = item.Value;
         }
 
 
         private DataType? dataType;
         private List<KeyValuePair<DeviceVariable, DeviceValue>> deviceValueList;
-        private Dictionary<DeviceVariable, DeviceValue> deviceValueDictionary;
+        private readonly Dictionary<DeviceVariable, DeviceValue> deviceValueDictionary = new Dictionary<DeviceVariable, DeviceValue>();
 
         /// <summary>
         /// 키로 사용되는 디바이스 변수들
@@ -230,7 +227,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="byteList">프레임 데이터를 추가할 바이트 리스트</param>
         protected override void OnCreateFrameData(List<byte> byteList)
         {
-            if (Request is ICnetContinuousAccessRequest)
+            if (Request is IContinuousAccessRequest)
             {
                 switch (dataType.Value)
                 {

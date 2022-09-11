@@ -37,6 +37,6 @@ namespace VagabondK.Protocols.Logging
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.
         /// </summary>
         /// <returns>정규화된 형식 이름입니다.</returns>
-        public override string ToString() => $"Response: {RawMessage.ModbusRawMessageToString(serializer)}";
+        public override string ToString() => $"RES: {RawMessage.ModbusRawMessageToString(serializer)}";
     }
 }

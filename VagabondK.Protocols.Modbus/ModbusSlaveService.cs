@@ -172,11 +172,7 @@ namespace VagabondK.Protocols.Modbus
 
                 if (serializer != value)
                 {
-                    if (serializer != null)
-                        serializer.Unrecognized -= OnReceivedUnrecognizedMessage;
-
                     serializer = value;
-                    serializer.Unrecognized += OnReceivedUnrecognizedMessage;
                 }
             }
         }
@@ -185,11 +181,6 @@ namespace VagabondK.Protocols.Modbus
         /// 채널 유지 제한시간(밀리세컨드 단위). 이 시간 동안 요청이 발생하지 않으면 채널을 닫습니다. 기본값은 10000(10초)이고, 0이면 채널을 항상 유지합니다.
         /// </summary>
         public int ChannelTimeout { get; set; } = 10000;
-
-        private void OnReceivedUnrecognizedMessage(object sender, UnrecognizedEventArgs e)
-        {
-            e?.Channel?.Logger?.Log(new UnrecognizedErrorLog(e.Channel, e.UnrecognizedMessage.ToArray()));
-        }
 
         private readonly Dictionary<Channel, ChannelTask> channelTasks = new Dictionary<Channel, ChannelTask>();
         private readonly List<IChannel> channels = new List<IChannel>();
@@ -528,7 +519,7 @@ namespace VagabondK.Protocols.Modbus
                                             channel.Write(responseMessage);
 
                                             if (response is ModbusExceptionResponse exceptionResponse)
-                                                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog));
+                                                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog, serializer));
                                             else
                                                 channel?.Logger?.Log(new ModbusResponseLog(channel, response, responseMessage, requestLog, serializer));
                                         }

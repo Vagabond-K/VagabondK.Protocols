@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.LSElectric.Cnet;
 
@@ -34,8 +35,11 @@ namespace VagabondK.Protocols.Logging
         /// <returns>정규화된 형식 이름입니다.</returns>
         public override string ToString()
         {
+            var stringBuilder = new StringBuilder(RawMessage.CnetRawMessageToString());
+            stringBuilder.Append(' ');
             var codeName = NAKCode.ToString();
-            return $"Exception: {(typeof(CnetNAKCode).GetMember(codeName, BindingFlags.Static | BindingFlags.Public)?.FirstOrDefault()?.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? codeName}";
+            stringBuilder.Append($"Error: {(typeof(CnetNAKCode).GetMember(codeName, BindingFlags.Static | BindingFlags.Public)?.FirstOrDefault()?.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description ?? codeName}");
+            return stringBuilder.ToString();
         }
     }
 }
