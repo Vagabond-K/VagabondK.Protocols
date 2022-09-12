@@ -310,12 +310,28 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <param name="deviceValue">쓰기 요청할 디바이스 값</param>
         /// <param name="moreDeviceValues">추가로 쓸 디바이스 값들</param>
         public void Write(int timeout, DeviceType deviceType, uint index, byte deviceValue, params byte[] moreDeviceValues)
+            => Write(timeout, deviceType, index, new byte[] { deviceValue }.Concat(moreDeviceValues));
+        /// <summary>
+        /// 연속 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="deviceType">읽기 요청 시작 디바이스</param>
+        /// <param name="index">읽기 요청 시작 디바이스 인덱스</param>
+        /// <param name="deviceValues">쓰기 요청할 디바이스 값들</param>
+        public void Write(DeviceType deviceType, uint index, IEnumerable<byte> deviceValues)
+            => Write(Timeout, deviceType, index, deviceValues);
+        /// <summary>
+        /// 연속 디바이스 변수 쓰기
+        /// </summary>
+        /// <param name="timeout">응답 제한시간(밀리초)</param>
+        /// <param name="deviceType">읽기 요청 시작 디바이스</param>
+        /// <param name="index">읽기 요청 시작 디바이스 인덱스</param>
+        /// <param name="deviceValues">쓰기 요청할 디바이스 값들</param>
+        public void Write(int timeout, DeviceType deviceType, uint index, IEnumerable<byte> deviceValues)
         {
-            var response = Request(timeout, new FEnetWriteContinuousRequest(deviceType, index, new byte[] { deviceValue }.Concat(moreDeviceValues)));
+            var response = Request(timeout, new FEnetWriteContinuousRequest(deviceType, index, deviceValues));
             if (response is FEnetNAKResponse exceptionResponse)
                 throw new FEnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
         }
-
 
 
         private void RunReceive(Channel channel)
