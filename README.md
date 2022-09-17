@@ -142,12 +142,16 @@ class Program
 ```
 # VagabondK.Protocols.LSElectric [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.LSElectric.svg)](https://www.nuget.org/packages/VagabondK.Protocols.LSElectric/)   
 - [LS ELECTRIC(구 LS산전) Cnet 프로토콜 라이브러리 사용법](https://blog.naver.com/vagabond-k/222498651714)
+- [LS ELECTRIC(구 LS산전) FEnet 프로토콜 라이브러리 사용법](https://blog.naver.com/vagabond-k/222877084987)
 
-LS ELECTRIC(구 LS산전)의 PLC 제품들과 Cnet 프로토콜 기반으로 통신하는 기능들을 제공합니다.   
-Cnet I/F 모듈, MASTER-K PLC 등과 통신할 수 있습니다.   
-통신 채널은 주로 Serial Port Channel을 사용하지만, Serial Device Server(Serial to Ethernet Converter) 등의 장치를 이용해 통신할 경우에는 TCP 및 UDP 기반 Channel로도 통신할 수 있습니다.
+LS ELECTRIC(구 LS산전)의 PLC 제품들과 Cnet, FEnet 프로토콜 기반으로 통신하는 기능들을 제공합니다.   
+Cnet I/F 모듈, FEnet I/F 모듈, MASTER-K PLC 등과 통신할 수 있습니다.   
 
-#### Read, Write, Monitor 사용 예시
+Cnet 프로토콜의 경우 통신 채널은 주로 Serial Port Channel을 사용하지만, Serial Device Server(Serial to Ethernet Converter) 등의 장치를 이용해 통신할 경우에는 TCP 및 UDP 기반 Channel로도 통신할 수 있습니다.   
+
+FEnet 프로토콜은 TCP 및 UDP 기반 Channel로 통신 가능하며 기본적인 포트로 TCP는 2004, UDP는 2005를 사용합니다.
+
+#### Cnet 프로토콜 기반 Read, Write, Monitor 사용 예시
 ```csharp
 using System;
 using System.IO.Ports;
@@ -177,6 +181,34 @@ class Program
         var monitorExecute2 = client.RegisterMonitor(1, 2, "%MW100", 5);
         foreach (var item in client.Read(monitorExecute2))
             Console.WriteLine($"변수: {item.Key}, 값: {item.Value.WordValue}");
+    }
+}
+```
+
+#### FEnet 프로토콜 기반 Read, Write 실행 예시
+```csharp
+using System;
+using System.Linq;
+using VagabondK.Protocols.Channels;
+using VagabondK.Protocols.LSElectric;
+using VagabondK.Protocols.LSElectric.FEnet;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        FEnetClient client = new FEnetClient(new TcpChannel("127.0.0.1", 2004));
+
+        foreach (var item in client.Read("%MW100", "%MW200"))
+            Console.WriteLine($"변수: {item.Key}, 값: {item.Value.WordValue}");
+
+        var bytes = client.Read(DeviceType.M, 200, 10).ToArray();
+        for (int i = 0; i < bytes.Length; i+=2)
+            Console.WriteLine($"변수: %MW{100 + i / 2}, 값: {BitConverter.ToInt16(bytes, i)}");
+
+        client.Write(("%MW102", 10), ("%MW202", 20));
+
+        client.Write(DeviceType.M, 600, 10, 0, 20, 0);
     }
 }
 ```
