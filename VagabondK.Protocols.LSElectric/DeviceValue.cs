@@ -15,7 +15,7 @@ namespace VagabondK.Protocols.LSElectric
         /// 생성자
         /// </summary>
         /// <param name="bitValue">비트 값</param>
-        public DeviceValue(bool bitValue) : this() => this.bitValue = bitValue;
+        public DeviceValue(bool bitValue) : this() => BitValue = bitValue;
         /// <summary>
         /// 생성자
         /// </summary>
@@ -56,8 +56,17 @@ namespace VagabondK.Protocols.LSElectric
         /// </summary>
         /// <param name="unsignedLongWordValue">부호 없는 롱 워드 값</param>
         public DeviceValue(ulong unsignedLongWordValue) : this() => this.unsignedLongWordValue = unsignedLongWordValue;
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="singleFloatingPointValue">단정밀도 부동소수 값</param>
+        public DeviceValue(float singleFloatingPointValue) : this() => this.singleFloatingPointValue = singleFloatingPointValue;
+        /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="doubleFloatingPointValue">배정밀도 부동소수 값</param>
+        public DeviceValue(double doubleFloatingPointValue) : this() => this.doubleFloatingPointValue = doubleFloatingPointValue;
 
-        [FieldOffset(0)] private bool bitValue;
         [FieldOffset(0)] private byte byteValue;
         [FieldOffset(0)] private short wordValue;
         [FieldOffset(0)] private int doubleWordValue;
@@ -66,14 +75,20 @@ namespace VagabondK.Protocols.LSElectric
         [FieldOffset(0)] private ushort unsignedWordValue;
         [FieldOffset(0)] private uint unsignedDoubleWordValue;
         [FieldOffset(0)] private ulong unsignedLongWordValue;
+        [FieldOffset(0)] private float singleFloatingPointValue;
+        [FieldOffset(0)] private double doubleFloatingPointValue;
 
         /// <summary>
         /// 비트 값
         /// </summary>
         public bool BitValue
         {
-            get => bitValue;
-            set { unsignedLongWordValue = 0; bitValue = value; }
+            get => (doubleWordValue & 1) == 1;
+            set
+            {
+                unsignedLongWordValue = 0;
+                doubleWordValue = value ? 1 : 0;
+            }
         }
 
         /// <summary>
@@ -149,11 +164,29 @@ namespace VagabondK.Protocols.LSElectric
         }
 
         /// <summary>
+        /// 단정밀도 부동소수 값
+        /// </summary>
+        public float SingleFloatingPointValue
+        {
+            get => singleFloatingPointValue;
+            set { unsignedLongWordValue = 0; singleFloatingPointValue = value; }
+        }
+
+        /// <summary>
+        /// 배정밀도 부동소수 값
+        /// </summary>
+        public double DoubleFloatingPointValue
+        {
+            get => doubleFloatingPointValue;
+            set { doubleFloatingPointValue = value; }
+        }
+
+        /// <summary>
         /// 디바이스 값의 bool 형식으로의 변환
         /// </summary>
         /// <param name="deviceValue">디바이스 값</param>
         /// <returns>bool 형식 값</returns>
-        public static implicit operator bool(DeviceValue deviceValue) => deviceValue.bitValue;
+        public static implicit operator bool(DeviceValue deviceValue) => deviceValue.BitValue;
         /// <summary>
         /// 디바이스 값의 byte 형식으로의 변환
         /// </summary>
@@ -202,6 +235,18 @@ namespace VagabondK.Protocols.LSElectric
         /// <param name="deviceValue">디바이스 값</param>
         /// <returns>ulong 형식 값</returns>
         public static implicit operator ulong(DeviceValue deviceValue) => deviceValue.unsignedLongWordValue;
+        /// <summary>
+        /// 디바이스 값의 float 형식으로의 변환
+        /// </summary>
+        /// <param name="deviceValue">디바이스 값</param>
+        /// <returns>float 형식 값</returns>
+        public static implicit operator float(DeviceValue deviceValue) => deviceValue.singleFloatingPointValue;
+        /// <summary>
+        /// 디바이스 값의 double 형식으로의 변환
+        /// </summary>
+        /// <param name="deviceValue">디바이스 값</param>
+        /// <returns>double 형식 값</returns>
+        public static implicit operator double(DeviceValue deviceValue) => deviceValue.doubleFloatingPointValue;
 
         /// <summary>
         /// bool 형식 값의 디바이스 값으로의 변환
@@ -257,6 +302,18 @@ namespace VagabondK.Protocols.LSElectric
         /// <param name="value">ulong 형식 값</param>
         /// <returns>디바이스 값</returns>
         public static implicit operator DeviceValue(ulong value) => new DeviceValue(value);
+        /// <summary>
+        /// float 형식 값의 디바이스 값으로의 변환
+        /// </summary>
+        /// <param name="value">float 형식 값</param>
+        /// <returns>디바이스 값</returns>
+        public static implicit operator DeviceValue(float value) => new DeviceValue(value);
+        /// <summary>
+        /// double 형식 값의 디바이스 값으로의 변환
+        /// </summary>
+        /// <param name="value">double 형식 값</param>
+        /// <returns>디바이스 값</returns>
+        public static implicit operator DeviceValue(double value) => new DeviceValue(value);
 
         /// <summary>
         /// ModbusEndian의 지정된 두 인스턴스가 같은지를 확인합니다.

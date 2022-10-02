@@ -147,7 +147,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                 if (result == null)
                 {
                     responseWaitHandles.Remove(request.InvokeID.Value);
-                    return new FEnetCommErrorResponse(FEnetCommErrorCode.ResponseTimeout, new byte[0], request, 0, 0);
+                    result = new FEnetCommErrorResponse(FEnetCommErrorCode.ResponseTimeout, new byte[0], request, 0, 0);
                 }
             }
             catch (Exception ex)
@@ -209,22 +209,22 @@ namespace VagabondK.Protocols.LSElectric.FEnet
 
 
         /// <summary>
-        /// 연속 디바이스 변수 읽기
+        /// 연속 바이트 디바이스 변수 읽기
         /// </summary>
         /// <param name="deviceType">읽기 요청할 디바이스 영역</param>
         /// <param name="index">읽기 요청 시작 디바이스 인덱스</param>
         /// <param name="count">읽을 개수</param>
-        /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
-        public IReadOnlyList<byte> Read(DeviceType deviceType, uint index, int count) => Read(Timeout, deviceType, index, count);
+        /// <returns>읽은 디바이스 데이터 블록</returns>
+        public IDeviceDataBlock Read(DeviceType deviceType, uint index, int count) => Read(Timeout, deviceType, index, count);
         /// <summary>
-        /// 연속 디바이스 변수 읽기
+        /// 연속 바이트 디바이스 변수 읽기
         /// </summary>
         /// <param name="timeout">응답 제한시간(밀리초)</param>
         /// <param name="deviceType">읽기 요청할 디바이스 영역</param>
         /// <param name="index">읽기 요청 시작 디바이스 인덱스</param>
         /// <param name="count">읽을 개수</param>
-        /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
-        public IReadOnlyList<byte> Read(int timeout, DeviceType deviceType, uint index, int count)
+        /// <returns>읽은 디바이스 데이터 블록</returns>
+        public IDeviceDataBlock Read(int timeout, DeviceType deviceType, uint index, int count)
         {
             if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -235,7 +235,31 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                 throw new FEnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             return null;
         }
+        /// <summary>
+        /// 연속 디바이스 변수 읽기
+        /// </summary>
+        /// <param name="deviceVariable">연속 읽기 요청 시작 디바이스 변수</param>
+        /// <param name="count">읽을 개수</param>
+        /// <returns>읽은 디바이스 데이터 블록</returns>
+        public IDeviceDataBlock Read(DeviceVariable deviceVariable, int count) => Read(Timeout, deviceVariable, count);
+        /// <summary>
+        /// 연속 디바이스 변수 읽기
+        /// </summary>
+        /// <param name="timeout">응답 제한시간(밀리초)</param>
+        /// <param name="deviceVariable">연속 읽기 요청 시작 디바이스 변수</param>
+        /// <param name="count">읽을 개수</param>
+        /// <returns>읽은 디바이스 데이터 블록</returns>
+        public IDeviceDataBlock Read(int timeout, DeviceVariable deviceVariable, int count)
+        {
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
 
+            var response = Request(timeout, new FEnetReadContinuousRequest(deviceVariable, count));
+            if (response is FEnetReadContinuousResponse readResponse)
+                return readResponse;
+            else if (response is FEnetNAKResponse exceptionResponse)
+                throw new FEnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
+            return null;
+        }
 
 
         /// <summary>
@@ -526,9 +550,12 @@ namespace VagabondK.Protocols.LSElectric.FEnet
             var continuousAccessRequest = (IContinuousAccessRequest)request;
             bytes = null;
 
-            int dataUnit;
+            double dataUnit;
             switch (continuousAccessRequest.StartDeviceVariable.DataType)
             {
+                case DataType.Bit:
+                    dataUnit = 1d / 8;
+                    break;
                 case DataType.Word:
                     dataUnit = 2;
                     break;

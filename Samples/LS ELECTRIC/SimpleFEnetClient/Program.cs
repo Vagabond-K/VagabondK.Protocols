@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
@@ -29,16 +30,16 @@ namespace SimpleFEnetClient
                 try
                 {
                     var readIndividualResponse = client.Request(readIndividual);
-                    var valuesIndividual = client.Read("%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100", "%MW100");
+                    var valuesIndividual = client.Read("%MW100");
 
                     var readContinuousResponse = client.Request(readContinuous);
                     var valuesContinuous = client.Read(DeviceType.M, 200, 2);
 
                     var writeIndividualResponse = client.Request(writeIndividual);
-                    client.Write("%MW100", 30);
+                    client.Write("%MW102", 30);
 
                     var writeContinuousResponse = client.Request(writeContinuous);
-                    client.Write(DeviceType.M, 200, 10, 20);
+                    client.Write(DeviceType.M, 200, 10, 20, 30);
                 }
                 catch (Exception ex)
                 {

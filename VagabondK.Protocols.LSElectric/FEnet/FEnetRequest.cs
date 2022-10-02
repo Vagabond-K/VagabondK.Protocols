@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace VagabondK.Protocols.LSElectric.FEnet
 {
@@ -247,6 +246,26 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         }
 
         /// <summary>
+        /// 생성자
+        /// </summary>
+        /// <param name="deviceVariable">연속 읽기 요청 시작 디바이스 변수, Bit 형식일 경우 주소와 개수는 8의 배수여야만 함.</param>
+        /// <param name="count">읽을 개수</param>
+        public FEnetReadContinuousRequest(DeviceVariable deviceVariable, int count) : base(FEnetDataType.Continuous)
+        {
+            if (deviceVariable.DataType == LSElectric.DataType.Unknown)
+                throw new ArgumentException(nameof(deviceVariable));
+
+            if (deviceVariable.DataType == LSElectric.DataType.Bit)
+            {
+                if (deviceVariable.Index % 8 != 0) throw new ArgumentException($"{nameof(deviceVariable)}.{nameof(deviceVariable.Index)}");
+                if (count % 8 != 0) throw new ArgumentException(nameof(count));
+            }
+
+            startDeviceVariable = deviceVariable;
+            this.count = count;
+        }
+
+        /// <summary>
         /// 블록 수
         /// </summary>
         public override ushort BlockCount => 1;
@@ -255,7 +274,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new FEnetReadContinuousRequest(startDeviceVariable.DeviceType, startDeviceVariable.Index, count) { InvokeID = InvokeID };
+        public override object Clone() => new FEnetReadContinuousRequest(startDeviceVariable, count) { InvokeID = InvokeID };
 
         private DeviceVariable startDeviceVariable;
         private int count;
@@ -263,39 +282,8 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <summary>
         /// 읽기 요청 시작 디바이스 변수
         /// </summary>
-        public DeviceVariable StartDeviceVariable { get => startDeviceVariable; }
+        public DeviceVariable StartDeviceVariable{ get => startDeviceVariable; set => SetProperty(ref startDeviceVariable, value); }
 
-        /// <summary>
-        /// 읽기 요청할 디바이스 영역
-        /// </summary>
-        public DeviceType StartDeviceType
-        {
-            get => startDeviceVariable.DeviceType;
-            set
-            {
-                if (startDeviceVariable.DeviceType != value)
-                {
-                    startDeviceVariable = new DeviceVariable(value, startDeviceVariable.DataType, startDeviceVariable.Index, startDeviceVariable.SubIndices.ToArray());
-                    InvalidateFrameData();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 읽기 요청 시작 디바이스 인덱스
-        /// </summary>
-        public uint StartDeviceIndex
-        {
-            get => startDeviceVariable.Index;
-            set
-            {
-                if (startDeviceVariable.Index != value)
-                {
-                    startDeviceVariable = new DeviceVariable(startDeviceVariable.DeviceType, startDeviceVariable.DataType, value, startDeviceVariable.SubIndices.ToArray());
-                    InvalidateFrameData();
-                }
-            }
-        }
 
         /// <summary>
         /// 읽을 개수
@@ -308,12 +296,40 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <returns>데이터의 직렬화 된 바이트 열거</returns>
         protected override IEnumerable<byte> OnCreateDataFrame()
         {
-            var deviceVariableBytes = startDeviceVariable.ToBytes();
+            DeviceVariable deviceVariable;
+            int count;
+            switch (startDeviceVariable.DataType)
+            {
+                case LSElectric.DataType.Bit:
+                    deviceVariable = new DeviceVariable(startDeviceVariable.DeviceType, LSElectric.DataType.Byte, startDeviceVariable.Index / 8);
+                    count = this.count / 8;
+                    break;
+                case LSElectric.DataType.Byte:
+                    deviceVariable = startDeviceVariable;
+                    count = this.count;
+                    break;
+                case LSElectric.DataType.Word:
+                    deviceVariable = new DeviceVariable(startDeviceVariable.DeviceType, LSElectric.DataType.Byte, startDeviceVariable.Index * 2);
+                    count = this.count * 2;
+                    break;
+                case LSElectric.DataType.DoubleWord:
+                    deviceVariable = new DeviceVariable(startDeviceVariable.DeviceType, LSElectric.DataType.Byte, startDeviceVariable.Index * 4);
+                    count = this.count * 4;
+                    break;
+                case LSElectric.DataType.LongWord:
+                    deviceVariable = new DeviceVariable(startDeviceVariable.DeviceType, LSElectric.DataType.Byte, startDeviceVariable.Index * 8);
+                    count = this.count * 8;
+                    break;
+                default:
+                    throw new ArgumentException(nameof(startDeviceVariable));
+            }
+
+            var deviceVariableBytes = deviceVariable.ToBytes();
 
             return base.OnCreateDataFrame()
                 .Concat(WordToLittleEndianBytes((ushort)deviceVariableBytes.Length))
                 .Concat(deviceVariableBytes)
-                .Concat(WordToLittleEndianBytes((ushort)Count));
+                .Concat(WordToLittleEndianBytes((ushort)count));
         }
     }
 

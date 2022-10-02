@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace VagabondK.Protocols.LSElectric.FEnet
 {
@@ -179,18 +178,55 @@ namespace VagabondK.Protocols.LSElectric.FEnet
     /// <summary>
     /// 연속 디바이스 변수 읽기 응답
     /// </summary>
-    public class FEnetReadContinuousResponse : FEnetACKResponse, IReadOnlyList<byte>
+    public class FEnetReadContinuousResponse : FEnetACKResponse, IDeviceDataBlock
     {
-        internal FEnetReadContinuousResponse(IEnumerable<byte> bytes, FEnetReadContinuousRequest request, ushort plcInfo, byte ethernetModuleInfo) : base(request, plcInfo, ethernetModuleInfo) 
-            => this.bytes = bytes.ToArray();
+        internal FEnetReadContinuousResponse(IEnumerable<byte> bytes, FEnetReadContinuousRequest request, ushort plcInfo, byte ethernetModuleInfo) : base(request, plcInfo, ethernetModuleInfo)
+        {
+            StartDeviceVariable = (Request as FEnetReadContinuousRequest).StartDeviceVariable;
+            DeviceValueCount = (Request as FEnetReadContinuousRequest).Count;
+
+            var startDeviceVariable = StartDeviceVariable;
+            switch (startDeviceVariable.DataType)
+            {
+                case LSElectric.DataType.Bit:
+                    startByteIndex = startDeviceVariable.Index / 8;
+                    startBitIndex = startDeviceVariable.Index;
+                    bitLength = (uint)DeviceValueCount;
+                    break;
+                case LSElectric.DataType.Byte:
+                    startByteIndex = startDeviceVariable.Index;
+                    startBitIndex = startDeviceVariable.Index * 8;
+                    bitLength = (uint)DeviceValueCount * 8;
+                    break;
+                case LSElectric.DataType.Word:
+                    startByteIndex = startDeviceVariable.Index * 2;
+                    startBitIndex = startDeviceVariable.Index * 16;
+                    bitLength = (uint)DeviceValueCount * 16;
+                    break;
+                case LSElectric.DataType.DoubleWord:
+                    startByteIndex = startDeviceVariable.Index * 4;
+                    startBitIndex = startDeviceVariable.Index * 32;
+                    bitLength = (uint)DeviceValueCount * 32;
+                    break;
+                case LSElectric.DataType.LongWord:
+                    startByteIndex = startDeviceVariable.Index * 8;
+                    startBitIndex = startDeviceVariable.Index * 64;
+                    bitLength = (uint)DeviceValueCount * 64;
+                    break;
+            }
+
+            this.bytes = bytes.ToArray();
+        }
 
         private readonly byte[] bytes;
+        private readonly uint startByteIndex;
+        private readonly uint startBitIndex;
+        private readonly uint bitLength;
 
         /// <summary>
         /// 바이트 값 개수
         /// </summary>
         public int Count => bytes.Length;
-
 
         /// <summary>
         /// 지정한 인덱스의 바이트 값을 가져옵니다.
@@ -222,6 +258,59 @@ namespace VagabondK.Protocols.LSElectric.FEnet
             foreach (var b in WordToLittleEndianBytes((ushort)bytes.Length)) yield return b;
             foreach (var b in bytes)
                 yield return b;
+        }
+
+        /// <summary>
+        /// 시작 디바이스 변수
+        /// </summary>
+        public DeviceVariable StartDeviceVariable { get; }
+
+        /// <summary>
+        /// 디바이스 값 개수
+        /// </summary>
+        public int DeviceValueCount { get; }
+
+        /// <summary>
+        /// 디바이스 값을 가져옵니다.
+        /// </summary>
+        /// <param name="dataType">데이터 형식</param>
+        /// <param name="index">데이터 인덱스(절대주소)</param>
+        /// <returns>디바이스 값</returns>
+        public DeviceValue this[DataType dataType, uint index]
+        {
+            get
+            {
+                switch (dataType)
+                {
+                    case LSElectric.DataType.Bit:
+                        if (startBitIndex > index || index >= startBitIndex + bitLength)
+                            throw new ArgumentOutOfRangeException(nameof(index));
+                        var bitIndex = index - startBitIndex;
+                        return ((bytes[bitIndex / 8] >> (int)(bitIndex % 8)) & 1) == 1;
+                    case LSElectric.DataType.Byte:
+                        uint byteIndex = index - startByteIndex;
+                        if (byteIndex >= bytes.Length)
+                            throw new ArgumentOutOfRangeException(nameof(index));
+                        return bytes[index - startByteIndex];
+                    case LSElectric.DataType.Word:
+                        byteIndex = index * 2 - startByteIndex;
+                        if (byteIndex + 2 > bytes.Length)
+                            throw new ArgumentOutOfRangeException(nameof(index));
+                        return BitConverter.ToInt16(bytes, (int)byteIndex);
+                    case LSElectric.DataType.DoubleWord:
+                        byteIndex = index * 4 - startByteIndex;
+                        if (byteIndex + 4 > bytes.Length)
+                            throw new ArgumentOutOfRangeException(nameof(index));
+                        return BitConverter.ToInt32(bytes, (int)byteIndex);
+                    case LSElectric.DataType.LongWord:
+                        byteIndex = index * 8 - startByteIndex;
+                        if (byteIndex + 8 > bytes.Length)
+                            throw new ArgumentOutOfRangeException(nameof(index));
+                        return BitConverter.ToInt64(bytes, (int)byteIndex);
+                    default:
+                        throw new ArgumentException(nameof(dataType));
+                }
+            }
         }
     }
 
