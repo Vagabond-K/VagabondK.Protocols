@@ -76,8 +76,8 @@ namespace SimpleFEnetServerSimulation
                     {
                         var byteIndex = item.Key.Index / 8;
                         deviceMemory[byteIndex] = (byte)(item.Value.BitValue
-                            ? deviceMemory[byteIndex] | (1 >> (int)(item.Key.Index % 8))
-                            : deviceMemory[byteIndex] & ~(1 >> (int)(item.Key.Index % 8)));
+                            ? deviceMemory[byteIndex] | (1 << (int)(item.Key.Index % 8))
+                            : deviceMemory[byteIndex] & ~(1 << (int)(item.Key.Index % 8)));
                     }
                     else
                     {
