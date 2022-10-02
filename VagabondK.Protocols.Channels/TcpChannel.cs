@@ -56,6 +56,20 @@ namespace VagabondK.Protocols.Channels
         /// </summary>
         public int ConnectTimeout { get; }
 
+        /// <summary>
+        /// TCP 채널 연결 여부
+        /// </summary>
+        public bool Connected
+        {
+            get
+            {
+                lock (connectLock)
+                {
+                    return tcpClient != null && tcpClient.Connected;
+                }
+            }
+        }
+
         internal Guid Guid { get; }
         private readonly TcpChannelProvider provider;
 
@@ -138,7 +152,7 @@ namespace VagabondK.Protocols.Channels
                         tcpClient?.Client?.Dispose();
                         tcpClient = null;
                         Logger?.Log(new ChannelErrorLog(this, ex));
-                        throw ex;
+                        throw ex.InnerException ?? ex;
                     }
                 }
             }
@@ -219,7 +233,7 @@ namespace VagabondK.Protocols.Channels
                 catch (Exception ex)
                 {
                     Close();
-                    throw ex;
+                    throw ex.InnerException ?? ex;
                 }
             }
         }
@@ -288,11 +302,11 @@ namespace VagabondK.Protocols.Channels
                     for (int i = 0; i < received; i++)
                         yield return receivedBuffer[i];
 
-                try
-                {
-                    available = tcpClient.Client.Available;
-                }
-                catch { }
+                    try
+                    {
+                        available = tcpClient.Client.Available;
+                    }
+                    catch { }
                 }
             }
         }
