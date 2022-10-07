@@ -197,15 +197,32 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <param name="moreDeviceVariables">추가 디바이스 변수 목록</param>
         /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
         public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(int timeout, DeviceVariable deviceVariable, params DeviceVariable[] moreDeviceVariables)
+            => Read(timeout, new DeviceVariable[] { deviceVariable }.Concat(moreDeviceVariables));
+        /// <summary>
+        /// 개별 디바이스 변수 읽기
+        /// </summary>
+        /// <param name="deviceVariables">디바이스 변수 목록</param>
+        /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
+        public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(IEnumerable<DeviceVariable> deviceVariables)
+            => Read(Timeout, deviceVariables);
+        /// <summary>
+        /// 개별 디바이스 변수 읽기
+        /// </summary>
+        /// <param name="timeout">응답 제한시간(밀리초)</param>
+        /// <param name="deviceVariables">디바이스 변수 목록</param>
+        /// <returns>읽은 디바이스 변수/값 Dictionary</returns>
+        public IReadOnlyDictionary<DeviceVariable, DeviceValue> Read(int timeout, IEnumerable<DeviceVariable> deviceVariables)
         {
-            var response = Request(timeout, new FEnetReadIndividualRequest(deviceVariable.DataType, new DeviceVariable[] { deviceVariable }.Concat(moreDeviceVariables)));
+            if (deviceVariables == null) throw new ArgumentNullException(nameof(deviceVariables));
+            if (deviceVariables.Count() == 0) throw new ArgumentException(nameof(deviceVariables));
+
+            var response = Request(timeout, new FEnetReadIndividualRequest(deviceVariables.First().DataType, deviceVariables));
             if (response is FEnetReadIndividualResponse readResponse)
                 return readResponse;
             else if (response is FEnetNAKResponse exceptionResponse)
                 throw new FEnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
             return null;
         }
-
 
 
         /// <summary>
