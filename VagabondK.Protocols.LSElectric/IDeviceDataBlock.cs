@@ -43,22 +43,6 @@ namespace VagabondK.Protocols.LSElectric
         public static IEnumerable<DeviceValue> Cast(this IDeviceDataBlock deviceDataBlock, DataType dataType)
         {
             var startDeviceVariable = deviceDataBlock.StartDeviceVariable;
-            int valueCount = 0;
-            switch (startDeviceVariable.DataType)
-            {
-                case DataType.Byte:
-                    valueCount = deviceDataBlock.Count;
-                    break;
-                case DataType.Word:
-                    valueCount = deviceDataBlock.Count / 2;
-                    break;
-                case DataType.DoubleWord:
-                    valueCount = deviceDataBlock.Count / 4;
-                    break;
-                case DataType.LongWord:
-                    valueCount = deviceDataBlock.Count / 8;
-                    break;
-            }
 
             switch (dataType)
             {
@@ -73,17 +57,17 @@ namespace VagabondK.Protocols.LSElectric
                     break;
                 case DataType.Word:
                     var bytes = deviceDataBlock.ToArray();
-                    for (int i = 0; i < valueCount; i += 2)
+                    for (int i = 0; i < deviceDataBlock.Count; i += 2)
                         yield return BitConverter.ToInt16(bytes, i);
                     break;
                 case DataType.DoubleWord:
                     bytes = deviceDataBlock.ToArray();
-                    for (int i = 0; i < valueCount; i += 4)
+                    for (int i = 0; i < deviceDataBlock.Count; i += 4)
                         yield return BitConverter.ToInt32(bytes, i);
                     break;
                 case DataType.LongWord:
                     bytes = deviceDataBlock.ToArray();
-                    for (int i = 0; i < valueCount; i += 8)
+                    for (int i = 0; i < deviceDataBlock.Count; i += 8)
                         yield return BitConverter.ToInt64(bytes, i);
                     break;
                 default:
