@@ -42,8 +42,6 @@ namespace VagabondK.Protocols.LSElectric
         /// <returns>변환된 데이터들</returns>
         public static IEnumerable<DeviceValue> Cast(this IDeviceDataBlock deviceDataBlock, DataType dataType)
         {
-            var startDeviceVariable = deviceDataBlock.StartDeviceVariable;
-
             switch (dataType)
             {
                 case DataType.Bit:
