@@ -151,7 +151,7 @@ namespace VagabondK.Protocols.Channels
 
                 lock (channels)
                 {
-                    foreach (var reference in channels.Values)
+                    foreach (var reference in channels.Values.ToArray())
                     {
                         if (reference.TryGetTarget(out var channel))
                         {
