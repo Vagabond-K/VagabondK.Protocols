@@ -131,7 +131,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
         /// <summary>
         /// PLC의 CPU 타입 및 상태 정보. 자세한 내용은 매뉴얼 참조 바람.
         /// </summary>
-        public ushort PlcInfo { get; }
+        public ushort PlcInfo { get; set; }
 
         /// <summary>
         /// 이더넷 모듈의 슬롯(Slot) 번호.

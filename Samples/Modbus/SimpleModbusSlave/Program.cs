@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
 using VagabondK.Protocols.Modbus;
@@ -31,21 +32,29 @@ namespace SimpleModbusSlave
             int boolIndex = 0;
             (channel as ChannelProvider)?.Start();
 
-            while (true)
+            Task.Run(() =>
             {
-                float100 += 0.01f;
-                float102 += 0.01f;
+                while (true)
+                {
+                    float100 += 0.01f;
+                    float102 += 0.01f;
 
-                modbusSlave1.InputRegisters.SetValue(100, float100);
-                modbusSlave1.InputRegisters.SetValue(102, float102);
+                    modbusSlave1.InputRegisters.SetValue(100, float100);
+                    modbusSlave1.InputRegisters.SetValue(102, float102);
 
-                for (ushort i = 0; i < 10; i++)
-                    modbusSlave1.DiscreteInputs[i] = i == boolIndex;
+                    for (ushort i = 0; i < 10; i++)
+                    {
+                        modbusSlave1.DiscreteInputs[i] = i == boolIndex;
+                        modbusSlave1.Coils[i] = i == boolIndex;
+                    }
+                    boolIndex = (boolIndex + 1) % 10;
 
-                boolIndex = (boolIndex + 1) % 10;
+                    Thread.Sleep(1000);
+                }
+            });
 
-                Thread.Sleep(1000);
-            }
+            Console.ReadKey();
+            modbusSlaveService.Dispose();
         }
     }
 }

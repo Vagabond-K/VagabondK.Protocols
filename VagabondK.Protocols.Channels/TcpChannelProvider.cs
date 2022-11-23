@@ -48,7 +48,7 @@ namespace VagabondK.Protocols.Channels
         public int Port { get; }
 
         private readonly TcpListener tcpListener;
-        internal readonly Dictionary<Guid, WeakReference<TcpChannel>> channels = new Dictionary<Guid, WeakReference<TcpChannel>>();
+        private readonly Dictionary<Guid, WeakReference<TcpChannel>> channels = new Dictionary<Guid, WeakReference<TcpChannel>>();
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
@@ -95,16 +95,18 @@ namespace VagabondK.Protocols.Channels
                         try
                         {
                             var tcpClient = tcpListener.AcceptTcpClient();
-
-                            var channel = new TcpChannel(this, tcpClient)
+                            lock (channels)
                             {
-                                Logger = Logger
-                            };
-                            Logger?.Log(new ChannelOpenEventLog(channel));
-                            channels[channel.Guid] = new WeakReference<TcpChannel>(channel);
-                            RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
-                            foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
-                                channels.Remove(disposed);
+                                var channel = new TcpChannel(this, tcpClient)
+                                {
+                                    Logger = Logger
+                                };
+                                Logger?.Log(new ChannelOpenEventLog(channel));
+                                channels[channel.Guid] = new WeakReference<TcpChannel>(channel);
+                                RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                                foreach (var disposed in channels.Where(c => c.Value == null || !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
+                                    channels.Remove(disposed);
+                            }
                         }
                         catch { }
                     }
@@ -131,6 +133,12 @@ namespace VagabondK.Protocols.Channels
                 }
                 channels.Clear();
             }
+        }
+
+        internal void RemoveChannel(Guid guid)
+        {
+            lock (channels)
+                channels?.Remove(guid);
         }
     }
 }

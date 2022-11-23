@@ -100,23 +100,26 @@ namespace VagabondK.Protocols.Channels
                         {
                             var received = udpClient.Receive(ref remoteEndPoint);
 
-                            if (channels.TryGetValue(remoteEndPoint.ToString(), out var channelReference)
-                                && channelReference.TryGetTarget(out var channel))
+                            lock (channels)
                             {
-                                channel.AddReceivedMessage(received);
-                            }
-                            else
-                            {
-                                channel = new UdpClientChannel(this, remoteEndPoint, received)
+                                if (channels.TryGetValue(remoteEndPoint.ToString(), out var channelReference)
+                                    && channelReference.TryGetTarget(out var channel))
                                 {
-                                    Logger = Logger
-                                };
-                                Logger?.Log(new ChannelOpenEventLog(channel));
-                                channels[channel.Description] = new WeakReference<UdpClientChannel>(channel);
-                                RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                                    channel.AddReceivedMessage(received);
+                                }
+                                else
+                                {
+                                    channel = new UdpClientChannel(this, remoteEndPoint, received)
+                                    {
+                                        Logger = Logger
+                                    };
+                                    Logger?.Log(new ChannelOpenEventLog(channel));
+                                    channels[channel.Description] = new WeakReference<UdpClientChannel>(channel);
+                                    RaiseCreatedEvent(new ChannelCreatedEventArgs(channel));
+                                }
+                                foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
+                                    channels.Remove(disposed);
                             }
-                            foreach (var disposed in channels.Where(c => !c.Value.TryGetTarget(out var target)).Select(c => c.Key).ToArray())
-                                channels.Remove(disposed);
                         }
                         catch (Exception ex)
                         {
@@ -146,6 +149,12 @@ namespace VagabondK.Protocols.Channels
                 }
                 channels.Clear();
             }
+        }
+
+        internal void RemoveChannel(string description)
+        {
+            lock (channels)
+                channels?.Remove(description);
         }
 
         class UdpClientChannel : Channel
@@ -186,7 +195,7 @@ namespace VagabondK.Protocols.Channels
             {
                 if (!IsDisposed)
                 {
-                    provider?.channels?.Remove(Description);
+                    provider?.RemoveChannel(Description);
                     IsDisposed = true;
                     Logger?.Log(new ChannelCloseEventLog(this));
                     readEventWaitHandle.Set();

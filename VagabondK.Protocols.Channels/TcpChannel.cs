@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using VagabondK.Protocols.Logging;
@@ -38,6 +40,7 @@ namespace VagabondK.Protocols.Channels
 
             this.provider = provider;
             this.tcpClient = tcpClient;
+            stream = tcpClient.GetStream();
             description = tcpClient.Client.RemoteEndPoint.ToString();
         }
 
@@ -74,6 +77,7 @@ namespace VagabondK.Protocols.Channels
         private readonly TcpChannelProvider provider;
 
         private TcpClient tcpClient = null;
+        private Stream stream = null;
         private readonly object connectLock = new object();
         private readonly object writeLock = new object();
         private readonly object readLock = new object();
@@ -103,7 +107,7 @@ namespace VagabondK.Protocols.Channels
         {
             if (!IsDisposed)
             {
-                provider?.channels?.Remove(Guid);
+                provider?.RemoveChannel(Guid);
                 IsDisposed = true;
                 readEventWaitHandle.Set();
                 Close();
@@ -144,6 +148,7 @@ namespace VagabondK.Protocols.Channels
                         if (!task.Wait(ConnectTimeout, cancellationTokenSource.Token))
                             throw new SocketException(10060);
 
+                        stream = tcpClient.GetStream();
                         description = tcpClient.Client.RemoteEndPoint.ToString();
                         Logger?.Log(new ChannelOpenEventLog(this));
                     }
@@ -179,7 +184,7 @@ namespace VagabondK.Protocols.Channels
                                     byte[] buffer = new byte[8192];
                                     while (true)
                                     {
-                                        int received = tcpClient.Client.Receive(buffer);
+                                        int received = stream.Read(buffer, 0, buffer.Length);
                                         lock (readBuffer)
                                         {
                                             for (int i = 0; i < received; i++)
@@ -228,7 +233,7 @@ namespace VagabondK.Protocols.Channels
                 try
                 {
                     if (tcpClient?.Client?.Connected == true)
-                        tcpClient?.Client?.Send(bytes);
+                        stream.Write(bytes, 0, bytes.Length);
                 }
                 catch (Exception ex)
                 {
@@ -296,7 +301,7 @@ namespace VagabondK.Protocols.Channels
                     int received = 0;
                     try
                     {
-                        received = tcpClient.Client.Receive(receivedBuffer);
+                        received = stream.Read(receivedBuffer, 0, receivedBuffer.Length);
                     }
                     catch { }
                     for (int i = 0; i < received; i++)
