@@ -54,7 +54,16 @@ namespace VagabondK.Protocols.Channels
         /// <summary>
         /// 연결 요청 들어온 TCP 클라이언트 채널 목록
         /// </summary>
-        public override IReadOnlyList<Channel> Channels { get => channels.Values.Select(w => w.TryGetTarget(out var channel) ? channel : null).Where(c => c != null).ToList(); }
+        public override IReadOnlyList<Channel> Channels
+        {
+            get
+            {
+                IReadOnlyList<Channel> result = null;
+                lock (channels)
+                    result = channels.Values.Select(w => w.TryGetTarget(out var channel) ? channel : null).Where(c => c != null).ToList();
+                return result;
+            }
+        }
 
         /// <summary>
         /// 채널 공급자 설명
@@ -124,14 +133,17 @@ namespace VagabondK.Protocols.Channels
                 cancellationTokenSource?.Cancel();
                 tcpListener?.Stop();
 
-                foreach (var reference in channels.Values)
+                lock (channels)
                 {
-                    if (reference.TryGetTarget(out var channel))
+                    foreach (var reference in channels.Values)
                     {
-                        channel.Dispose();
+                        if (reference.TryGetTarget(out var channel))
+                        {
+                            channel.Dispose();
+                        }
                     }
+                    channels.Clear();
                 }
-                channels.Clear();
             }
         }
 
