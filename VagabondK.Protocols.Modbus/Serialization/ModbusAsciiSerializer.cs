@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -11,6 +12,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
     public sealed class ModbusAsciiSerializer : ModbusSerializer
     {
         private readonly List<byte> errorBuffer = new List<byte>();
+        private readonly object lockReceive = new object();
 
         internal override IEnumerable<byte> OnSerialize(IModbusMessage message)
         {
@@ -58,55 +60,67 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
-            ModbusResponse result = null;
-
-            while (result == null ||
-                result is ModbusCommErrorResponse responseCommErrorMessage
-                && responseCommErrorMessage.ErrorCode != ModbusCommErrorCode.ResponseTimeout)
+            lock (lockReceive)
             {
-                if (buffer.Count > 0)
-                {
-                    errorBuffer.Add(buffer[0]);
-                    buffer.RemoveAt(0);
-                }
+                var remainMessage = buffer.Channel.ReadAllRemain().ToArray();
+                if (remainMessage != null && remainMessage.Length > 0)
+                    RaiseUnrecognized(buffer.Channel, remainMessage);
 
-                buffer.Read(timeout);
+                var requestMessage = Serialize(request).ToArray();
+                buffer.Channel.Write(requestMessage);
+                buffer.RequestLog = new ModbusRequestLog(buffer.Channel, request, requestMessage, this);
+                buffer.Channel?.Logger?.Log(buffer.RequestLog);
 
-                try
+                ModbusResponse result = null;
+
+                while (result == null ||
+                    result is ModbusCommErrorResponse responseCommErrorMessage
+                    && responseCommErrorMessage.ErrorCode != ModbusCommErrorCode.ResponseTimeout)
                 {
-                    while (buffer[0] != 0x3a)
+                    if (buffer.Count > 0)
                     {
                         errorBuffer.Add(buffer[0]);
                         buffer.RemoveAt(0);
-                        buffer.Read(timeout);
+                    }
+
+                    buffer.Read(timeout);
+
+                    try
+                    {
+                        while (buffer[0] != 0x3a)
+                        {
+                            errorBuffer.Add(buffer[0]);
+                            buffer.RemoveAt(0);
+                            buffer.Read(timeout);
+                        }
+                    }
+                    catch
+                    {
+                        return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseAsciiStartError, errorBuffer.Concat(buffer), request);
+                    }
+
+                    result = base.DeserializeResponse(buffer, request, timeout);
+                }
+
+                if (result is ModbusCommErrorResponse responseCommError)
+                {
+                    result = new ModbusCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
+                }
+                else
+                {
+                    var asciiEnd = buffer.Read(2, timeout);
+                    if (!asciiEnd.SequenceEqual(new byte[] { 13, 10 }))
+                        return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseAsciiEndError, buffer, request);
+
+                    if (errorBuffer.Count > 0)
+                    {
+                        RaiseUnrecognized(buffer.Channel, errorBuffer.ToArray());
+                        errorBuffer.Clear();
                     }
                 }
-                catch
-                {
-                    return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseAsciiStartError, errorBuffer.Concat(buffer), request);
-                }
 
-                result = base.DeserializeResponse(buffer, request, timeout);
+                return result;
             }
-
-            if (result is ModbusCommErrorResponse responseCommError)
-            {
-                result = new ModbusCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
-            }
-            else
-            {
-                var asciiEnd = buffer.Read(2, timeout);
-                if (!asciiEnd.SequenceEqual(new byte[] { 13, 10 }))
-                    return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseAsciiEndError, buffer, request);
-
-                if (errorBuffer.Count > 0)
-                {
-                    RaiseUnrecognized(buffer.Channel, errorBuffer.ToArray());
-                    errorBuffer.Clear();
-                }
-            }
-
-            return result;
         }
 
         private bool IsException(ResponseBuffer buffer, ModbusRequest request, int timeout, out ModbusResponse responseMessage)

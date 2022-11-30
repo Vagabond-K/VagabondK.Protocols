@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using VagabondK.Protocols.Channels;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -45,6 +46,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
         internal ResponseBuffer(Channel channel) : base(channel)
         {
         }
+
+        public ModbusRequestLog RequestLog { get; set; }
     }
 
 }

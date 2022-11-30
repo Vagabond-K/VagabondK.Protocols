@@ -51,9 +51,11 @@ namespace VagabondK.Protocols.Logging
         /// <param name="log">통신 채널 Log</param>
         protected virtual void WriteToStream(StreamWriter writer, ChannelLog log)
         {
-            writer.Write($"({log.ChannelDescription}) ");
-            writer.WriteLine(log);
-            writer.Flush();
+            lock (InnerStream)
+            {
+                writer.Write($"({log.ChannelDescription}) {log}");
+                writer.Flush();
+            }
         }
     }
 }

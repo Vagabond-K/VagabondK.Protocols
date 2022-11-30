@@ -169,6 +169,7 @@ namespace VagabondK.Protocols.Channels
             lock (writeLock)
             {
                 outputStream.Write(bytes, 0, bytes.Length);
+                outputStream.Flush();
             }
         }
 

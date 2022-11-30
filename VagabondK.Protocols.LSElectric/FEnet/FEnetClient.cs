@@ -19,6 +19,8 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         private readonly Dictionary<ushort, ResponseWaitHandle> responseWaitHandles = new Dictionary<ushort, ResponseWaitHandle>();
         private bool isReceiving = false;
         private readonly List<byte> errorBuffer = new List<byte>();
+        private readonly object lockSerialize = new object();
+        private readonly object lockReceive = new object();
 
         class ResponseWaitHandle : EventWaitHandle
         {
@@ -113,42 +115,46 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <returns>FEnet 응답</returns>
         public FEnetResponse Request(int timeout, FEnetRequest request)
         {
-            if (request.InvokeID == null)
-                request.InvokeID = invokeID++;
-
-            request = (FEnetRequest)request.Clone();
-
             Channel channel = (Channel as Channel) ?? (Channel as ChannelProvider)?.PrimaryChannel;
 
             if (channel == null)
                 throw new ArgumentNullException(nameof(Channel));
 
-            var requestMessage = request.Serialize(CompanyID, UseChecksum).ToArray();
-
-            channel.Write(requestMessage);
-            var requestLog = new FEnetRequestLog(channel, request, requestMessage);
-            channel?.Logger?.Log(requestLog);
-
+            byte[] requestMessage;
+            FEnetRequestLog requestLog;
             FEnetResponse result;
             List<byte> buffer = new List<byte>();
+
+            lock (lockSerialize)
+            {
+                request = (FEnetRequest)request.Clone();
+                if (request.InvokeID == null)
+                    request.InvokeID = invokeID++;
+                requestMessage = request.Serialize(CompanyID, UseChecksum).ToArray();
+            }
 
             try
             {
                 if (responseWaitHandles.TryGetValue(request.InvokeID.Value, out var oldHandle))
                     oldHandle.WaitOne(timeout);
 
-                var responseWaitHandle = responseWaitHandles[request.InvokeID.Value] = new ResponseWaitHandle(buffer, request, timeout);
+                ResponseWaitHandle responseWaitHandle;
+                lock (responseWaitHandles)
+                    responseWaitHandle = responseWaitHandles[request.InvokeID.Value] = new ResponseWaitHandle(buffer, request, timeout);
 
-                Task.Run(() => RunReceive(channel));
+                channel.Write(requestMessage);
+                requestLog = new FEnetRequestLog(channel, request, requestMessage);
+                channel?.Logger?.Log(requestLog);
+
+                RunReceive(channel);
 
                 responseWaitHandle.WaitOne(timeout);
 
                 result = responseWaitHandle.Response;
-                if (result == null)
-                {
+                lock (responseWaitHandles)
                     responseWaitHandles.Remove(request.InvokeID.Value);
+                if (result == null)
                     result = new FEnetCommErrorResponse(FEnetCommErrorCode.ResponseTimeout, new byte[0], request, 0, 0);
-                }
             }
             catch (Exception ex)
             {
@@ -377,17 +383,29 @@ namespace VagabondK.Protocols.LSElectric.FEnet
 
         private void RunReceive(Channel channel)
         {
-            lock (responseWaitHandles)
+            lock (lockReceive)
             {
-                if (!isReceiving)
-                {
+                if (isReceiving) return;
                     isReceiving = true;
+
+                new Thread(new ThreadStart(() =>
+                {
                     try
                     {
                         var buffer = new List<byte>();
 
-                        while (responseWaitHandles.Count > 0)
+                        while (true)
                         {
+                            lock (responseWaitHandles)
+                                if (responseWaitHandles.Count == 0)
+                                {
+                                    errorBuffer.AddRange(buffer);
+                                    if (errorBuffer.Count > 0)
+                                        channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
+                                    errorBuffer.Clear();
+                                    break;
+                                }
+
                             if (errorBuffer.Count >= 256)
                             {
                                 channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
@@ -410,9 +428,14 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                                 buffer.RemoveRange(0, 14);
                                 continue;
                             }
+                            ushort invokeID;
+                            ResponseWaitHandle responseWaitHandle;
 
-                            ushort invokeID = (ushort)(buffer[14]| (buffer[15] << 8));
-                            if (!responseWaitHandles.TryGetValue(invokeID, out var responseWaitHandle))
+                            invokeID = (ushort)(buffer[14]| (buffer[15] << 8));
+                            lock (responseWaitHandles)
+                                responseWaitHandles.TryGetValue(invokeID, out responseWaitHandle);
+
+                            if (responseWaitHandle == null)
                             {
                                 errorBuffer.AddRange(buffer.Take(15));
                                 buffer.RemoveRange(0, 15);
@@ -522,7 +545,6 @@ namespace VagabondK.Protocols.LSElectric.FEnet
 
                             buffer.Clear();
                             responseWaitHandle.Response = result;
-                            responseWaitHandles.Remove(invokeID);
                             responseWaitHandle.Set();
                         }
                     }
@@ -530,7 +552,10 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                     {
                     }
                     isReceiving = false;
-                }
+                }))
+                {
+                    IsBackground = true
+                }.Start();
             }
         }
 

@@ -83,9 +83,9 @@ namespace VagabondK.Protocols.Channels
         private readonly object readLock = new object();
         private readonly Queue<byte> readBuffer = new Queue<byte>();
         private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-        private bool isRunningReceive = false;
         private string description;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private Thread readThread;
 
         /// <summary>
         /// 채널 설명
@@ -170,12 +170,10 @@ namespace VagabondK.Protocols.Channels
                 if (readBuffer.Count == 0)
                 {
                     readEventWaitHandle.Reset();
-
-                    Task.Run(() =>
+                    if (readThread == null)
                     {
-                        if (!isRunningReceive)
+                        readThread = new Thread(new ThreadStart(() =>
                         {
-                            isRunningReceive = true;
                             try
                             {
                                 CheckConnection();
@@ -208,9 +206,11 @@ namespace VagabondK.Protocols.Channels
                                 Close();
                             }
                             readEventWaitHandle.Set();
-                            isRunningReceive = false;
-                        }
-                    }, cancellationTokenSource.Token);
+                            readThread = null;
+                        }))
+                        { IsBackground = true };
+                        readThread.Start();
+                    }
                 }
                 else return readBuffer.Dequeue();
             }
@@ -233,7 +233,10 @@ namespace VagabondK.Protocols.Channels
                 try
                 {
                     if (tcpClient?.Client?.Connected == true)
+                    {
                         stream.Write(bytes, 0, bytes.Length);
+                        stream.Flush();
+                    }
                 }
                 catch (Exception ex)
                 {

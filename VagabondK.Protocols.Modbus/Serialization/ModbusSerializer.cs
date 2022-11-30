@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using VagabondK.Protocols.Channels;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -11,7 +12,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
     public abstract class ModbusSerializer
     {
         internal void RaiseUnrecognized(IChannel channel, IReadOnlyList<byte> errorMessage)
-            => channel?.Logger?.Log(new Logging.UnrecognizedErrorLog(channel, errorMessage.ToArray()));
+            => channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorMessage.ToArray()));
 
         /// <summary>
         /// Modbus 메시지 직렬화

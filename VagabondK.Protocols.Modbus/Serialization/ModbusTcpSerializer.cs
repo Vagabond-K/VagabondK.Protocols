@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using VagabondK.Protocols.Channels;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -16,6 +18,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
         private readonly Dictionary<ushort, ResponseWaitHandle> responseWaitHandles = new Dictionary<ushort, ResponseWaitHandle>();
         private bool isReceiving = false;
         private readonly List<byte> errorBuffer = new List<byte>();
+        private readonly object lockSerialize = new object();
+        private readonly object lockReceive = new object();
 
         class ResponseWaitHandle : EventWaitHandle
         {
@@ -35,22 +39,25 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override IEnumerable<byte> OnSerialize(IModbusMessage message)
         {
-            if (message is ModbusRequest request && request.TransactionID == null)
-                request.TransactionID = transactionID++;
-
-            var messageArray = message.Serialize().ToArray();
-            int messageLength = messageArray.Length;
-
-            yield return (byte)((message.TransactionID >> 8) & 0xff);
-            yield return (byte)(message.TransactionID & 0xff);
-            yield return 0;
-            yield return 0;
-            yield return (byte)((messageLength >> 8) & 0xff);
-            yield return (byte)(messageLength & 0xff);
-
-            foreach (var b in messageArray)
+            lock (lockSerialize)
             {
-                yield return b;
+                if (message is ModbusRequest request && request.TransactionID == null)
+                    request.TransactionID = transactionID++;
+
+                var messageArray = message.Serialize().ToArray();
+                int messageLength = messageArray.Length;
+
+                yield return (byte)((message.TransactionID >> 8) & 0xff);
+                yield return (byte)(message.TransactionID & 0xff);
+                yield return 0;
+                yield return 0;
+                yield return (byte)((messageLength >> 8) & 0xff);
+                yield return (byte)(messageLength & 0xff);
+
+                foreach (var b in messageArray)
+                {
+                    yield return b;
+                }
             }
         }
 
@@ -77,30 +84,49 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         private void RunReceive(Channel channel)
         {
-            lock (responseWaitHandles)
+            lock (lockReceive)
             {
-                if (!isReceiving)
+                if (isReceiving) return;
+                isReceiving = true;
+
+                var thread = new Thread(new ThreadStart(() =>
                 {
-                    isReceiving = true;
-                    try
+                    var readBuffer = new ResponseBuffer(channel);
+                    while (true)
                     {
-                        var readBuffer = new ResponseBuffer(channel);
-
-                        while (responseWaitHandles.Count > 0)
-                        {
-                            if (errorBuffer.Count >= 256)
-                            {
-                                RaiseUnrecognized(channel, errorBuffer.ToArray());
-                                errorBuffer.Clear();
-                            }
-
-                            readBuffer.Read(2, 0);
-
-                            ushort transactionID = (ushort)((readBuffer[0] << 8) | readBuffer[1]);
-                            if (!responseWaitHandles.TryGetValue(transactionID, out var responseWaitHandle))
+                        lock (responseWaitHandles)
+                            if (responseWaitHandles.Count == 0)
                             {
                                 errorBuffer.AddRange(readBuffer);
-                                readBuffer.Clear();
+                                if (errorBuffer.Count > 0)
+                                    RaiseUnrecognized(channel, errorBuffer.ToArray());
+                                errorBuffer.Clear();
+                                break;
+                            }
+
+                        if (errorBuffer.Count >= 256)
+                        {
+                            RaiseUnrecognized(channel, errorBuffer.ToArray());
+                            errorBuffer.Clear();
+                        }
+
+                        try
+                        {
+                            ushort transactionID;
+                            ResponseWaitHandle responseWaitHandle;
+
+                            if (readBuffer.Count < 2)
+                                readBuffer.Read((uint)(2 - readBuffer.Count), 0);
+
+                            transactionID = (ushort)((readBuffer[0] << 8) | readBuffer[1]);
+
+                            lock (responseWaitHandles)
+                                responseWaitHandles.TryGetValue(transactionID, out responseWaitHandle);
+
+                            if (responseWaitHandle == null)
+                            {
+                                errorBuffer.Add(readBuffer[0]);
+                                readBuffer.RemoveAt(0);
                                 continue;
                             }
 
@@ -116,7 +142,6 @@ namespace VagabondK.Protocols.Modbus.Serialization
                             }
 
                             var result = base.DeserializeResponse(readBuffer, responseWaitHandle.Request, responseWaitHandle.Timeout);
-
                             if (result is ModbusCommErrorResponse responseCommErrorMessage)
                             {
                                 errorBuffer.AddRange(readBuffer.Take(4));
@@ -135,44 +160,50 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                 continue;
                             }
 
+                            var length = result.Serialize().Count() + 6;
+                            responseWaitHandle.ResponseBuffer.AddRange(readBuffer.Take(length));
+                            readBuffer.RemoveRange(0, length);
 
-                            if (errorBuffer.Count > 0)
-                            {
-                                RaiseUnrecognized(channel, errorBuffer.ToArray());
-                                errorBuffer.Clear();
-                            }
-
-                            responseWaitHandle.ResponseBuffer.AddRange(readBuffer);
-
-                            readBuffer.Clear();
                             responseWaitHandle.Response = result;
-                            responseWaitHandles.Remove(transactionID);
                             responseWaitHandle.Set();
                         }
-                    }
-                    catch
-                    {
+                        catch
+                        {
+                            break;
+                        }
                     }
                     isReceiving = false;
-                }
+                }))
+                {
+                    IsBackground = true
+                };
+                thread.Start();
             }
         }
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
+            var requestMessage = Serialize(request).ToArray();
+
             if (responseWaitHandles.TryGetValue(request.TransactionID.Value, out var oldHandle))
-                oldHandle.WaitOne(timeout);
+                oldHandle?.WaitOne(timeout);
 
-            var responseWaitHandle = responseWaitHandles[request.TransactionID.Value] = new ResponseWaitHandle(buffer, request, timeout);
+            ResponseWaitHandle responseWaitHandle;
+            lock (responseWaitHandles)
+                responseWaitHandles[request.TransactionID.Value] = responseWaitHandle = new ResponseWaitHandle(buffer, request, timeout);
 
-            Task.Run(() => RunReceive(buffer.Channel));
+            buffer.Channel.Write(requestMessage);
+            RunReceive(buffer.Channel);
+            buffer.RequestLog = new ModbusRequestLog(buffer.Channel, request, requestMessage, this);
+            buffer.Channel?.Logger?.Log(buffer.RequestLog);
 
             responseWaitHandle.WaitOne(timeout);
 
             var result = responseWaitHandle.Response;
+            lock (responseWaitHandles)
+                responseWaitHandles.Remove(request.TransactionID.Value);
             if (result == null)
             {
-                responseWaitHandles.Remove(request.TransactionID.Value);
                 return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseTimeout, new byte[0], request);
             }
 

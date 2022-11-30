@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using VagabondK.Protocols.Logging;
 
 namespace VagabondK.Protocols.Modbus.Serialization
 {
@@ -10,6 +11,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
     public sealed class ModbusRtuSerializer : ModbusSerializer
     {
         private readonly List<byte> errorBuffer = new List<byte>();
+        private readonly object lockReceive = new object();
 
         private static readonly ushort[] crcTable = {
             0x0000, 0xc0c1, 0xc181, 0x0140, 0xc301, 0x03c0, 0x0280, 0xc241,
@@ -95,27 +97,39 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
-            ModbusResponse result = base.DeserializeResponse(buffer, request, timeout);
-
-            while (result is ModbusCommErrorResponse responseCommErrorMessage
-                && responseCommErrorMessage.ErrorCode != ModbusCommErrorCode.ResponseTimeout)
+            lock (lockReceive)
             {
-                errorBuffer.Add(buffer[0]);
-                buffer.RemoveAt(0);
-                result = base.DeserializeResponse(buffer, request, timeout);
-            }
+                var remainMessage = buffer.Channel.ReadAllRemain().ToArray();
+                if (remainMessage != null && remainMessage.Length > 0)
+                    RaiseUnrecognized(buffer.Channel, remainMessage);
 
-            if (result is ModbusCommErrorResponse responseCommError)
-            {
-                result = new ModbusCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
-            }
-            else if (errorBuffer.Count > 0)
-            {
-                RaiseUnrecognized(buffer.Channel, errorBuffer.ToArray());
-                errorBuffer.Clear();
-            }
+                var requestMessage = Serialize(request).ToArray();
+                buffer.Channel.Write(requestMessage);
+                buffer.RequestLog = new ModbusRequestLog(buffer.Channel, request, requestMessage, this);
+                buffer.Channel?.Logger?.Log(buffer.RequestLog);
 
-            return result;
+                ModbusResponse result = base.DeserializeResponse(buffer, request, timeout);
+
+                while (result is ModbusCommErrorResponse responseCommErrorMessage
+                    && responseCommErrorMessage.ErrorCode != ModbusCommErrorCode.ResponseTimeout)
+                {
+                    errorBuffer.Add(buffer[0]);
+                    buffer.RemoveAt(0);
+                    result = base.DeserializeResponse(buffer, request, timeout);
+                }
+
+                if (result is ModbusCommErrorResponse responseCommError)
+                {
+                    result = new ModbusCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
+                }
+                else if (errorBuffer.Count > 0)
+                {
+                    RaiseUnrecognized(buffer.Channel, errorBuffer.ToArray());
+                    errorBuffer.Clear();
+                }
+
+                return result;
+            }
         }
 
         internal override ModbusResponse DeserializeReadBooleanResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout)

@@ -13,8 +13,7 @@ namespace VagabondK.Protocols.Logging
         /// <param name="log">통신 채널 Log</param>
         public void Log(ChannelLog log)
         {
-            Console.Write($"({log.ChannelDescription}) ");
-            Console.WriteLine(log);
+            Console.WriteLine($"({log.ChannelDescription}) {log}");
         }
     }
 }
