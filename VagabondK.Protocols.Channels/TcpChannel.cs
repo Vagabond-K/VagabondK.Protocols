@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using VagabondK.Protocols.Logging;
@@ -82,10 +81,8 @@ namespace VagabondK.Protocols.Channels
         private readonly object writeLock = new object();
         private readonly object readLock = new object();
         private readonly Queue<byte> readBuffer = new Queue<byte>();
-        private readonly EventWaitHandle readEventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private string description;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        private Thread readThread;
 
         /// <summary>
         /// 채널 설명
@@ -109,7 +106,6 @@ namespace VagabondK.Protocols.Channels
             {
                 provider?.RemoveChannel(Guid);
                 IsDisposed = true;
-                readEventWaitHandle.Set();
                 Close();
             }
         }
@@ -163,62 +159,51 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
+        private readonly byte[] buffer = new byte[8192];
         private byte? GetByte(int timeout)
         {
             lock (readBuffer)
             {
                 if (readBuffer.Count == 0)
                 {
-                    readEventWaitHandle.Reset();
-                    if (readThread == null)
+                    try
                     {
-                        readThread = new Thread(new ThreadStart(() =>
+                        CheckConnection();
+                        if (tcpClient != null)
                         {
-                            try
-                            {
-                                CheckConnection();
-                                if (tcpClient != null)
-                                {
-                                    byte[] buffer = new byte[8192];
-                                    while (true)
-                                    {
-                                        int received = stream.Read(buffer, 0, buffer.Length);
-                                        lock (readBuffer)
-                                        {
-                                            for (int i = 0; i < received; i++)
-                                                readBuffer.Enqueue(buffer[i]);
-                                            readEventWaitHandle.Set();
-                                        }
+                            int received = 0;
 
-                                        if (received == 0)
-                                        {
-                                            var socket = tcpClient?.Client;
-                                            if (socket == null || socket.Available == 0 && socket.Poll(1000, SelectMode.SelectRead))
-                                            {
-                                                throw new Exception();
-                                            }
-                                        }
-                                    }
+                            if (timeout == 0)
+                                received = stream.Read(buffer, 0, buffer.Length);
+                            else
+                            {
+                                var task = stream.ReadAsync(buffer, 0, buffer.Length);
+                                if (task.Wait(timeout))
+                                    received = task.Result;
+                            }
+
+                            for (int i = 1; i < received; i++)
+                                readBuffer.Enqueue(buffer[i]);
+
+                            if (received == 0)
+                            {
+                                var socket = tcpClient?.Client;
+                                if (socket == null || socket.Available == 0 && socket.Poll(1000, SelectMode.SelectRead))
+                                {
+                                    throw new Exception();
                                 }
                             }
-                            catch
-                            {
-                                Close();
-                            }
-                            readEventWaitHandle.Set();
-                            readThread = null;
-                        }))
-                        { IsBackground = true };
-                        readThread.Start();
+                            else return buffer[0];
+                        }
                     }
+                    catch
+                    {
+                        Close();
+                    }
+                    return null;
                 }
                 else return readBuffer.Dequeue();
             }
-
-            if (timeout == 0 ? readEventWaitHandle.WaitOne() : readEventWaitHandle.WaitOne(timeout))
-                return readBuffer.Count > 0 ? readBuffer.Dequeue() : (byte?)null;
-            else
-                return null;
         }
 
         /// <summary>

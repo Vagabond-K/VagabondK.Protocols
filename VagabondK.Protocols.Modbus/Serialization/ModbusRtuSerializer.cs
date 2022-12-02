@@ -236,7 +236,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
         }
 
 
-        internal override ModbusRequest DeserializeRequest(RequestBuffer buffer)
+        internal override ModbusRequest DeserializeRequest(RequestBuffer buffer, int timeout)
         {
             ModbusRequest result = null;
             while (!buffer.Channel.IsDisposed)
@@ -248,7 +248,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 }
 
                 while (buffer.Count < 8 && !buffer.Channel.IsDisposed)
-                    buffer.Read();
+                    buffer.Read(1, timeout);
 
                 if (buffer.Channel.IsDisposed) break;
 
@@ -296,7 +296,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                         case ModbusFunction.WriteMultipleCoils:
                         case ModbusFunction.WriteMultipleHoldingRegisters:
                             if (buffer.Count < 7 && !buffer.Channel.IsDisposed)
-                                buffer.Read();
+                                buffer.Read(1, timeout);
 
                             if (buffer.Channel.IsDisposed) break;
 
@@ -307,7 +307,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                 || function == ModbusFunction.WriteMultipleHoldingRegisters && byteLength == valueOrLength * 2)
                             {
                                 while (buffer.Count < messageLength && !buffer.Channel.IsDisposed)
-                                    buffer.Read();
+                                    buffer.Read(1, timeout);
 
                                 if (buffer.Channel.IsDisposed) break;
 

@@ -388,7 +388,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                 if (isReceiving) return;
                     isReceiving = true;
 
-                new Thread(new ThreadStart(() =>
+                Task.Factory.StartNew(() =>
                 {
                     try
                     {
@@ -431,7 +431,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                             ushort invokeID;
                             ResponseWaitHandle responseWaitHandle;
 
-                            invokeID = (ushort)(buffer[14]| (buffer[15] << 8));
+                            invokeID = (ushort)(buffer[14] | (buffer[15] << 8));
                             lock (responseWaitHandles)
                                 responseWaitHandles.TryGetValue(invokeID, out responseWaitHandle);
 
@@ -552,10 +552,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                     {
                     }
                     isReceiving = false;
-                }))
-                {
-                    IsBackground = true
-                }.Start();
+                }, TaskCreationOptions.LongRunning);
             }
         }
 

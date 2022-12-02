@@ -140,7 +140,7 @@ namespace VagabondK.Protocols.Channels
                 {
                     readEventWaitHandle.Reset();
 
-                    Task.Run(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         if (!isRunningReceive)
                         {
@@ -184,7 +184,7 @@ namespace VagabondK.Protocols.Channels
                             readEventWaitHandle.Set();
                             isRunningReceive = false;
                         }
-                    });
+                    }, TaskCreationOptions.LongRunning);
                 }
                 else return readBuffer.Dequeue();
             }

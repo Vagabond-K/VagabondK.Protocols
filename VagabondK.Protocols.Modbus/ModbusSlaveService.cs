@@ -481,59 +481,48 @@ namespace VagabondK.Protocols.Modbus
                 if (!channel.IsDisposed)
                 {
                     isRunning = true;
-                    Task.Run(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         while (isRunning && !channel.IsDisposed)
                         {
                             try
                             {
-                                void receive()
-                                {
-                                    RequestBuffer buffer = new RequestBuffer(modbusSlaveService, channel);
-
-                                    var serializer = modbusSlaveService.Serializer;
-
-                                    var request = serializer.Deserialize(buffer);
-                                    if (request != null)
-                                    {
-                                        var requestLog = new ModbusRequestLog(channel, request, buffer.ToArray(), serializer);
-                                        channel.Logger?.Log(requestLog);
-                                        ModbusResponse response = null;
-
-                                        try
-                                        {
-                                            response = modbusSlaveService.OnReceivedModbusRequest(channel, request);
-                                        }
-                                        catch (ModbusException modbusException)
-                                        {
-                                            response = new ModbusExceptionResponse(modbusException.Code, request);
-                                        }
-                                        catch
-                                        {
-                                            response = new ModbusExceptionResponse(ModbusExceptionCode.SlaveDeviceFailure, request);
-                                        }
-
-                                        if (response != null)
-                                        {
-                                            var responseMessage = serializer.Serialize(response).ToArray();
-                                            channel.Write(responseMessage);
-
-                                            if (response is ModbusExceptionResponse exceptionResponse)
-                                                channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog, serializer));
-                                            else
-                                                channel?.Logger?.Log(new ModbusResponseLog(channel, response, responseMessage, requestLog, serializer));
-                                        }
-                                    }
-                                }
-
                                 var channelTimeout = modbusSlaveService.ChannelTimeout;
-                                if (!createdFromProvider || channelTimeout == 0)
+
+                                RequestBuffer buffer = new RequestBuffer(modbusSlaveService, channel);
+
+                                var serializer = modbusSlaveService.Serializer;
+
+                                var request = serializer.Deserialize(buffer, channelTimeout);
+                                if (request != null)
                                 {
-                                    receive();
-                                }
-                                else if (!Task.Run(receive).Wait(channelTimeout))
-                                {
-                                    modbusSlaveService.RemoveChannel(channel);
+                                    var requestLog = new ModbusRequestLog(channel, request, buffer.ToArray(), serializer);
+                                    channel.Logger?.Log(requestLog);
+                                    ModbusResponse response = null;
+
+                                    try
+                                    {
+                                        response = modbusSlaveService.OnReceivedModbusRequest(channel, request);
+                                    }
+                                    catch (ModbusException modbusException)
+                                    {
+                                        response = new ModbusExceptionResponse(modbusException.Code, request);
+                                    }
+                                    catch
+                                    {
+                                        response = new ModbusExceptionResponse(ModbusExceptionCode.SlaveDeviceFailure, request);
+                                    }
+
+                                    if (response != null)
+                                    {
+                                        var responseMessage = serializer.Serialize(response).ToArray();
+                                        channel.Write(responseMessage);
+
+                                        if (response is ModbusExceptionResponse exceptionResponse)
+                                            channel?.Logger?.Log(new ModbusExceptionLog(channel, exceptionResponse, responseMessage, requestLog, serializer));
+                                        else
+                                            channel?.Logger?.Log(new ModbusResponseLog(channel, response, responseMessage, requestLog, serializer));
+                                    }
                                 }
                             }
                             catch
@@ -544,7 +533,7 @@ namespace VagabondK.Protocols.Modbus
                         }
                         if (!channel.IsDisposed)
                             channel.Dispose();
-                    });
+                    }, TaskCreationOptions.LongRunning);
                 }
             }
 

@@ -113,12 +113,12 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
 
 
-        internal ModbusRequest Deserialize(RequestBuffer buffer)
+        internal ModbusRequest Deserialize(RequestBuffer buffer, int timeout)
         {
-            return DeserializeRequest(buffer);
+            return DeserializeRequest(buffer, timeout);
         }
 
-        internal abstract ModbusRequest DeserializeRequest(RequestBuffer buffer);
+        internal abstract ModbusRequest DeserializeRequest(RequestBuffer buffer, int timeout);
 
 
         internal static IEnumerable<bool> ByteToBooleanArray(byte value)

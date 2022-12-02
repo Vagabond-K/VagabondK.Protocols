@@ -445,7 +445,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
                 if (!channel.IsDisposed)
                 {
                     isRunning = true;
-                    Task.Run(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         List<byte> buffer = new List<byte>();
                         List<byte> errorBuffer = new List<byte>();
@@ -475,7 +475,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
                         }
                         if (!channel.IsDisposed)
                             channel.Dispose();
-                    });
+                    }, TaskCreationOptions.LongRunning);
                 }
             }
 

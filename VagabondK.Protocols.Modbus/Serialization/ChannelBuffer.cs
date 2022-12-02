@@ -21,8 +21,6 @@ namespace VagabondK.Protocols.Modbus.Serialization
             return result;
         }
 
-        public byte Read() => Read(0);
-
         public byte[] Read(uint count, int timeout)
         {
             var result = Channel.Read(count, timeout).ToArray();

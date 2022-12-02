@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,7 +88,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 if (isReceiving) return;
                 isReceiving = true;
 
-                var thread = new Thread(new ThreadStart(() =>
+                Task.Factory.StartNew(() =>
                 {
                     var readBuffer = new ResponseBuffer(channel);
                     while (true)
@@ -172,11 +171,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                         }
                     }
                     isReceiving = false;
-                }))
-                {
-                    IsBackground = true
-                };
-                thread.Start();
+                }, TaskCreationOptions.LongRunning);
             }
         }
 
@@ -307,7 +302,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
         }
 
 
-        internal override ModbusRequest DeserializeRequest(RequestBuffer buffer)
+        internal override ModbusRequest DeserializeRequest(RequestBuffer buffer, int timeout)
         {
             ModbusRequest result = null;
             while (!buffer.Channel.IsDisposed)
@@ -319,7 +314,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 }
 
                 while (buffer.Count < 12 && !buffer.Channel.IsDisposed)
-                    buffer.Read();
+                    buffer.Read(1, timeout);
 
                 if (buffer.Channel.IsDisposed) break;
 
@@ -371,7 +366,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                             case ModbusFunction.WriteMultipleCoils:
                             case ModbusFunction.WriteMultipleHoldingRegisters:
                                 if (buffer.Count < 13 && !buffer.Channel.IsDisposed)
-                                    buffer.Read();
+                                    buffer.Read(1, timeout);
 
                                 if (buffer.Channel.IsDisposed) break;
 
@@ -382,7 +377,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                     || function == ModbusFunction.WriteMultipleHoldingRegisters && byteLength == valueOrLength * 2))
                                 {
                                     while (buffer.Count < 6 + messageLength && !buffer.Channel.IsDisposed)
-                                        buffer.Read();
+                                        buffer.Read(1, timeout);
 
                                     if (buffer.Channel.IsDisposed) break;
 

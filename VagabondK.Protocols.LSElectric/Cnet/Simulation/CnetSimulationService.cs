@@ -700,7 +700,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                 if (!channel.IsDisposed)
                 {
                     isRunning = true;
-                    Task.Run(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         while (isRunning && !channel.IsDisposed)
                         {
@@ -729,7 +729,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet.Simulation
                         }
                         if (!channel.IsDisposed)
                             channel.Dispose();
-                    });
+                    }, TaskCreationOptions.LongRunning);
                 }
             }
 

@@ -289,7 +289,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             return value == 0x0d || value == 0x0a || value >= 0x30 && value <= 0x3a || value >= 0x41 && value <= 0x46 || value >= 0x61 && value <= 0x66;
         }
 
-        internal override ModbusRequest DeserializeRequest(RequestBuffer rawBuffer)
+        internal override ModbusRequest DeserializeRequest(RequestBuffer rawBuffer, int timeout)
         {
             ModbusRequest result = null;
 
@@ -302,7 +302,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 }
 
                 while (rawBuffer.Count < 17 && !rawBuffer.Channel.IsDisposed)
-                    rawBuffer.Read();
+                    rawBuffer.Read(1, timeout);
 
                 if (rawBuffer.Channel.IsDisposed) break;
 
@@ -377,7 +377,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                     || function == ModbusFunction.WriteMultipleHoldingRegisters && byteLength == valueOrLength * 2)
                                 {
                                     while (rawBuffer.Count < messageLength && !rawBuffer.Channel.IsDisposed)
-                                        rawBuffer.Read();
+                                        rawBuffer.Read(1, timeout);
 
                                     if (rawBuffer.Channel.IsDisposed) break;
 

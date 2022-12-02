@@ -100,7 +100,7 @@ namespace VagabondK.Protocols.Channels
                     throw new ObjectDisposedException(nameof(UdpChannelProvider));
 
                 cancellationTokenSource = new CancellationTokenSource();
-                Task.Run(() =>
+                Task.Factory.StartNew(() =>
                 {
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
@@ -135,7 +135,7 @@ namespace VagabondK.Protocols.Channels
                             Logger?.Log(new ChannelErrorLog(this, ex));
                         }
                     }
-                }, cancellationTokenSource.Token);
+                }, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
             }
         }
 

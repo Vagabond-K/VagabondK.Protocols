@@ -150,7 +150,7 @@ namespace VagabondK.Protocols.Channels
                     catch (Exception ex)
                     {
                         Logger?.Log(new ChannelErrorLog(this, ex));
-                        throw ex;
+                        //throw ex;
                     }
                 }
             }
@@ -164,7 +164,7 @@ namespace VagabondK.Protocols.Channels
                 {
                     readEventWaitHandle.Reset();
 
-                    Task.Run(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         if (!isRunningReceive)
                         {
@@ -179,7 +179,11 @@ namespace VagabondK.Protocols.Channels
                                     {
                                         if (SerialPort.BytesToRead > 0)
                                         {
+#if NETSTANDARD2_0
                                             int received = SerialPort.Read(buffer, 0, buffer.Length);
+#else
+                                            int received = SerialPort.Read(buffer, 0, buffer.Length);
+#endif
                                             lock (readBuffer)
                                             {
                                                 for (int i = 0; i < received; i++)
@@ -187,6 +191,9 @@ namespace VagabondK.Protocols.Channels
                                                 readEventWaitHandle.Set();
                                             }
                                         }
+#if NETSTANDARD2_0
+                                        else Thread.Sleep(1);
+#endif
                                     }
                                 }
                             }
@@ -197,7 +204,7 @@ namespace VagabondK.Protocols.Channels
                             readEventWaitHandle.Set();
                             isRunningReceive = false;
                         }
-                    });
+                    }, TaskCreationOptions.LongRunning);
                 }
                 else return readBuffer.Dequeue();
             }
