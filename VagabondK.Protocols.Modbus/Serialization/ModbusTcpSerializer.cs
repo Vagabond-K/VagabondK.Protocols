@@ -160,9 +160,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                 continue;
                             }
 
-                            var length = result.Serialize().Count() + 6;
-                            responseWaitHandle.ResponseBuffer.AddRange(readBuffer.Take(length));
-                            readBuffer.RemoveRange(0, length);
+                            responseWaitHandle.ResponseBuffer.AddRange(readBuffer);
+                            readBuffer.Clear();
 
                             responseWaitHandle.Response = result;
                             responseWaitHandle.Set();
