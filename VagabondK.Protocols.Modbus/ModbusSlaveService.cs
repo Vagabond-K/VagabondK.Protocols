@@ -439,10 +439,12 @@ namespace VagabondK.Protocols.Modbus
                 RequestedWriteHoldingRegister);
         
         private TEventArgs InvokeOverrideMethodAndEvent<TEventArgs>(TEventArgs eventArgs, Action<TEventArgs> action, EventHandler<TEventArgs> eventHandler)
+            where TEventArgs : RequestedEventArgs
         {
             try
             {
                 action(eventArgs);
+                eventArgs.Succeed = true;
             }
             catch (Exception ex)
             {
@@ -603,6 +605,11 @@ namespace VagabondK.Protocols.Modbus
         /// 통신 채널
         /// </summary>
         public Channel Channel { get; }
+
+        /// <summary>
+        /// 요청 처리 성공 여부
+        /// </summary>
+        public bool Succeed { get; internal set; }
     }
 
     /// <summary>
