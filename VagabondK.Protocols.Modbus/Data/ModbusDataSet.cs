@@ -244,8 +244,15 @@ namespace VagabondK.Protocols.Modbus.Data
 
             if (dataBlocks.Count == 0)
             {
-                newDataBlock.AlignRawDataArray();
-                dataBlocks.Add(newDataBlock);
+                if (autoAllocation)
+                {
+                    newDataBlock.AlignRawDataArray();
+                    dataBlocks.Add(newDataBlock);
+                }
+                else
+                {
+                    throw new ModbusException(ModbusExceptionCode.IllegalDataAddress);
+                }
             }
             else
             {
