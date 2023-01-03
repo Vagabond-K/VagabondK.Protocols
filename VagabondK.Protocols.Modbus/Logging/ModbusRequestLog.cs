@@ -25,12 +25,18 @@ namespace VagabondK.Protocols.Logging
             ModbusRequest = request;
         }
 
+        private ushort? transactionID = null;
         private readonly ModbusSerializer serializer;
 
         /// <summary>
         /// Modbus 요청 메시지
         /// </summary>
         public ModbusRequest ModbusRequest { get; }
+
+        /// <summary>
+        /// 트랜잭션 ID (Modbus TCP에서 사용)
+        /// </summary>
+        public ushort? TransactionID { get => transactionID ?? ModbusRequest?.TransactionID; set => transactionID = value; }
 
         /// <summary>
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.

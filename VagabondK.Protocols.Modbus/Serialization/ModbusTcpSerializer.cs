@@ -13,7 +13,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
     /// </summary>
     public sealed class ModbusTcpSerializer : ModbusSerializer
     {
-        private ushort transactionID = 0;
+        private ushort currentTransactionID = 0;
         private readonly Dictionary<ushort, ResponseWaitHandle> responseWaitHandles = new Dictionary<ushort, ResponseWaitHandle>();
         private bool isReceiving = false;
         private readonly List<byte> errorBuffer = new List<byte>();
@@ -40,14 +40,13 @@ namespace VagabondK.Protocols.Modbus.Serialization
         {
             lock (lockSerialize)
             {
-                if (message is ModbusRequest request && request.TransactionID == null)
-                    request.TransactionID = transactionID++;
+                ushort transactionID = message?.TransactionID ?? currentTransactionID++;
 
                 var messageArray = message.Serialize().ToArray();
                 int messageLength = messageArray.Length;
 
-                yield return (byte)((message.TransactionID >> 8) & 0xff);
-                yield return (byte)(message.TransactionID & 0xff);
+                yield return (byte)((transactionID >> 8) & 0xff);
+                yield return (byte)(transactionID & 0xff);
                 yield return 0;
                 yield return 0;
                 yield return (byte)((messageLength >> 8) & 0xff);
@@ -178,28 +177,30 @@ namespace VagabondK.Protocols.Modbus.Serialization
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
             var requestMessage = Serialize(request).ToArray();
+            var transactionID = (ushort)((requestMessage[0] << 8) | requestMessage[1]);
 
-            if (responseWaitHandles.TryGetValue(request.TransactionID.Value, out var oldHandle))
+            if (responseWaitHandles.TryGetValue(transactionID, out var oldHandle))
                 oldHandle?.WaitOne(timeout);
 
             ResponseWaitHandle responseWaitHandle;
             lock (responseWaitHandles)
-                responseWaitHandles[request.TransactionID.Value] = responseWaitHandle = new ResponseWaitHandle(buffer, request, timeout);
+                responseWaitHandles[transactionID] = responseWaitHandle = new ResponseWaitHandle(buffer, request, timeout);
 
             buffer.Channel.Write(requestMessage);
             RunReceive(buffer.Channel);
-            buffer.RequestLog = new ModbusRequestLog(buffer.Channel, request, requestMessage, this);
+            buffer.RequestLog = new ModbusRequestLog(buffer.Channel, request, requestMessage, this) { TransactionID = transactionID };
             buffer.Channel?.Logger?.Log(buffer.RequestLog);
 
             responseWaitHandle.WaitOne(timeout);
 
             var result = responseWaitHandle.Response;
             lock (responseWaitHandles)
-                responseWaitHandles.Remove(request.TransactionID.Value);
+                responseWaitHandles.Remove(transactionID);
             if (result == null)
-            {
-                return new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseTimeout, new byte[0], request);
-            }
+                result = new ModbusCommErrorResponse(ModbusCommErrorCode.ResponseTimeout, new byte[0], request);
+
+            if (result.TransactionID == null)
+                result.TransactionID = transactionID;
 
             return result;
         }

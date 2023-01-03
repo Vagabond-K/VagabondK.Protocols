@@ -10,6 +10,8 @@ namespace VagabondK.Protocols.Modbus
     /// </summary>
     public abstract class ModbusResponse : IModbusMessage, IResponse
     {
+        private ushort? transactionID = null;
+
         /// <summary>
         /// 생성자
         /// </summary>
@@ -33,7 +35,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 트랜잭션 ID (Modbus TCP에서 사용)
         /// </summary>
-        public ushort? TransactionID { get => Request.TransactionID; }
+        public ushort? TransactionID { get => transactionID ?? Request.TransactionID; set => transactionID = value; }
 
         /// <summary>
         /// Modbus 메시지 카테고리
