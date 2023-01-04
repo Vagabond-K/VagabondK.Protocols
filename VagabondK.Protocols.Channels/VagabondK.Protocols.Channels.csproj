@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Channels</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>프로토콜 라이브러리들에 사용되는 이더넷 기반 채널 라이브러리입니다.</Description>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <PackageProjectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Channels</PackageProjectUrl>
   </PropertyGroup>
 
