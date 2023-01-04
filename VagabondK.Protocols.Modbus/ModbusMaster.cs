@@ -138,8 +138,8 @@ namespace VagabondK.Protocols.Modbus
             }
             catch (RequestException<ModbusCommErrorCode> ex)
             {
-                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
-                throw ex;
+                channel?.Logger?.Log(new ChannelErrorLog(channel, ex.InnerException ?? ex));
+                throw ex.InnerException ?? ex;
             }
 
             if (result is ModbusExceptionResponse exceptionResponse)

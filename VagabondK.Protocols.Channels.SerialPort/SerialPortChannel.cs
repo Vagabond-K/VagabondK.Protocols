@@ -132,7 +132,7 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
-        private void CheckPort()
+        private void CheckPort(bool isWriting)
         {
             lock (openLock)
             {
@@ -149,8 +149,9 @@ namespace VagabondK.Protocols.Channels
                     }
                     catch (Exception ex)
                     {
-                        Logger?.Log(new ChannelErrorLog(this, ex));
-                        //throw ex;
+                        if (!isWriting)
+                            Logger?.Log(new ChannelErrorLog(this, ex));
+                        throw ex;
                     }
                 }
             }
@@ -171,7 +172,7 @@ namespace VagabondK.Protocols.Channels
                             isRunningReceive = true;
                             try
                             {
-                                CheckPort();
+                                CheckPort(false);
                                 if (SerialPort.IsOpen)
                                 {
                                     byte[] buffer = new byte[8192];
@@ -221,7 +222,7 @@ namespace VagabondK.Protocols.Channels
         /// <param name="bytes">바이트 배열</param>
         public override void Write(byte[] bytes)
         {
-            CheckPort();
+            CheckPort(true);
             lock (writeLock)
             {
                 try

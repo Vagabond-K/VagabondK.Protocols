@@ -109,19 +109,19 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (channel == null)
                 throw new ArgumentNullException(nameof(Channel));
 
-
-            var requestMessage = request.Serialize(useBCC).ToArray();
-
-            channel.Write(requestMessage);
-            var requestLog = new CnetRequestLog(channel, request, requestMessage);
-            channel?.Logger?.Log(requestLog);
-
+            CnetRequestLog requestLog;
             CnetResponse result;
             List<byte> buffer = new List<byte>();
             List<byte> errorBuffer = new List<byte>();
 
             try
             {
+                var requestMessage = request.Serialize(useBCC).ToArray();
+
+                channel.Write(requestMessage);
+                requestLog = new CnetRequestLog(channel, request, requestMessage);
+                channel?.Logger?.Log(requestLog);
+
                 result = DeserializeResponse(channel, buffer, request, useBCC, timeout);
 
                 while (result is CnetCommErrorResponse responseCommErrorMessage

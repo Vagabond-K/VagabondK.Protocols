@@ -158,8 +158,8 @@ namespace VagabondK.Protocols.LSElectric.FEnet
             }
             catch (Exception ex)
             {
-                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
-                throw ex;
+                channel?.Logger?.Log(new ChannelErrorLog(channel, ex.InnerException ?? ex));
+                throw ex.InnerException ?? ex;
             }
 
             if (result is FEnetCommErrorResponse commErrorResponse)

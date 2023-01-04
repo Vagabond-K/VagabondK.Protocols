@@ -31,6 +31,7 @@ namespace VagabondK.Protocols.Channels
             Host = host;
             Port = port;
             ConnectTimeout = connectTimeout;
+            description = $"{host}:{port}";
         }
 
         internal TcpChannel(TcpChannelProvider provider, TcpClient tcpClient)
@@ -129,7 +130,7 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
-        private void CheckConnection()
+        private void CheckConnection(bool isWriting)
         {
             if (provider != null) return;
 
@@ -152,7 +153,8 @@ namespace VagabondK.Protocols.Channels
                     {
                         tcpClient?.Client?.Dispose();
                         tcpClient = null;
-                        Logger?.Log(new ChannelErrorLog(this, ex));
+                        if (!isWriting)
+                            Logger?.Log(new ChannelErrorLog(this, ex));
                         throw ex.InnerException ?? ex;
                     }
                 }
@@ -168,7 +170,7 @@ namespace VagabondK.Protocols.Channels
                 {
                     try
                     {
-                        CheckConnection();
+                        CheckConnection(false);
                         if (tcpClient != null)
                         {
                             int received = 0;
@@ -212,7 +214,7 @@ namespace VagabondK.Protocols.Channels
         /// <param name="bytes">바이트 배열</param>
         public override void Write(byte[] bytes)
         {
-            CheckConnection();
+            CheckConnection(true);
             lock (writeLock)
             {
                 try
