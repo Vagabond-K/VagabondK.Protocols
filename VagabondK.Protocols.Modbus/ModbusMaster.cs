@@ -353,42 +353,42 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
-        public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadInt32FromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Input Register에서 부호 없는 4바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
-        public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt32FromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Input Register에서 부호 있는 8바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
-        public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadInt64FromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Input Register에서 부호 없는 8바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
-        public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt64FromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Input Register에서 4바이트 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 4바이트 실수 값</returns>
-        public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address) => ReadSingleFromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address) => ReadSingleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Input Register에서 8바이트 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Input Register의 8바이트 실수 값</returns>
-        public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address) => ReadDoubleFromInputRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address) => ReadDoubleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
 
 
 
@@ -478,42 +478,42 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
-        public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt32FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
-        public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt32FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
-        public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt64FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
-        public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt64FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Holding Register에서 4바이트 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 4바이트 실수 값</returns>
-        public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadSingleFromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadSingleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// Holding Register에서 8바이트 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <returns>Holding Register의 8바이트 실수 값</returns>
-        public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadDoubleFromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), Timeout);
+        public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadDoubleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
 
         /// <summary>
         /// 부호 있는 2바이트 정수 값 쓰기
@@ -522,7 +522,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, new ModbusEndian(isBigEndian).Sort(BitConverter.GetBytes(value)), Timeout);
+        public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
         /// 부호 없는 2바이트 정수 값 쓰기
         /// </summary>
@@ -530,7 +530,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, new ModbusEndian(isBigEndian).Sort(BitConverter.GetBytes(value)), Timeout);
+        public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
         /// 부호 있는 4바이트 정수 값 쓰기
         /// </summary>
@@ -600,42 +600,42 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, int value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, int value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// 부호 없는 4바이트 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, uint value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, uint value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// 부호 있는 8바이트 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, long value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, long value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// 부호 없는 8바이트 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, ulong value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, ulong value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// 4바이트 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, float value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, float value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
         /// 8바이트 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
-        public void Write(byte slaveAddress, ushort address, double value) => Write(slaveAddress, address, value, new ModbusEndian(true), Timeout);
+        public void Write(byte slaveAddress, ushort address, double value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
 
         /// <summary>
         /// 다중 Coil 읽기
@@ -773,7 +773,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 있는 2바이트 정수 값</returns>
-        public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16(new ModbusEndian(isBigEndian).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
+        public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
         /// Input Register에서 부호 없는 2바이트 정수 값 읽기
         /// </summary>
@@ -782,7 +782,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 없는 2바이트 정수 값</returns>
-        public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16(new ModbusEndian(isBigEndian).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
+        public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
         /// Input Register에서 부호 있는 4바이트 정수 값 읽기
         /// </summary>
@@ -861,7 +861,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
-        public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Input Register에서 부호 없는 4바이트 정수 값 읽기
         /// </summary>
@@ -869,7 +869,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
-        public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Input Register에서 부호 있는 8바이트 정수 값 읽기
         /// </summary>
@@ -877,7 +877,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
-        public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Input Register에서 부호 없는 8바이트 정수 값 읽기
         /// </summary>
@@ -885,7 +885,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
-        public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Input Register에서 4바이트 실수 값 읽기
         /// </summary>
@@ -893,7 +893,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 4바이트 실수 값</returns>
-        public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Input Register에서 8바이트 실수 값 읽기
         /// </summary>
@@ -901,7 +901,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register의 8바이트 실수 값</returns>
-        public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromInputRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
 
         /// <summary>
         /// Holding Register에서 부호 있는 2바이트 정수 값 읽기
@@ -911,7 +911,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 있는 2바이트 정수 값</returns>
-        public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16(new ModbusEndian(isBigEndian).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
+        public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
         /// Holding Register에서 부호 없는 2바이트 정수 값 읽기
         /// </summary>
@@ -920,7 +920,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 없는 2바이트 정수 값</returns>
-        public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16(new ModbusEndian(isBigEndian).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
+        public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
         /// Holding Register에서 부호 있는 4바이트 정수 값 읽기
         /// </summary>
@@ -999,7 +999,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
-        public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
         /// </summary>
@@ -1007,7 +1007,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
-        public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
         /// </summary>
@@ -1015,7 +1015,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
-        public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
         /// </summary>
@@ -1023,7 +1023,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
-        public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Holding Register에서 4바이트 실수 값 읽기
         /// </summary>
@@ -1031,7 +1031,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 4바이트 실수 값</returns>
-        public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// Holding Register에서 8바이트 실수 값 읽기
         /// </summary>
@@ -1039,7 +1039,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register의 8바이트 실수 값</returns>
-        public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromHoldingRegisters(slaveAddress, address, new ModbusEndian(true), timeout);
+        public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
 
         /// <summary>
         /// 부호 있는 2바이트 정수 값 쓰기
@@ -1049,7 +1049,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="value">쓸 값</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, new ModbusEndian(isBigEndian).Sort(BitConverter.GetBytes(value)), timeout);
+        public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
         /// 부호 없는 2바이트 정수 값 쓰기
         /// </summary>
@@ -1058,7 +1058,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="value">쓸 값</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, new ModbusEndian(isBigEndian).Sort(BitConverter.GetBytes(value)), timeout);
+        public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
         /// 부호 있는 4바이트 정수 값 쓰기
         /// </summary>
@@ -1137,7 +1137,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, int value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, int value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// 부호 없는 4바이트 정수 값 쓰기
         /// </summary>
@@ -1145,7 +1145,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, uint value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, uint value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// 부호 있는 8바이트 정수 값 쓰기
         /// </summary>
@@ -1153,7 +1153,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, long value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, long value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// 부호 없는 8바이트 정수 값 쓰기
         /// </summary>
@@ -1161,7 +1161,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, ulong value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, ulong value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// 4바이트 실수 값 쓰기
         /// </summary>
@@ -1169,7 +1169,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, float value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, float value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
         /// 8바이트 실수 값 쓰기
         /// </summary>
@@ -1177,7 +1177,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        public void Write(byte slaveAddress, ushort address, double value, int timeout) => Write(slaveAddress, address, value, new ModbusEndian(true), timeout);
+        public void Write(byte slaveAddress, ushort address, double value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
 
     }
 }

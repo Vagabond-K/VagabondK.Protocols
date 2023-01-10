@@ -353,4 +353,31 @@ namespace VagabondK.Protocols.Modbus
         ResponseException = 0b_0000_0001_0000_0000_0000_0000,
     }
 
+    /// <summary>
+    /// Modbus 엔디안
+    /// </summary>
+    [Flags]
+    public enum ModbusEndian : byte
+    {
+        /// <summary>
+        /// 전체 리틀 엔디안
+        /// </summary>
+        [Description("DCBA")]
+        AllLittle = 0b00,
+        /// <summary>
+        /// 레지스터 내부 빅 엔디안, 레지스터 단위는 리틀 엔디안
+        /// </summary>
+        [Description("CDAB")]
+        InnerBig = 0b01,
+        /// <summary>
+        /// 레지스터 단위 빅 엔디안, 레지스터 내부는 리틀 엔디안
+        /// </summary>
+        [Description("BADC")]
+        OuterBig = 0b10,
+        /// <summary>
+        /// 전체 빅 엔디안
+        /// </summary>
+        [Description("ABCD")]
+        AllBig = 0b11,
+    }
 }
