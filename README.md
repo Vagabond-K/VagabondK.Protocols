@@ -81,8 +81,8 @@ class Program
 
         int int_ABCD = response.GetInt32(100);
         int int_DCBA = response.GetInt32(102, ModbusEndian.AllLittle);
-        int int_BADC = response.GetInt32(104, new ModbusEndian(true, false));
-        int int_CDAB = response.GetInt32(106, new ModbusEndian(false, true));
+        int int_BADC = response.GetInt32(104, ModbusEndian.OuterBig);
+        int int_CDAB = response.GetInt32(106, ModbusEndian.InnerBig);
 
         Console.WriteLine(int_ABCD);
         Console.WriteLine(int_DCBA);
