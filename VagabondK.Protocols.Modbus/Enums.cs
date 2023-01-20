@@ -365,12 +365,12 @@ namespace VagabondK.Protocols.Modbus
         [Description("DCBA")]
         AllLittle = 0b00,
         /// <summary>
-        /// 레지스터 내부 빅 엔디안, 레지스터 단위는 리틀 엔디안
+        /// Word(2Byte) 내부 빅 엔디안, Word 단위는 리틀 엔디안
         /// </summary>
         [Description("CDAB")]
         InnerBig = 0b01,
         /// <summary>
-        /// 레지스터 단위 빅 엔디안, 레지스터 내부는 리틀 엔디안
+        /// Word(2Byte) 단위 빅 엔디안, Word 내부는 리틀 엔디안
         /// </summary>
         [Description("BADC")]
         OuterBig = 0b10,

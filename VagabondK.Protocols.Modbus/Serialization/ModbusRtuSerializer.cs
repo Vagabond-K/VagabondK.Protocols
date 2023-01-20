@@ -132,7 +132,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             }
         }
 
-        internal override ModbusResponse DeserializeReadBooleanResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout)
+        internal override ModbusResponse DeserializeReadBitResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout)
         {
             if (IsException(buffer, request, timeout, out var responseMessage))
                 return responseMessage;
@@ -149,10 +149,10 @@ namespace VagabondK.Protocols.Modbus.Serialization
             if (byteLength != (byte)Math.Ceiling(request.Length / 8d))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
 
-            return new ModbusReadBooleanResponse(Read(buffer, 3, byteLength, timeout).SelectMany(b => ByteToBooleanArray(b)).Take(request.Length).ToArray(), request);
+            return new ModbusReadBitResponse(Read(buffer, 3, byteLength, timeout).SelectMany(b => ByteToBitArray(b)).Take(request.Length).ToArray(), request);
         }
 
-        internal override ModbusResponse DeserializeReadRegisterResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout)
+        internal override ModbusResponse DeserializeReadWordResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout)
         {
             if (IsException(buffer, request, timeout, out var responseMessage))
                 return responseMessage;
@@ -169,7 +169,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             if (byteLength != (byte)(request.Length * 2))
                 throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseLengthDoNotMatch, buffer, request);
 
-            return new ModbusReadRegisterResponse(Read(buffer, 3, byteLength, timeout).ToArray(), request);
+            return new ModbusReadWordResponse(Read(buffer, 3, byteLength, timeout).ToArray(), request);
         }
 
         internal override ModbusResponse DeserializeWriteResponse(ResponseBuffer buffer, ModbusWriteCoilRequest request, int timeout)
@@ -190,7 +190,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             switch (request.Function)
             {
                 case ModbusFunction.WriteSingleCoil:
-                    if (Read(buffer, 4, timeout) != (request.SingleBooleanValue ? 0xff : 0x00)
+                    if (Read(buffer, 4, timeout) != (request.SingleBitValue ? 0xff : 0x00)
                         || Read(buffer, 5, timeout) != 0x00)
                         throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
                     break;
@@ -223,7 +223,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
             switch (request.Function)
             {
                 case ModbusFunction.WriteSingleHoldingRegister:
-                    if (value != request.SingleRegisterValue)
+                    if (value != request.SingleWordValue)
                         throw new RequestException<ModbusCommErrorCode>(ModbusCommErrorCode.ResponseWritedValueDoNotMatch, buffer, request);
                     break;
                 case ModbusFunction.WriteMultipleHoldingRegisters:
@@ -316,7 +316,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                                     switch (function)
                                     {
                                         case ModbusFunction.WriteMultipleCoils:
-                                            result = new ModbusWriteCoilRequest(slaveAddress, address, buffer.Skip(7).Take(byteLength).SelectMany(b => ByteToBooleanArray(b)).Take(valueOrLength).ToArray());
+                                            result = new ModbusWriteCoilRequest(slaveAddress, address, buffer.Skip(7).Take(byteLength).SelectMany(b => ByteToBitArray(b)).Take(valueOrLength).ToArray());
                                             break;
                                         case ModbusFunction.WriteMultipleHoldingRegisters:
                                             result = new ModbusWriteHoldingRegisterRequest(slaveAddress, address, buffer.Skip(7).Take(byteLength).ToArray());

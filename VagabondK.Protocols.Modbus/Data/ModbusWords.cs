@@ -5,9 +5,9 @@ using System.Linq;
 namespace VagabondK.Protocols.Modbus.Data
 {
     /// <summary>
-    /// Modbus 레지스터(2 바이트) 데이터셋
+    /// Modbus Word(Holding Register, Input Register) 데이터셋
     /// </summary>
-    public class ModbusRegisters : ModbusDataSet<ushort, byte>
+    public class ModbusWords : ModbusDataSet<ushort, byte>
     {
         /// <summary>
         /// 데이터셋 열거자 가져오기
@@ -15,7 +15,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <returns>데이터셋 열거</returns>
         public override IEnumerator<KeyValuePair<ushort, ushort>> GetEnumerator()
         {
-            foreach (ModbusRegisterDataBlock dataBlock in DataBlocks)
+            foreach (ModbusWordDataBlock dataBlock in DataBlocks)
             {
                 ushort address = dataBlock.StartAddress;
                 foreach (var value in dataBlock)
@@ -30,17 +30,17 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="bytes">Raw 데이터 배열</param>
         public void Allocate(ushort startAddress, byte[] bytes)
         {
-            AllocateCore(new ModbusRegisterDataBlock(startAddress, bytes));
+            AllocateCore(new ModbusWordDataBlock(startAddress, bytes));
         }
 
         /// <summary>
-        /// 레지스터(2 바이트) 기반 주소 할당
+        /// Word(Holding Register, Input Register) 기반 주소 할당
         /// </summary>
         /// <param name="startAddress">시작 주소</param>
-        /// <param name="values">레지스터 데이터 배열</param>
+        /// <param name="values">Word(Holding Register, Input Register) 데이터 배열</param>
         public void Allocate(ushort startAddress, ushort[] values)
         {
-            AllocateCore(new ModbusRegisterDataBlock(startAddress, values));
+            AllocateCore(new ModbusWordDataBlock(startAddress, values));
         }
 
         /// <summary>
@@ -52,10 +52,10 @@ namespace VagabondK.Protocols.Modbus.Data
         public void AllocateRepeatRawData(ushort startAddress, int rawDataCount, byte value) => Allocate(startAddress, Enumerable.Repeat(value, rawDataCount).ToArray());
 
         /// <summary>
-        /// 레지스터(2 바이트) 기반 반복 할당
+        /// Word(Holding Register, Input Register) 기반 반복 할당
         /// </summary>
         /// <param name="startAddress">시작 주소</param>
-        /// <param name="registerCount">레지스터 개수</param>
+        /// <param name="registerCount">Word(Holding Register, Input Register) 개수</param>
         /// <param name="value">반복할 값</param>
         public void AllocateRepeat(ushort startAddress, ushort registerCount, ushort value) => Allocate(startAddress, Enumerable.Repeat(value, registerCount).ToArray());
 
@@ -66,7 +66,7 @@ namespace VagabondK.Protocols.Modbus.Data
         public void AllocateAllRawData(byte value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue * 2).ToArray());
 
         /// <summary>
-        /// 레지스터(2 바이트) 기반 전체 주소 할당
+        /// Word(Holding Register, Input Register) 기반 전체 주소 할당
         /// </summary>
         /// <param name="value">전체 주소에 할당할 값</param>
         public void AllocateAll(ushort value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue).ToArray());
@@ -84,157 +84,157 @@ namespace VagabondK.Protocols.Modbus.Data
         /// </summary>
         /// <param name="startAddress">시작 주소</param>
         /// <param name="bytes">Raw 데이터 배열</param>
-        public void SetRawData(ushort startAddress, byte[] bytes) => SetDataBlock(new ModbusRegisterDataBlock(startAddress, bytes));
+        public void SetRawData(ushort startAddress, byte[] bytes) => SetDataBlock(new ModbusWordDataBlock(startAddress, bytes));
 
         /// <summary>
-        /// 특정 주소에 부호 있는 2바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 2 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, short value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 2바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 2 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, ushort value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 있는 4바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 4 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, int value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 4바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 4 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, uint value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 있는 8바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 8 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, long value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 8바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 8 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, ulong value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 4바이트 실수 값 할당
+        /// 특정 주소에 4 Byte 실수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, float value) => Allocate(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 8바이트 실수 값 할당
+        /// 특정 주소에 8 Byte 실수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void Allocate(ushort address, double value) => Allocate(address, value, ModbusEndian.AllBig);
 
         /// <summary>
-        /// 특정 주소로부터 부호 있는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public short GetInt16(ushort address) => GetInt16(address, true);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public ushort GetUInt16(ushort address) => GetUInt16(address, true);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public int GetInt32(ushort address) => GetInt32(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public uint GetUInt32(ushort address) => GetUInt32(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public long GetInt64(ushort address) => GetInt64(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public ulong GetUInt64(ushort address) => GetUInt64(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 4바이트 실수 값 가져오기
+        /// 특정 주소로부터 4 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public float GetSingle(ushort address) => GetSingle(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public double GetDouble(ushort address) => GetDouble(address, ModbusEndian.AllBig);
 
         /// <summary>
-        /// 특정 주소에 부호 있는 2바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 2 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, short value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 2바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 2 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, ushort value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 있는 4바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 4 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, int value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 4바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 4 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, uint value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 있는 8바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 8 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, long value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 부호 없는 8바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 8 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, ulong value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 4바이트 실수 값 설정
+        /// 특정 주소에 4 Byte 실수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         public void SetValue(ushort address, float value) => SetValue(address, value, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소에 8바이트 실수 값 설정
+        /// 특정 주소에 8 Byte 실수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -242,56 +242,56 @@ namespace VagabondK.Protocols.Modbus.Data
         public void SetValue(ushort address, double value) => SetValue(address, value, ModbusEndian.AllBig);
 
         /// <summary>
-        /// 특정 주소에 부호 있는 2바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 2 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, short value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 2바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 2 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, ushort value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 있는 4바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 4 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, int value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 4바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 4 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, uint value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 있는 8바이트 정수 값 할당
+        /// 특정 주소에 부호 있는 8 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, long value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 8바이트 정수 값 할당
+        /// 특정 주소에 부호 없는 8 Byte 정수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, ulong value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 4바이트 실수 값 할당
+        /// 특정 주소에 4 Byte 실수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
         /// <param name="endian">엔디안</param>
         public void Allocate(ushort address, float value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 8바이트 실수 값 할당
+        /// 특정 주소에 8 Byte 실수 값 할당
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="value">값</param>
@@ -299,56 +299,56 @@ namespace VagabondK.Protocols.Modbus.Data
         public void Allocate(ushort address, double value, ModbusEndian endian) => Allocate(address, endian.Sort(BitConverter.GetBytes(value)));
 
         /// <summary>
-        /// 특정 주소로부터 부호 있는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <returns>값</returns>
         public short GetInt16(ushort address, bool isBigEndian) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(GetRawData(address, 2).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <returns>값</returns>
         public ushort GetUInt16(ushort address, bool isBigEndian) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(GetRawData(address, 2).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public int GetInt32(ushort address, ModbusEndian endian) => BitConverter.ToInt32(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public uint GetUInt32(ushort address, ModbusEndian endian) => BitConverter.ToUInt32(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public long GetInt64(ushort address, ModbusEndian endian) => BitConverter.ToInt64(endian.Sort(GetRawData(address, 8).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public ulong GetUInt64(ushort address, ModbusEndian endian) => BitConverter.ToUInt64(endian.Sort(GetRawData(address, 8).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public float GetSingle(ushort address, ModbusEndian endian) => BitConverter.ToSingle(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
@@ -356,7 +356,7 @@ namespace VagabondK.Protocols.Modbus.Data
         public double GetDouble(ushort address, ModbusEndian endian) => BitConverter.ToDouble(endian.Sort(GetRawData(address, 8).ToArray()), 0);
 
         /// <summary>
-        /// 특정 주소에 부호 있는 2바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 2 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -364,7 +364,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, short value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 2바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 2 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -372,7 +372,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, ushort value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 있는 4바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 4 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -380,7 +380,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, int value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 4바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 4 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -388,7 +388,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, uint value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 있는 8바이트 정수 값 설정
+        /// 특정 주소에 부호 있는 8 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -396,7 +396,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, long value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 부호 없는 8바이트 정수 값 설정
+        /// 특정 주소에 부호 없는 8 Byte 정수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -404,7 +404,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, ulong value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 4바이트 실수 값 설정
+        /// 특정 주소에 4 Byte 실수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -412,7 +412,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="endian">엔디안</param>
         public void SetValue(ushort address, float value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
         /// <summary>
-        /// 특정 주소에 8바이트 실수 값 설정
+        /// 특정 주소에 8 Byte 실수 값 설정
         /// (자동 할당 설정이 되어있지 않으면서 미리 할당된 주소가 아니면 오류 발생)
         /// </summary>
         /// <param name="address">주소</param>
@@ -421,18 +421,18 @@ namespace VagabondK.Protocols.Modbus.Data
         public void SetValue(ushort address, double value, ModbusEndian endian) => SetRawData(address, endian.Sort(BitConverter.GetBytes(value)));
 
         internal override ModbusDataBlock<ushort, byte> CreateDataBlock(ushort startAddress, ushort[] values)
-            => new ModbusRegisterDataBlock(startAddress, values);
+            => new ModbusWordDataBlock(startAddress, values);
 
 
-        class ModbusRegisterDataBlock : ModbusDataBlock<ushort, byte>
+        class ModbusWordDataBlock : ModbusDataBlock<ushort, byte>
         {
-            public ModbusRegisterDataBlock(ushort startAddress, byte[] bytes)
+            public ModbusWordDataBlock(ushort startAddress, byte[] bytes)
             {
                 this.startAddress = startAddress;
                 rawData = bytes;
             }
 
-            public ModbusRegisterDataBlock(ushort startAddress, ushort[] values)
+            public ModbusWordDataBlock(ushort startAddress, ushort[] values)
             {
                 this.startAddress = startAddress;
                 rawData = values.SelectMany(value => new[] { (byte)(value >> 8), (byte)(value & 0xff) }).ToArray();

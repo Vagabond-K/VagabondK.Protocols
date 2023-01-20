@@ -13,9 +13,9 @@ namespace VagabondK.Protocols.Modbus
         /// 엔디안으로 정렬
         /// </summary>
         /// <param name="modbusEndian">Modbus 엔디안</param>
-        /// <param name="bytes">바이트 배열</param>
+        /// <param name="bytes">Byte 배열</param>
         /// <param name="useBitConverter">정렬 시 BitConverter.IsLittleEndian을 고려할 지 여부</param>
-        /// <returns>정렬된 바이트 배열</returns>
+        /// <returns>정렬된 Byte 배열</returns>
         public static byte[] Sort(this ModbusEndian modbusEndian, byte[] bytes, bool useBitConverter = true)
         {
             var outerBigEndian = modbusEndian.HasFlag(ModbusEndian.OuterBig);

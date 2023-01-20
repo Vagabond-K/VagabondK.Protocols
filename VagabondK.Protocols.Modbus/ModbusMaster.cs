@@ -161,47 +161,47 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Modbus 논리값 읽기 응답</returns>
-        public ModbusReadBooleanResponse ReadCoils(byte slaveAddress, ushort address, ushort length) => ReadCoils(slaveAddress, address, length, Timeout);
+        /// <returns>Bit(Coil, Discrete Input) 읽기 응답</returns>
+        public ModbusReadBitResponse ReadCoils(byte slaveAddress, ushort address, ushort length) => ReadCoils(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Discrete Input 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Modbus 논리값 읽기 응답</returns>
-        public ModbusReadBooleanResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length) => ReadDiscreteInputs(slaveAddress, address, length, Timeout);
+        /// <returns>Bit(Coil, Discrete Input) 읽기 응답</returns>
+        public ModbusReadBitResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length) => ReadDiscreteInputs(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Holding Register 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Modbus 레지스터 읽기 응답</returns>
-        public ModbusReadRegisterResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisters(slaveAddress, address, length, Timeout);
+        /// <returns>Word(Holding Register, Input Register) 읽기 응답</returns>
+        public ModbusReadWordResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisters(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Input Register 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Modbus 레지스터 읽기 응답</returns>
-        public ModbusReadRegisterResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length) => ReadInputRegisters(slaveAddress, address, length, Timeout);
+        /// <returns>Word(Holding Register, Input Register) 읽기 응답</returns>
+        public ModbusReadWordResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length) => ReadInputRegisters(slaveAddress, address, length, Timeout);
         /// <summary>
-        /// 다중 Holding Register를 Raw 바이트 배열로 읽기
+        /// 다중 Holding Register를 Raw Byte 배열로 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Holding Register들의 Raw 바이트 배열</returns>
+        /// <returns>Holding Register들의 Raw Byte 배열</returns>
         public byte[] ReadHoldingRegisterBytes(byte slaveAddress, ushort address, ushort length) => ReadHoldingRegisterBytes(slaveAddress, address, length, Timeout);
         /// <summary>
-        /// 다중 Input Register를 Raw 바이트 배열로 읽기
+        /// 다중 Input Register를 Raw Byte 배열로 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
-        /// <returns>Input Register들의 Raw 바이트 배열</returns>
+        /// <returns>Input Register들의 Raw Byte 배열</returns>
         public byte[] ReadInputRegisterBytes(byte slaveAddress, ushort address, ushort length) => ReadInputRegisterBytes(slaveAddress, address, length, Timeout);
         /// <summary>
         /// 다중 Coil 쓰기
@@ -218,11 +218,11 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="values">보낼 Holding Register 값 목록</param>
         public void WriteHoldingRegisters(byte slaveAddress, ushort address, IEnumerable<ushort> values) => WriteHoldingRegisters(slaveAddress, address, values, Timeout);
         /// <summary>
-        /// 다중 Holding Register를 Raw 바이트 배열로 쓰기
+        /// 다중 Holding Register를 Raw Byte 배열로 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <param name="bytes">보낼 Holding Register 값들의 Raw 바이트 목록</param>
+        /// <param name="bytes">보낼 Holding Register 값들의 Raw Byte 목록</param>
         public void WriteHoldingRegisterBytes(byte slaveAddress, ushort address, IEnumerable<byte> bytes) => WriteHoldingRegisterBytes(slaveAddress, address, bytes, Timeout);
 
         /// <summary>
@@ -269,254 +269,254 @@ namespace VagabondK.Protocols.Modbus
         public void WriteHoldingRegister(byte slaveAddress, ushort address, ushort value) => WriteHoldingRegister(slaveAddress, address, value, Timeout);
 
         /// <summary>
-        /// Input Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        /// <returns>Input Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian) => ReadInt16FromInputRegisters(slaveAddress, address, isBigEndian, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        /// <returns>Input Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian) => ReadUInt16FromInputRegisters(slaveAddress, address, isBigEndian, Timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadInt32FromInputRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadUInt32FromInputRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadInt64FromInputRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadUInt64FromInputRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Input Register에서 4바이트 실수 값 읽기
+        /// Input Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 4바이트 실수 값</returns>
+        /// <returns>Input Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadSingleFromInputRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Input Register에서 8바이트 실수 값 읽기
+        /// Input Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Input Register의 8바이트 실수 값</returns>
+        /// <returns>Input Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadDoubleFromInputRegisters(slaveAddress, address, endian, Timeout);
 
         /// <summary>
-        /// Input Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address) => ReadInt16FromInputRegisters(slaveAddress, address, true, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt16FromInputRegisters(slaveAddress, address, true, Timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address) => ReadUInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Input Register에서 4바이트 실수 값 읽기
+        /// Input Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 4바이트 실수 값</returns>
+        /// <returns>Input Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address) => ReadSingleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Input Register에서 8바이트 실수 값 읽기
+        /// Input Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Input Register의 8바이트 실수 값</returns>
+        /// <returns>Input Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address) => ReadDoubleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
 
 
 
 
         /// <summary>
-        /// Holding Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        /// <returns>Holding Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian) => ReadInt16FromHoldingRegisters(slaveAddress, address, isBigEndian, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
-        /// <returns>Holding Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian) => ReadUInt16FromHoldingRegisters(slaveAddress, address, isBigEndian, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadInt32FromHoldingRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadUInt32FromHoldingRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadInt64FromHoldingRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadUInt64FromHoldingRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Holding Register에서 4바이트 실수 값 읽기
+        /// Holding Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 4바이트 실수 값</returns>
+        /// <returns>Holding Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadSingleFromHoldingRegisters(slaveAddress, address, endian, Timeout);
         /// <summary>
-        /// Holding Register에서 8바이트 실수 값 읽기
+        /// Holding Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
-        /// <returns>Holding Register의 8바이트 실수 값</returns>
+        /// <returns>Holding Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian) => ReadDoubleFromHoldingRegisters(slaveAddress, address, endian, Timeout);
 
         /// <summary>
-        /// Holding Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt16FromHoldingRegisters(slaveAddress, address, true, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt16FromHoldingRegisters(slaveAddress, address, true, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address) => ReadUInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Holding Register에서 4바이트 실수 값 읽기
+        /// Holding Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 4바이트 실수 값</returns>
+        /// <returns>Holding Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadSingleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// Holding Register에서 8바이트 실수 값 읽기
+        /// Holding Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <returns>Holding Register의 8바이트 실수 값</returns>
+        /// <returns>Holding Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address) => ReadDoubleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, Timeout);
 
         /// <summary>
-        /// 부호 있는 2바이트 정수 값 쓰기
+        /// 부호 있는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -524,7 +524,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 부호 없는 2바이트 정수 값 쓰기
+        /// 부호 없는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -532,7 +532,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 부호 있는 4바이트 정수 값 쓰기
+        /// 부호 있는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -540,7 +540,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="endian">엔디안</param>
         public void Write(byte slaveAddress, ushort address, int value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 부호 없는 4바이트 정수 값 쓰기
+        /// 부호 없는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -548,7 +548,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="endian">엔디안</param>
         public void Write(byte slaveAddress, ushort address, uint value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 부호 있는 8바이트 정수 값 쓰기
+        /// 부호 있는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -556,7 +556,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="endian">엔디안</param>
         public void Write(byte slaveAddress, ushort address, long value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 부호 없는 8바이트 정수 값 쓰기
+        /// 부호 없는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -564,7 +564,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="endian">엔디안</param>
         public void Write(byte slaveAddress, ushort address, ulong value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 4바이트 실수 값 쓰기
+        /// 4 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -572,7 +572,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="endian">엔디안</param>
         public void Write(byte slaveAddress, ushort address, float value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
         /// <summary>
-        /// 8바이트 실수 값 쓰기
+        /// 8 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -581,56 +581,56 @@ namespace VagabondK.Protocols.Modbus
         public void Write(byte slaveAddress, ushort address, double value, ModbusEndian endian) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), Timeout);
 
         /// <summary>
-        /// 부호 있는 2바이트 정수 값 쓰기
+        /// 부호 있는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, short value) => Write(slaveAddress, address, value, true, Timeout);
         /// <summary>
-        /// 부호 없는 2바이트 정수 값 쓰기
+        /// 부호 없는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, ushort value) => Write(slaveAddress, address, value, true, Timeout);
         /// <summary>
-        /// 부호 있는 4바이트 정수 값 쓰기
+        /// 부호 있는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, int value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// 부호 없는 4바이트 정수 값 쓰기
+        /// 부호 없는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, uint value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// 부호 있는 8바이트 정수 값 쓰기
+        /// 부호 있는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, long value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// 부호 없는 8바이트 정수 값 쓰기
+        /// 부호 없는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, ulong value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// 4바이트 실수 값 쓰기
+        /// 4 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="value">쓸 값</param>
         public void Write(byte slaveAddress, ushort address, float value) => Write(slaveAddress, address, value, ModbusEndian.AllBig, Timeout);
         /// <summary>
-        /// 8바이트 실수 값 쓰기
+        /// 8 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -644,8 +644,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Modbus 논리값 읽기 응답</returns>
-        public ModbusReadBooleanResponse ReadCoils(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, length), timeout) as ModbusReadBooleanResponse;
+        /// <returns>Bit(Coil, Discrete Input) 읽기 응답</returns>
+        public ModbusReadBitResponse ReadCoils(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, length), timeout) as ModbusReadBitResponse;
         /// <summary>
         /// 다중 Discrete Input 읽기
         /// </summary>
@@ -653,8 +653,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Modbus 논리값 읽기 응답</returns>
-        public ModbusReadBooleanResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, length), timeout) as ModbusReadBooleanResponse;
+        /// <returns>Bit(Coil, Discrete Input) 읽기 응답</returns>
+        public ModbusReadBitResponse ReadDiscreteInputs(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, length), timeout) as ModbusReadBitResponse;
         /// <summary>
         /// 다중 Holding Register 읽기
         /// </summary>
@@ -662,8 +662,8 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Modbus 레지스터 읽기 응답</returns>
-        public ModbusReadRegisterResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadRegisterResponse;
+        /// <returns>Word(Holding Register, Input Register) 읽기 응답</returns>
+        public ModbusReadWordResponse ReadHoldingRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadWordResponse;
         /// <summary>
         /// 다중 Input Register 읽기
         /// </summary>
@@ -671,26 +671,26 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Modbus 레지스터 읽기 응답</returns>
-        public ModbusReadRegisterResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadRegisterResponse;
+        /// <returns>Word(Holding Register, Input Register) 읽기 응답</returns>
+        public ModbusReadWordResponse ReadInputRegisters(byte slaveAddress, ushort address, ushort length, int timeout) => Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadWordResponse;
         /// <summary>
-        /// 다중 Holding Register를 Raw 바이트 배열로 읽기
+        /// 다중 Holding Register를 Raw Byte 배열로 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register들의 Raw 바이트 배열</returns>
-        public byte[] ReadHoldingRegisterBytes(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadRegisterResponse)?.Bytes?.ToArray();
+        /// <returns>Holding Register들의 Raw Byte 배열</returns>
+        public byte[] ReadHoldingRegisterBytes(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, length), timeout) as ModbusReadWordResponse)?.Bytes?.ToArray();
         /// <summary>
-        /// 다중 Input Register를 Raw 바이트 배열로 읽기
+        /// 다중 Input Register를 Raw Byte 배열로 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="length">길이</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register들의 Raw 바이트 배열</returns>
-        public byte[] ReadInputRegisterBytes(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadRegisterResponse)?.Bytes?.ToArray();
+        /// <returns>Input Register들의 Raw Byte 배열</returns>
+        public byte[] ReadInputRegisterBytes(byte slaveAddress, ushort address, ushort length, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, length), timeout) as ModbusReadWordResponse)?.Bytes?.ToArray();
         /// <summary>
         /// 다중 Coil 쓰기
         /// </summary>
@@ -708,11 +708,11 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void WriteHoldingRegisters(byte slaveAddress, ushort address, IEnumerable<ushort> values, int timeout) => Request(new ModbusWriteHoldingRegisterRequest(slaveAddress, address, values), timeout);
         /// <summary>
-        /// 다중 Holding Register를 Raw 바이트 배열로 쓰기
+        /// 다중 Holding Register를 Raw Byte 배열로 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <param name="bytes">보낼 Holding Register 값들의 Raw 바이트 목록</param>
+        /// <param name="bytes">보낼 Holding Register 값들의 Raw Byte 목록</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         public void WriteHoldingRegisterBytes(byte slaveAddress, ushort address, IEnumerable<byte> bytes, int timeout) => Request(new ModbusWriteHoldingRegisterRequest(slaveAddress, address, bytes), timeout);
 
@@ -723,7 +723,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Coil 값</returns>
-        public bool? ReadCoil(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, 1), timeout) as ModbusReadBooleanResponse)?.Values?.FirstOrDefault();
+        public bool? ReadCoil(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.Coil, address, 1), timeout) as ModbusReadBitResponse)?.Values?.FirstOrDefault();
         /// <summary>
         /// 단일 Discrete Input 읽기
         /// </summary>
@@ -731,7 +731,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Discrete Input 값</returns>
-        public bool? ReadDiscreteInput(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, 1), timeout) as ModbusReadBooleanResponse)?.Values?.FirstOrDefault();
+        public bool? ReadDiscreteInput(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.DiscreteInput, address, 1), timeout) as ModbusReadBitResponse)?.Values?.FirstOrDefault();
         /// <summary>
         /// 단일 Holding Register 읽기
         /// </summary>
@@ -739,7 +739,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Holding Register 값</returns>
-        public ushort? ReadHoldingRegister(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, 1), timeout) as ModbusReadRegisterResponse)?.Values?.FirstOrDefault();
+        public ushort? ReadHoldingRegister(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.HoldingRegister, address, 1), timeout) as ModbusReadWordResponse)?.Values?.FirstOrDefault();
         /// <summary>
         /// 단일 Input Register 읽기
         /// </summary>
@@ -747,7 +747,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
         /// <returns>Input Register 값</returns>
-        public ushort? ReadInputRegister(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, 1), timeout) as ModbusReadRegisterResponse)?.Values?.FirstOrDefault();
+        public ushort? ReadInputRegister(byte slaveAddress, ushort address, int timeout) => (Request(new ModbusReadRequest(slaveAddress, ModbusObjectType.InputRegister, address, 1), timeout) as ModbusReadWordResponse)?.Values?.FirstOrDefault();
         /// <summary>
         /// 단일 Coil 쓰기
         /// </summary>
@@ -766,283 +766,283 @@ namespace VagabondK.Protocols.Modbus
         public void WriteHoldingRegister(byte slaveAddress, ushort address, ushort value, int timeout) => Request(new ModbusWriteHoldingRegisterRequest(slaveAddress, address, value), timeout);
 
         /// <summary>
-        /// Input Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
-        /// Input Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadInputRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
-        /// Input Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToInt32(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Input Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToUInt32(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Input Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToInt64(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 4, timeout)), 0);
         /// <summary>
-        /// Input Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToUInt64(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 4, timeout)), 0);
         /// <summary>
-        /// Input Register에서 4바이트 실수 값 읽기
+        /// Input Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 4바이트 실수 값</returns>
+        /// <returns>Input Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToSingle(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Input Register에서 8바이트 실수 값 읽기
+        /// Input Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 8바이트 실수 값</returns>
+        /// <returns>Input Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToDouble(endian.Sort(ReadInputRegisterBytes(slaveAddress, address, 4, timeout)), 0);
 
         /// <summary>
-        /// Input Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt16FromInputRegisters(slaveAddress, address, true, timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt16FromInputRegisters(slaveAddress, address, true, timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Input Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Input Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Input Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Input Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Input Register에서 4바이트 실수 값 읽기
+        /// Input Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 4바이트 실수 값</returns>
+        /// <returns>Input Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Input Register에서 8바이트 실수 값 읽기
+        /// Input Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Input Register의 8바이트 실수 값</returns>
+        /// <returns>Input Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromInputRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromInputRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
 
         /// <summary>
-        /// Holding Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address, bool isBigEndian, int timeout) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(ReadHoldingRegisterBytes(slaveAddress, address, 1, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToInt32(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToUInt32(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToInt64(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 4, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToUInt64(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 4, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 4바이트 실수 값 읽기
+        /// Holding Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 4바이트 실수 값</returns>
+        /// <returns>Holding Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToSingle(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 2, timeout)), 0);
         /// <summary>
-        /// Holding Register에서 8바이트 실수 값 읽기
+        /// Holding Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="endian">엔디안</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 8바이트 실수 값</returns>
+        /// <returns>Holding Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address, ModbusEndian endian, int timeout) => BitConverter.ToDouble(endian.Sort(ReadHoldingRegisterBytes(slaveAddress, address, 4, timeout)), 0);
 
         /// <summary>
-        /// Holding Register에서 부호 있는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 2 Byte 정수 값</returns>
         public short ReadInt16FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt16FromHoldingRegisters(slaveAddress, address, true, timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 2바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 2 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 2바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 2 Byte 정수 값</returns>
         public ushort ReadUInt16FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt16FromHoldingRegisters(slaveAddress, address, true, timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 4 Byte 정수 값</returns>
         public int ReadInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 4바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 4 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 4바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 4 Byte 정수 값</returns>
         public uint ReadUInt32FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt32FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Holding Register에서 부호 있는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 있는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 있는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 있는 8 Byte 정수 값</returns>
         public long ReadInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Holding Register에서 부호 없는 8바이트 정수 값 읽기
+        /// Holding Register에서 부호 없는 8 Byte 정수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 부호 없는 8바이트 정수 값</returns>
+        /// <returns>Holding Register의 부호 없는 8 Byte 정수 값</returns>
         public ulong ReadUInt64FromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadUInt64FromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Holding Register에서 4바이트 실수 값 읽기
+        /// Holding Register에서 4 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 4바이트 실수 값</returns>
+        /// <returns>Holding Register의 4 Byte 실수 값</returns>
         public float ReadSingleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadSingleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// Holding Register에서 8바이트 실수 값 읽기
+        /// Holding Register에서 8 Byte 실수 값 읽기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
         /// <param name="timeout">제한시간(밀리초)</param>
-        /// <returns>Holding Register의 8바이트 실수 값</returns>
+        /// <returns>Holding Register의 8 Byte 실수 값</returns>
         public double ReadDoubleFromHoldingRegisters(byte slaveAddress, ushort address, int timeout) => ReadDoubleFromHoldingRegisters(slaveAddress, address, ModbusEndian.AllBig, timeout);
 
         /// <summary>
-        /// 부호 있는 2바이트 정수 값 쓰기
+        /// 부호 있는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1051,7 +1051,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, short value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 부호 없는 2바이트 정수 값 쓰기
+        /// 부호 없는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1060,7 +1060,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, ushort value, bool isBigEndian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, (isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 부호 있는 4바이트 정수 값 쓰기
+        /// 부호 있는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1069,7 +1069,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, int value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 부호 없는 4바이트 정수 값 쓰기
+        /// 부호 없는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1078,7 +1078,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, uint value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 부호 있는 8바이트 정수 값 쓰기
+        /// 부호 있는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1087,7 +1087,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, long value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 부호 없는 8바이트 정수 값 쓰기
+        /// 부호 없는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1096,7 +1096,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, ulong value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 4바이트 실수 값 쓰기
+        /// 4 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1105,7 +1105,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, float value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
         /// <summary>
-        /// 8바이트 실수 값 쓰기
+        /// 8 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1115,7 +1115,7 @@ namespace VagabondK.Protocols.Modbus
         public void Write(byte slaveAddress, ushort address, double value, ModbusEndian endian, int timeout) => WriteHoldingRegisterBytes(slaveAddress, address, endian.Sort(BitConverter.GetBytes(value)), timeout);
 
         /// <summary>
-        /// 부호 있는 2바이트 정수 값 쓰기
+        /// 부호 있는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1123,7 +1123,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, short value, int timeout) => Write(slaveAddress, address, value, true, timeout);
         /// <summary>
-        /// 부호 없는 2바이트 정수 값 쓰기
+        /// 부호 없는 2 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1131,7 +1131,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, ushort value, int timeout) => Write(slaveAddress, address, value, true, timeout);
         /// <summary>
-        /// 부호 있는 4바이트 정수 값 쓰기
+        /// 부호 있는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1139,7 +1139,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, int value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// 부호 없는 4바이트 정수 값 쓰기
+        /// 부호 없는 4 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1147,7 +1147,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, uint value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// 부호 있는 8바이트 정수 값 쓰기
+        /// 부호 있는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1155,7 +1155,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, long value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// 부호 없는 8바이트 정수 값 쓰기
+        /// 부호 없는 8 Byte 정수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1163,7 +1163,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, ulong value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// 4바이트 실수 값 쓰기
+        /// 4 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
@@ -1171,7 +1171,7 @@ namespace VagabondK.Protocols.Modbus
         /// <param name="timeout">제한시간(밀리초)</param>
         public void Write(byte slaveAddress, ushort address, float value, int timeout) => Write(slaveAddress, address, value, ModbusEndian.AllBig, timeout);
         /// <summary>
-        /// 8바이트 실수 값 쓰기
+        /// 8 Byte 실수 값 쓰기
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>

@@ -5,9 +5,9 @@ using System.Linq;
 namespace VagabondK.Protocols.Modbus.Data
 {
     /// <summary>
-    /// 논리값 Modbus 데이터셋
+    /// Modbus Bit(Coil, Discrete Input) 데이터셋
     /// </summary>
-    public class ModbusBooleans : ModbusDataSet<bool, bool>
+    public class ModbusBits : ModbusDataSet<bool, bool>
     {
         /// <summary>
         /// 데이터셋 열거자 가져오기
@@ -15,7 +15,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <returns>데이터셋 열거</returns>
         public override IEnumerator<KeyValuePair<ushort, bool>> GetEnumerator()
         {
-            foreach (ModbusBooleanDataBlock dataBlock in DataBlocks)
+            foreach (ModbusBitDataBlock dataBlock in DataBlocks)
             {
                 ushort address = dataBlock.StartAddress;
                 foreach (var value in dataBlock)
@@ -30,7 +30,7 @@ namespace VagabondK.Protocols.Modbus.Data
         /// <param name="data">데이터 배열</param>
         public void Allocate(ushort startAddress, bool[] data)
         {
-            AllocateCore(new ModbusBooleanDataBlock(startAddress, data));
+            AllocateCore(new ModbusBitDataBlock(startAddress, data));
         }
 
         /// <summary>
@@ -48,11 +48,11 @@ namespace VagabondK.Protocols.Modbus.Data
         public void AllocateAll(bool value) => Allocate(0, Enumerable.Repeat(value, ushort.MaxValue).ToArray());
 
         internal override ModbusDataBlock<bool, bool> CreateDataBlock(ushort startAddress, bool[] values)
-            => new ModbusBooleanDataBlock(startAddress, values);
+            => new ModbusBitDataBlock(startAddress, values);
 
-        class ModbusBooleanDataBlock : ModbusDataBlock<bool, bool>
+        class ModbusBitDataBlock : ModbusDataBlock<bool, bool>
         {
-            public ModbusBooleanDataBlock(ushort startAddress, bool[] values)
+            public ModbusBitDataBlock(ushort startAddress, bool[] values)
             {
                 this.startAddress = startAddress;
                 rawData = values;

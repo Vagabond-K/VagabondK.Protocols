@@ -18,7 +18,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
         /// Modbus 메시지 직렬화
         /// </summary>
         /// <param name="message">Modbus 메시지</param>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public IEnumerable<byte> Serialize(IModbusMessage message)
         {
             if (message is ModbusCommErrorResponse commErrorResponse)
@@ -88,10 +88,10 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 {
                     case ModbusObjectType.DiscreteInput:
                     case ModbusObjectType.Coil:
-                        return DeserializeReadBooleanResponse(buffer, readMessage, timeout);
+                        return DeserializeReadBitResponse(buffer, readMessage, timeout);
                     case ModbusObjectType.InputRegister:
                     case ModbusObjectType.HoldingRegister:
-                        return DeserializeReadRegisterResponse(buffer, readMessage, timeout);
+                        return DeserializeReadWordResponse(buffer, readMessage, timeout);
                 }
             }
             else if (request is ModbusWriteCoilRequest writeCoilMessage)
@@ -106,8 +106,8 @@ namespace VagabondK.Protocols.Modbus.Serialization
             throw new ArgumentOutOfRangeException(nameof(request));
         }
 
-        internal abstract ModbusResponse DeserializeReadBooleanResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout);
-        internal abstract ModbusResponse DeserializeReadRegisterResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout);
+        internal abstract ModbusResponse DeserializeReadBitResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout);
+        internal abstract ModbusResponse DeserializeReadWordResponse(ResponseBuffer buffer, ModbusReadRequest request, int timeout);
         internal abstract ModbusResponse DeserializeWriteResponse(ResponseBuffer buffer, ModbusWriteCoilRequest request, int timeout);
         internal abstract ModbusResponse DeserializeWriteResponse(ResponseBuffer buffer, ModbusWriteHoldingRegisterRequest request, int timeout);
 
@@ -121,7 +121,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
         internal abstract ModbusRequest DeserializeRequest(RequestBuffer buffer, int timeout);
 
 
-        internal static IEnumerable<bool> ByteToBooleanArray(byte value)
+        internal static IEnumerable<bool> ByteToBitArray(byte value)
         {
             yield return (value & 0b00000001) != 0;
             yield return (value & 0b00000010) != 0;

@@ -29,7 +29,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public abstract IEnumerable<byte> Serialize();
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return Request.SlaveAddress;
@@ -118,16 +118,16 @@ namespace VagabondK.Protocols.Modbus
     }
 
     /// <summary>
-    /// Modbus 논리값 읽기 응답
+    /// Bit(Coil, Discrete Input) 읽기 응답
     /// </summary>
-    public class ModbusReadBooleanResponse : ModbusReadResponse
+    public class ModbusReadBitResponse : ModbusReadResponse
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="values">응답할 논리값 배열</param>
+        /// <param name="values">응답할 Bit(Coil, Discrete Input) 배열</param>
         /// <param name="request">Modbus 읽기 요청</param>
-        internal ModbusReadBooleanResponse(bool[] values, ModbusReadRequest request) : base(request)
+        internal ModbusReadBitResponse(bool[] values, ModbusReadRequest request) : base(request)
         {
             switch (request.Function)
             {
@@ -142,14 +142,14 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// 응답 논리값 목록
+        /// 응답 Bit(Coil, Discrete Input) 목록
         /// </summary>
         public IReadOnlyList<bool> Values { get; }
 
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return Request.SlaveAddress;
@@ -180,16 +180,16 @@ namespace VagabondK.Protocols.Modbus
     }
 
     /// <summary>
-    /// Modbus 레지스터 읽기 응답
+    /// Word(Holding Register, Input Register) 읽기 응답
     /// </summary>
-    public class ModbusReadRegisterResponse : ModbusReadResponse
+    public class ModbusReadWordResponse : ModbusReadResponse
     {
         /// <summary>
         /// 생성자
         /// </summary>
-        /// <param name="bytes">응답할 레지스터들의 Raw 바이트 배열</param>
+        /// <param name="bytes">응답할 Word(Holding Register, Input Register)들의 Raw Byte 배열</param>
         /// <param name="request">Modbus 읽기 요청</param>
-        internal ModbusReadRegisterResponse(byte[] bytes, ModbusReadRequest request) : base(request)
+        internal ModbusReadWordResponse(byte[] bytes, ModbusReadRequest request) : base(request)
         {
             switch (request.Function)
             {
@@ -206,12 +206,12 @@ namespace VagabondK.Protocols.Modbus
         private IReadOnlyList<ushort> values;
 
         /// <summary>
-        /// 응답 레지스터들의 Raw 바이트 배열
+        /// 응답 Word(Holding Register, Input Register)들의 Raw Byte 배열
         /// </summary>
         public IReadOnlyList<byte> Bytes { get; }
 
         /// <summary>
-        /// 응답 레지스터 배열
+        /// 응답 Word(Holding Register, Input Register) 배열
         /// </summary>
         public IReadOnlyList<ushort> Values
         {
@@ -229,7 +229,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return Request.SlaveAddress;
@@ -261,105 +261,105 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// 특정 주소로부터 부호 있는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public short GetInt16(ushort address) => GetInt16(address, true);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public ushort GetUInt16(ushort address) => GetUInt16(address, true);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public int GetInt32(ushort address) => GetInt32(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public uint GetUInt32(ushort address) => GetUInt32(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public long GetInt64(ushort address) => GetInt64(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public ulong GetUInt64(ushort address) => GetUInt64(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 4바이트 실수 값 가져오기
+        /// 특정 주소로부터 4 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public float GetSingle(ushort address) => GetSingle(address, ModbusEndian.AllBig);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <returns>값</returns>
         public double GetDouble(ushort address) => GetDouble(address, ModbusEndian.AllBig);
 
         /// <summary>
-        /// 특정 주소로부터 부호 있는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <returns>값</returns>
         public short GetInt16(ushort address, bool isBigEndian) => BitConverter.ToInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(GetRawData(address, 2).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 2바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 2 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="isBigEndian">빅 엔디안 여부</param>
         /// <returns>값</returns>
         public ushort GetUInt16(ushort address, bool isBigEndian) => BitConverter.ToUInt16((isBigEndian ? ModbusEndian.AllBig : ModbusEndian.AllLittle).Sort(GetRawData(address, 2).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public int GetInt32(ushort address, ModbusEndian endian) => BitConverter.ToInt32(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 4바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 4 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public uint GetUInt32(ushort address, ModbusEndian endian) => BitConverter.ToUInt32(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 있는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 있는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public long GetInt64(ushort address, ModbusEndian endian) => BitConverter.ToInt64(endian.Sort(GetRawData(address, 8).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 부호 없는 8바이트 정수 값 가져오기
+        /// 특정 주소로부터 부호 없는 8 Byte 정수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public ulong GetUInt64(ushort address, ModbusEndian endian) => BitConverter.ToUInt64(endian.Sort(GetRawData(address, 8).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
         /// <returns>값</returns>
         public float GetSingle(ushort address, ModbusEndian endian) => BitConverter.ToSingle(endian.Sort(GetRawData(address, 4).ToArray()), 0);
         /// <summary>
-        /// 특정 주소로부터 8바이트 실수 값 가져오기
+        /// 특정 주소로부터 8 Byte 실수 값 가져오기
         /// </summary>
         /// <param name="address">주소</param>
         /// <param name="endian">엔디안</param>
@@ -393,7 +393,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return Request.SlaveAddress;
@@ -410,13 +410,13 @@ namespace VagabondK.Protocols.Modbus
                     break;
                 case ModbusFunction.WriteSingleCoil:
                     ModbusWriteCoilRequest writeCoilRequest = Request as ModbusWriteCoilRequest;
-                    yield return writeCoilRequest.SingleBooleanValue ? (byte)0xff : (byte)0x00;
+                    yield return writeCoilRequest.SingleBitValue ? (byte)0xff : (byte)0x00;
                     yield return 0x00;
                     break;
                 case ModbusFunction.WriteSingleHoldingRegister:
                     ModbusWriteHoldingRegisterRequest writeHoldingRegisterRequest = Request as ModbusWriteHoldingRegisterRequest;
-                    yield return (byte)((writeHoldingRegisterRequest.SingleRegisterValue >> 8) & 0xff);
-                    yield return (byte)(writeHoldingRegisterRequest.SingleRegisterValue  & 0xff);
+                    yield return (byte)((writeHoldingRegisterRequest.SingleWordValue >> 8) & 0xff);
+                    yield return (byte)(writeHoldingRegisterRequest.SingleWordValue  & 0xff);
                     break;
             }
         }

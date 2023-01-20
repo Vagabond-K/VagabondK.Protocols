@@ -20,7 +20,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 된 바이트 열거</returns>
+        /// <returns>직렬화 된 Byte 열거</returns>
         IEnumerable<byte> Serialize();
     }
 }

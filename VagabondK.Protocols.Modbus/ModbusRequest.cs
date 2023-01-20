@@ -46,7 +46,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 결과 바이트 열거</returns>
+        /// <returns>직렬화 결과 Byte 열거</returns>
         public abstract IEnumerable<byte> Serialize();
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 결과 바이트 열거</returns>
+        /// <returns>직렬화 결과 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return SlaveAddress;
@@ -180,11 +180,11 @@ namespace VagabondK.Protocols.Modbus
         }
 
         /// <summary>
-        /// 단일 논리값
+        /// 단일 Bit(Coil, Discrete Input)
         /// </summary>
-        public bool SingleBooleanValue => Values != null && Values.Count> 0 ? Values[0] : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
+        public bool SingleBitValue => Values != null && Values.Count> 0 ? Values[0] : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
-        /// 다중 논리값 목록
+        /// 다중 Bit(Coil, Discrete Input) 목록
         /// </summary>
         public List<bool> Values { get; }
         /// <summary>
@@ -201,7 +201,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 결과 바이트 열거</returns>
+        /// <returns>직렬화 결과 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             yield return SlaveAddress;
@@ -212,7 +212,7 @@ namespace VagabondK.Protocols.Modbus
             switch (Function)
             {
                 case ModbusFunction.WriteSingleCoil:
-                    yield return SingleBooleanValue ? (byte)0xff : (byte)0x00;
+                    yield return SingleBitValue ? (byte)0xff : (byte)0x00;
                     yield return 0x00;
                     break;
                 case ModbusFunction.WriteMultipleCoils:
@@ -274,7 +274,7 @@ namespace VagabondK.Protocols.Modbus
         /// </summary>
         /// <param name="slaveAddress">슬레이브 주소</param>
         /// <param name="address">데이터 주소</param>
-        /// <param name="bytes">Holding Register 값들의 Raw 바이트 목록</param>
+        /// <param name="bytes">Holding Register 값들의 Raw Byte 목록</param>
         public ModbusWriteHoldingRegisterRequest(byte slaveAddress, ushort address, IEnumerable<byte> bytes)
             : base(slaveAddress, ModbusFunction.WriteMultipleHoldingRegisters, address)
         {
@@ -290,16 +290,16 @@ namespace VagabondK.Protocols.Modbus
         public ModbusWriteHoldingRegisterRequest(byte slaveAddress, ushort address, IEnumerable<ushort> values)
             : base(slaveAddress, ModbusFunction.WriteMultipleHoldingRegisters, address)
         {
-            Bytes = values.SelectMany(register => new byte[] { (byte)((register >> 8) & 0xff), (byte)(register & 0xff) }).ToList();
+            Bytes = values.SelectMany(word => new byte[] { (byte)((word >> 8) & 0xff), (byte)(word & 0xff) }).ToList();
         }
 
         /// <summary>
         /// 단일 Holding Register 값
         /// </summary>
-        public ushort SingleRegisterValue => Bytes.Count >= 2 ?
+        public ushort SingleWordValue => Bytes.Count >= 2 ?
             (ushort)(Bytes[0] << 8 | Bytes[1]) : throw new ModbusException(ModbusExceptionCode.IllegalDataValue);
         /// <summary>
-        /// Holding Register 값들의 Raw 바이트 목록
+        /// Holding Register 값들의 Raw Byte 목록
         /// </summary>
         public List<byte> Bytes { get; }
         /// <summary>
@@ -315,7 +315,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 직렬화
         /// </summary>
-        /// <returns>직렬화 결과 바이트 열거</returns>
+        /// <returns>직렬화 결과 Byte 열거</returns>
         public override IEnumerable<byte> Serialize()
         {
             if (Bytes.Count < 2)
