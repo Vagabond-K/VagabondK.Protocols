@@ -12,7 +12,6 @@ namespace VagabondK.Protocols.Modbus.Serialization
     public sealed class ModbusAsciiSerializer : ModbusSerializer
     {
         private readonly List<byte> errorBuffer = new List<byte>();
-        private readonly object lockReceive = new object();
 
         internal override IEnumerable<byte> OnSerialize(IModbusMessage message)
         {
@@ -60,7 +59,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
-            lock (lockReceive)
+            lock (buffer.Channel)
             {
                 var remainMessage = buffer.Channel.ReadAllRemain().ToArray();
                 if (remainMessage != null && remainMessage.Length > 0)

@@ -11,7 +11,6 @@ namespace VagabondK.Protocols.Modbus.Serialization
     public sealed class ModbusRtuSerializer : ModbusSerializer
     {
         private readonly List<byte> errorBuffer = new List<byte>();
-        private readonly object lockReceive = new object();
 
         private static readonly ushort[] crcTable = {
             0x0000, 0xc0c1, 0xc181, 0x0140, 0xc301, 0x03c0, 0x0280, 0xc241,
@@ -97,7 +96,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
 
         internal override ModbusResponse DeserializeResponse(ResponseBuffer buffer, ModbusRequest request, int timeout)
         {
-            lock (lockReceive)
+            lock (buffer.Channel)
             {
                 var remainMessage = buffer.Channel.ReadAllRemain().ToArray();
                 if (remainMessage != null && remainMessage.Length > 0)

@@ -109,62 +109,65 @@ namespace VagabondK.Protocols.LSElectric.Cnet
             if (channel == null)
                 throw new ArgumentNullException(nameof(Channel));
 
-            CnetRequestLog requestLog;
-            CnetResponse result;
-            List<byte> buffer = new List<byte>();
-            List<byte> errorBuffer = new List<byte>();
-
-            try
+            lock (channel)
             {
-                var requestMessage = request.Serialize(useBCC).ToArray();
+                CnetRequestLog requestLog;
+                CnetResponse result;
+                List<byte> buffer = new List<byte>();
+                List<byte> errorBuffer = new List<byte>();
 
-                channel.Write(requestMessage);
-                requestLog = new CnetRequestLog(channel, request, requestMessage);
-                channel?.Logger?.Log(requestLog);
-
-                result = DeserializeResponse(channel, buffer, request, useBCC, timeout);
-
-                while (result is CnetCommErrorResponse responseCommErrorMessage
-                    && responseCommErrorMessage.ErrorCode != CnetCommErrorCode.ResponseTimeout)
+                try
                 {
-                    errorBuffer.Add(buffer[0]);
-                    buffer.RemoveAt(0);
+                    var requestMessage = request.Serialize(useBCC).ToArray();
+
+                    channel.Write(requestMessage);
+                    requestLog = new CnetRequestLog(channel, request, requestMessage);
+                    channel?.Logger?.Log(requestLog);
+
                     result = DeserializeResponse(channel, buffer, request, useBCC, timeout);
-                }
 
-                if (result is CnetCommErrorResponse responseCommError)
+                    while (result is CnetCommErrorResponse responseCommErrorMessage
+                        && responseCommErrorMessage.ErrorCode != CnetCommErrorCode.ResponseTimeout)
+                    {
+                        errorBuffer.Add(buffer[0]);
+                        buffer.RemoveAt(0);
+                        result = DeserializeResponse(channel, buffer, request, useBCC, timeout);
+                    }
+
+                    if (result is CnetCommErrorResponse responseCommError)
+                    {
+                        result = new CnetCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
+                    }
+                    else if (errorBuffer.Count > 0)
+                    {
+                        channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
+                        errorBuffer.Clear();
+                    }
+                }
+                catch (Exception ex)
                 {
-                    result = new CnetCommErrorResponse(responseCommError.ErrorCode, errorBuffer.Concat(responseCommError.ReceivedBytes), request);
+                    channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
+                    throw ex;
                 }
-                else if (errorBuffer.Count > 0)
+
+                if (result is CnetCommErrorResponse commErrorResponse)
                 {
-                    channel?.Logger?.Log(new UnrecognizedErrorLog(channel, errorBuffer.ToArray()));
-                    errorBuffer.Clear();
+                    var ex = new RequestException<CnetCommErrorCode>(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
+                    channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
+                    throw ex;
                 }
-            }
-            catch (Exception ex)
-            {
-                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
-                throw ex;
-            }
 
-            if (result is CnetCommErrorResponse commErrorResponse)
-            {
-                var ex = new RequestException<CnetCommErrorCode>(commErrorResponse.ErrorCode, commErrorResponse.ReceivedBytes, commErrorResponse.Request);
-                channel?.Logger?.Log(new ChannelErrorLog(channel, ex));
-                throw ex;
-            }
+                if (result is CnetNAKResponse exceptionResponse)
+                {
+                    channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
+                    if (ThrowsExceptionFromNAK)
+                        throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
+                }
+                else
+                    channel?.Logger?.Log(new CnetResponseLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray(), requestLog));
 
-            if (result is CnetNAKResponse exceptionResponse)
-            {
-                channel?.Logger?.Log(new CnetNAKLog(channel, exceptionResponse, buffer.ToArray(), requestLog));
-                if (ThrowsExceptionFromNAK)
-                    throw new CnetNAKException(exceptionResponse.NAKCode, exceptionResponse.NAKCodeValue);
+                return result;
             }
-            else
-                channel?.Logger?.Log(new CnetResponseLog(channel, result, result is CnetNAKResponse ? null : buffer.ToArray(), requestLog));
-
-            return result;
         }
 
 
