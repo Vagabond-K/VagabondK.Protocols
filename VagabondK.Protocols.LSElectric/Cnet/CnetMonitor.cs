@@ -21,7 +21,7 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         public byte StationNumber { get; }
 
         /// <summary>
-        /// 국번
+        /// 모니터 번호
         /// </summary>
         public byte MonitorNumber { get; }
 
