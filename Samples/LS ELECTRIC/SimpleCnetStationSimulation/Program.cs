@@ -13,9 +13,11 @@ namespace SimpleCnetStationSimulation
         {
             var logger = new ConsoleChannelLogger();
 
-            IChannel channel = new TcpChannelProvider(1234) { Logger = logger };        //TCP Server
+            IChannel channel = new SerialPortChannel("COM4", 9600, 8, System.IO.Ports.StopBits.One, System.IO.Ports.Parity.None, System.IO.Ports.Handshake.None) { Logger = logger };     //Serial Port
+            //IChannel channel = new TcpChannelProvider(1234) { Logger = logger };        //TCP Server
             //IChannel channel = new TcpChannel("127.0.0.1", 1234) { Logger = logger };   //TCP Client
             //IChannel channel = new UdpChannelProvider(1234) { Logger = logger };        //UDP
+            BitConverter.GetBytes(123.456).CopyTo(deviceMemories[DeviceType.M], 0);
 
             var cnetSimulationService = new CnetSimulationService(channel);
 
