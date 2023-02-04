@@ -15,7 +15,12 @@ namespace VagabondK.Protocols.LSElectric.Cnet
         /// <param name="value">1바이트 값</param>
         /// <param name="size">자릿수</param>
         /// <returns>16진수 아스키 문자의 바이트 목록</returns>
-        public static IEnumerable<byte> ToAsciiBytes(long value, int size = 2) => Encoding.ASCII.GetBytes(value.ToString("X" + size));
+        public static IEnumerable<byte> ToAsciiBytes(long value, int size = 2)
+        {
+            var result = value.ToString("X" + size);
+            result = result.Remove(0, result.Length - size);
+            return Encoding.ASCII.GetBytes(result);
+        }
 
         private byte[] frameData;
 
