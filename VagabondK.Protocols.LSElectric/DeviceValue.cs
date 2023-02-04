@@ -356,7 +356,7 @@ namespace VagabondK.Protocols.LSElectric
                 case DataType.Bit:
                     return BitConverter.GetBytes(BitValue);
                 case DataType.Byte:
-                    return BitConverter.GetBytes(ByteValue);
+                    return new byte[] { ByteValue };
                 case DataType.Word:
                     return BitConverter.GetBytes(WordValue);
                 case DataType.DoubleWord:

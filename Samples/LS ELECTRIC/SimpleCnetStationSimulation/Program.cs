@@ -17,7 +17,11 @@ namespace SimpleCnetStationSimulation
             //IChannel channel = new TcpChannelProvider(1234) { Logger = logger };        //TCP Server
             //IChannel channel = new TcpChannel("127.0.0.1", 1234) { Logger = logger };   //TCP Client
             //IChannel channel = new UdpChannelProvider(1234) { Logger = logger };        //UDP
-            BitConverter.GetBytes(123.456).CopyTo(deviceMemories[DeviceType.M], 0);
+            BitConverter.GetBytes(255).CopyTo(deviceMemories[DeviceType.M], 100 / 8);
+            BitConverter.GetBytes(123).CopyTo(deviceMemories[DeviceType.M], 100);
+            BitConverter.GetBytes(456).CopyTo(deviceMemories[DeviceType.M], 100 * 2);
+            BitConverter.GetBytes(789).CopyTo(deviceMemories[DeviceType.M], 100 * 4);
+            BitConverter.GetBytes(123456789).CopyTo(deviceMemories[DeviceType.M], 100 * 8);
 
             var cnetSimulationService = new CnetSimulationService(channel);
 
