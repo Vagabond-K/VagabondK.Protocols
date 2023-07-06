@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -51,48 +52,103 @@ namespace VagabondK.Protocols.LSElectric
         /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.
         /// </summary>
         /// <returns>정규화된 형식 이름입니다.</returns>
-        public override string ToString()
-        {
-            if (DeviceType == DeviceType.U && DataType == DataType.Bit)
-            {
-                StringBuilder stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index:X}");
+        public override string ToString() => ToString(false);
 
-                foreach (var subIndex in SubIndices)
+        /// <summary>
+        /// 이 인스턴스의 정규화된 형식 이름을 반환합니다.
+        /// </summary>
+        /// <param name="useHexBitIndex">비트 변수의 인덱스를 16진수로 표시할지 여부를 결정합니다.</param>
+        /// <returns>정규화된 형식 이름입니다.</returns>
+        public string ToString(bool useHexBitIndex)
+        {
+            StringBuilder stringBuilder;
+
+            if (DataType != DataType.Bit || !useHexBitIndex)
+            {
+                if (DeviceType == DeviceType.U && DataType == DataType.Bit)
                 {
-                    stringBuilder.Append('.');
-                    stringBuilder.Append(subIndex.ToString("X"));
+                    stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index:X}");
+
+                    foreach (var subIndex in SubIndices)
+                    {
+                        stringBuilder.Append('.');
+                        stringBuilder.Append(subIndex.ToString("X"));
+                    }
+                    return stringBuilder.ToString();
                 }
-                return stringBuilder.ToString();
+                else
+                {
+                    stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index}");
+                    foreach (var subIndex in SubIndices)
+                    {
+                        stringBuilder.Append('.');
+                        stringBuilder.Append(subIndex);
+                    }
+                    return stringBuilder.ToString();
+                }
             }
             else
             {
-                StringBuilder stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index}");
-                foreach (var subIndex in SubIndices)
+                //P, M, L, K, F 이면서 Bit일 경우 16진수
+                //그 외에는 인덱스가 .으로 나누어져있고 Bit일 경우 마지막 자리만 16진수
+                switch (DeviceType)
                 {
-                    stringBuilder.Append('.');
-                    stringBuilder.Append(subIndex);
+                    case DeviceType.P:
+                    case DeviceType.M:
+                    case DeviceType.L:
+                    case DeviceType.K:
+                    case DeviceType.F:
+                        return $"%{(char)DeviceType}{(char)DataType}{Index:X}";
+                    case DeviceType.U:
+                        stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index:X}");
+                        foreach (var subIndex in SubIndices)
+                        {
+                            stringBuilder.Append('.');
+                            stringBuilder.Append(subIndex.ToString("X"));
+                        }
+                        return stringBuilder.ToString();
+                    default:
+                        stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index}");
+                        for (int i = 0; i < SubIndices.Count; i++)
+                        {
+                            stringBuilder.Append('.');
+                            stringBuilder.Append(i == SubIndices.Count - 1 ? SubIndices[i].ToString("X") : SubIndices[i].ToString());
+                        }
+                        return stringBuilder.ToString();
                 }
-                return stringBuilder.ToString();
             }
         }
+
 
         /// <summary>
         /// 변수 문자열을 바이트 배열로 반환합니다.
         /// </summary>
         /// <returns>변수 문자열을 바이트 배열</returns>
-        public byte[] ToBytes()
-        {
-            return Encoding.ASCII.GetBytes(ToString());
-        }
+        public byte[] ToBytes() => ToBytes(false);
+
+        /// <summary>
+        /// 변수 문자열을 바이트 배열로 반환합니다.
+        /// </summary>
+        /// <param name="useHexBitIndex">비트 변수의 인덱스를 16진수로 표시할지 여부를 결정합니다.</param>
+        /// <returns>변수 문자열을 바이트 배열</returns>
+        public byte[] ToBytes(bool useHexBitIndex) => Encoding.ASCII.GetBytes(ToString(useHexBitIndex));
 
         /// <summary>
         /// 문자열을 디바이스 변수로 해석합니다.
         /// </summary>
         /// <param name="text">문자열</param>
         /// <returns>디바이스 변수</returns>
-        public static DeviceVariable Parse(string text)
+        public static DeviceVariable Parse(string text) => Parse(text, false);
+
+        /// <summary>
+        /// 문자열을 디바이스 변수로 해석합니다.
+        /// </summary>
+        /// <param name="text">문자열</param>
+        /// <param name="useHexBitIndex">비트 변수의 인덱스를 16진수로 인식할지 여부를 결정합니다.</param>
+        /// <returns>디바이스 변수</returns>
+        public static DeviceVariable Parse(string text, bool useHexBitIndex)
         {
-            var exception = TryParseCore(text, out DeviceVariable result);
+            var exception = TryParseCore(text, useHexBitIndex, out DeviceVariable result);
             if (exception != null)
                 throw exception;
             return result;
@@ -104,9 +160,18 @@ namespace VagabondK.Protocols.LSElectric
         /// <param name="text">문자열</param>
         /// <param name="deviceVariable">디바이스 변수</param>
         /// <returns>성공 여부</returns>
-        public static bool TryParse(string text, out DeviceVariable deviceVariable) => TryParseCore(text, out deviceVariable) == null;
+        public static bool TryParse(string text, out DeviceVariable deviceVariable) => TryParseCore(text, false, out deviceVariable) == null;
 
-        private static Exception TryParseCore(string text, out DeviceVariable deviceVariable)
+        /// <summary>
+        /// 문자열을 디바이스 변수로 해석 시도합니다.
+        /// </summary>
+        /// <param name="text">문자열</param>
+        /// <param name="useHexBitIndex">비트 변수의 인덱스를 16진수로 인식할지 여부를 결정합니다.</param>
+        /// <param name="deviceVariable">디바이스 변수</param>
+        /// <returns>성공 여부</returns>
+        public static bool TryParse(string text, bool useHexBitIndex, out DeviceVariable deviceVariable) => TryParseCore(text, useHexBitIndex, out deviceVariable) == null;
+
+        private static Exception TryParseCore(string text, bool useHexBitIndex, out DeviceVariable deviceVariable)
         {
             if (text == null)
             {
@@ -130,25 +195,43 @@ namespace VagabondK.Protocols.LSElectric
 
                 List<uint> indices = new List<uint>();
 
-                foreach (var indexText in indexTexts)
+                for (int i = 0; i < indexTexts.Length; i++)
                 {
-                    if (deviceType == DeviceType.U && dataType == DataType.Bit)
+                    var indexText = indexTexts[i];
+                    uint index = 0;
+                    
+                    switch (deviceType)
                     {
-                        if (!uint.TryParse(indexText, System.Globalization.NumberStyles.HexNumber, null, out var index))
-                        {
-                            deviceVariable = new DeviceVariable();
-                            return new FormatException();
-                        }
-                        indices.Add(index);
-                    }
-                    else
-                    {
-                        if (!uint.TryParse(indexText, out var index))
-                        {
-                            deviceVariable = new DeviceVariable();
-                            return new FormatException();
-                        }
-                        indices.Add(index);
+                        case DeviceType.P:
+                        case DeviceType.M:
+                        case DeviceType.L:
+                        case DeviceType.K:
+                        case DeviceType.F:
+                            if (!useHexBitIndex && indexText.Any(c => !char.IsDigit(c))
+                                || !uint.TryParse(indexText, useHexBitIndex && dataType == DataType.Bit ? NumberStyles.HexNumber : NumberStyles.Number, null, out index))
+                            {
+                                deviceVariable = new DeviceVariable();
+                                return new FormatException();
+                            }
+                            indices.Add(index);
+                            break;
+                        case DeviceType.U:
+                            if (!uint.TryParse(indexText, NumberStyles.HexNumber, null, out index))
+                            {
+                                deviceVariable = new DeviceVariable();
+                                return new FormatException();
+                            }
+                            indices.Add(index);
+                            break;
+                        default:
+                            if (!useHexBitIndex && indexText.Any(c => !char.IsDigit(c))
+                                || !uint.TryParse(indexText, i == indexTexts.Length - 1 && useHexBitIndex && dataType == DataType.Bit ? NumberStyles.HexNumber : NumberStyles.Number, null, out index))
+                            {
+                                deviceVariable = new DeviceVariable();
+                                return new FormatException();
+                            }
+                            indices.Add(index);
+                            break;
                     }
                 }
 

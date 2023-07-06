@@ -142,6 +142,12 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
         /// </summary>
         public byte EthernetModuleBase { get; set; } = 1;
 
+        /// <summary>
+        /// 비트 변수의 인덱스를 16진수로 통신할지 여부를 결정합니다.
+        /// P, M, L, K, F 이면서 Bit일 경우 16진수로 인식합니다.
+        /// 그 외에는 인덱스가 .으로 나누어져있고 Bit일 경우 마지막 자리만 16진수로 인식합니다.
+        /// </summary>
+        public bool UseHexBitIndex { get; set; }
 
         private byte EthernetModuleInfo => (byte)((EthernetModuleBase << 4) | (EthernetModuleSlot & 0xF));
 
@@ -338,7 +344,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
             if (!Enum.IsDefined(typeof(DataType), (byte)s[2]))
                 throw new FEnetNAKException(FEnetNAKCode.DeviceVariableTypeError);
 
-            return DeviceVariable.TryParse(s, out var deviceVariable)? deviceVariable : throw new FEnetNAKException(FEnetNAKCode.IlegalDeviceMemory);
+            return DeviceVariable.TryParse(s, UseHexBitIndex, out var deviceVariable)? deviceVariable : throw new FEnetNAKException(FEnetNAKCode.IlegalDeviceMemory);
         }
 
         private FEnetRequest DeserializeReadRequest(Channel channel, DataType dataType, List<byte> buffer, ushort blockCount)
@@ -352,7 +358,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
                         throw new FEnetNAKException(FEnetNAKCode.DeviceVariableTypeError);
 
                     var count = FEnetMessage.ReadWord(channel, buffer);
-                    return new FEnetReadContinuousRequest(deviceVariable.Value.DeviceType, deviceVariable.Value.Index, count);
+                    return new FEnetReadContinuousRequest(deviceVariable.Value.DeviceType, deviceVariable.Value.Index, count) { UseHexBitIndex = UseHexBitIndex };
                 }
             }
             else
@@ -366,7 +372,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
 
                     deviceVariables.Add(deviceVariable.Value);
                 }
-                return new FEnetReadIndividualRequest(dataType, deviceVariables);
+                return new FEnetReadIndividualRequest(dataType, deviceVariables) { UseHexBitIndex = UseHexBitIndex };
             }
             return null;
         }
@@ -386,7 +392,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
                     if (count > 1400)
                         throw new FEnetNAKException(FEnetNAKCode.OverDataLengthTotal);
 
-                    return new FEnetWriteContinuousRequest(deviceVariable.Value.DeviceType, deviceVariable.Value.Index, channel.Read(count, 0).ToArray());
+                    return new FEnetWriteContinuousRequest(deviceVariable.Value.DeviceType, deviceVariable.Value.Index, channel.Read(count, 0).ToArray()) { UseHexBitIndex = UseHexBitIndex };
                 }
             }
             else
@@ -419,7 +425,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
                     deviceValues[i] = new DeviceValue(value);
                 }
 
-                return new FEnetWriteIndividualRequest(dataType, deviceVariables.Zip(deviceValues, (variable, value) => new KeyValuePair<DeviceVariable, DeviceValue>(variable, value)));
+                return new FEnetWriteIndividualRequest(dataType, deviceVariables.Zip(deviceValues, (variable, value) => new KeyValuePair<DeviceVariable, DeviceValue>(variable, value))) { UseHexBitIndex = UseHexBitIndex };
             }
             return null;
         }

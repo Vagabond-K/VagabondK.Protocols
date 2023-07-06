@@ -17,6 +17,8 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <param name="dataType">커맨드 데이터 타입</param>
         protected FEnetRequest(FEnetCommand command, FEnetDataType dataType) : base(command, dataType) { }
 
+        private bool? useHexBitIndex;
+
         /// <summary>
         /// 통신 메시지의 소스. 클라이언트(HMI): 0x33
         /// </summary>
@@ -26,6 +28,16 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 블록 수
         /// </summary>
         public abstract ushort BlockCount { get; }
+
+        /// <summary>
+        /// 비트 변수의 인덱스를 16진수로 통신할지 여부를 결정합니다.
+        /// P, M, L, K, F 이면서 Bit일 경우 16진수로 전송합니다.
+        /// 그 외에는 인덱스가 .으로 나누어져있고 Bit일 경우 마지막 자리만 16진수로 전송합니다.
+        /// 이 속성을 null로 설정하면 FEnetClient의 UseHexBitIndex 값을 따릅니다.
+        /// XGB PLC에서 비트를 읽거나 쓸 때 엉뚱한 비트가 읽히거나 쓰인다면 true로 설정해서 테스트 해보시기 바랍니다.
+        /// '라이스'님의 제보로 추가한 옵션입니다. 감사합니다.
+        /// </summary>
+        public bool? UseHexBitIndex { get => useHexBitIndex; set => SetProperty(ref useHexBitIndex, value); }
 
         /// <summary>
         /// 요청 메시지 복제
@@ -103,7 +115,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new FEnetReadIndividualRequest(ToDataType(DataType), deviceVariables) { InvokeID = InvokeID };
+        public override object Clone() => new FEnetReadIndividualRequest(ToDataType(DataType), deviceVariables) { InvokeID = InvokeID, UseHexBitIndex = UseHexBitIndex };
 
         private readonly List<DeviceVariable> deviceVariables;
 
@@ -222,7 +234,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
             return base.OnCreateDataFrame()
                 .Concat(deviceVariables.SelectMany(deviceVariable =>
                 {
-                    var deviceVariableBytes = deviceVariable.ToBytes();
+                    var deviceVariableBytes = deviceVariable.ToBytes(UseHexBitIndex ?? false);
                     return WordToLittleEndianBytes((ushort)deviceVariableBytes.Length).Concat(deviceVariableBytes);
                 }));
         }
@@ -274,7 +286,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new FEnetReadContinuousRequest(startDeviceVariable, count) { InvokeID = InvokeID };
+        public override object Clone() => new FEnetReadContinuousRequest(startDeviceVariable, count) { InvokeID = InvokeID, UseHexBitIndex = UseHexBitIndex };
 
         private DeviceVariable startDeviceVariable;
         private int count;
@@ -324,7 +336,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
                     throw new ArgumentException(nameof(startDeviceVariable));
             }
 
-            var deviceVariableBytes = deviceVariable.ToBytes();
+            var deviceVariableBytes = deviceVariable.ToBytes(UseHexBitIndex ?? false);
 
             return base.OnCreateDataFrame()
                 .Concat(WordToLittleEndianBytes((ushort)deviceVariableBytes.Length))
@@ -404,7 +416,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new FEnetWriteIndividualRequest(ToDataType(DataType), valueDictionary) { InvokeID = InvokeID };
+        public override object Clone() => new FEnetWriteIndividualRequest(ToDataType(DataType), valueDictionary) { InvokeID = InvokeID, UseHexBitIndex = UseHexBitIndex };
 
         private readonly Dictionary<DeviceVariable, DeviceValue> valueDictionary = new Dictionary<DeviceVariable, DeviceValue>();
 
@@ -543,7 +555,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
             foreach (var b in base.OnCreateDataFrame()
                 .Concat(valueDictionary.SelectMany(keyValuePair =>
                 {
-                    var deviceVariableBytes = keyValuePair.Key.ToBytes();
+                    var deviceVariableBytes = keyValuePair.Key.ToBytes(UseHexBitIndex ?? false);
                     return WordToLittleEndianBytes((ushort)deviceVariableBytes.Length).Concat(deviceVariableBytes);
                 })))
                 yield return b;
@@ -624,7 +636,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// 요청 메시지 복제
         /// </summary>
         /// <returns>복제된 요청 메시지</returns>
-        public override object Clone() => new FEnetWriteContinuousRequest(startDeviceVariable.DeviceType, startDeviceVariable.Index, deviceValues) { InvokeID = InvokeID };
+        public override object Clone() => new FEnetWriteContinuousRequest(startDeviceVariable.DeviceType, startDeviceVariable.Index, deviceValues) { InvokeID = InvokeID, UseHexBitIndex = UseHexBitIndex };
 
         private readonly List<byte> deviceValues;
 
@@ -780,7 +792,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
         /// <returns>데이터의 직렬화 된 바이트 열거</returns>
         protected override IEnumerable<byte> OnCreateDataFrame()
         {
-            var deviceVariableBytes = startDeviceVariable.ToBytes();
+            var deviceVariableBytes = startDeviceVariable.ToBytes(UseHexBitIndex ?? false);
 
             foreach (var b in base.OnCreateDataFrame()
                 .Concat(WordToLittleEndianBytes((ushort)deviceVariableBytes.Length))
