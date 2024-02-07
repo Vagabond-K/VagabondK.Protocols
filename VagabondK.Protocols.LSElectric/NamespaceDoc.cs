@@ -56,7 +56,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet
 namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
 {
     /// <summary>
-    /// LS ELECTRIC(구 LS산전) Cnet 프로토콜 시뮬레이션 관련 기능들을 제공합니다.
+    /// LS ELECTRIC(구 LS산전) FEnet 프로토콜 시뮬레이션 관련 기능들을 제공합니다.
     /// </summary>
     [System.Runtime.CompilerServices.CompilerGenerated()]
     class NamespaceDoc
