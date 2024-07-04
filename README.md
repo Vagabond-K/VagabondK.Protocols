@@ -1,7 +1,7 @@
 # Vagabond K Protocol Library [![License](https://img.shields.io/badge/license-LGPL--2.1-blue.svg)](https://licenses.nuget.org/LGPL-2.1-only)  
 Modbus RTU/ASCII/TCP 프로토콜, LS ELECTRIC(구 LS산전)의 Cnet, FEnet 프로토콜 등으로 장치와 통신하는 기능들을 구현했습니다.
 
-- [Documentation](https://vagabond-k.github.io/Documentation)
+- [Documentation](https://vagabond-k.github.io/docs/api/VagabondK.Protocols.html)
 
 [!["Buy me a soju"](https://vagabond-k.github.io/Images/buymeasoju131x36.png)](https://www.buymeacoffee.com/VagabondK)  
 
