@@ -144,7 +144,7 @@ namespace VagabondK.Protocols.LSElectric.FEnet.Simulation
 
         /// <summary>
         /// 비트 변수의 인덱스를 16진수로 통신할지 여부를 결정합니다.
-        /// P, M, L, K, F 이면서 Bit일 경우 16진수로 인식합니다.
+        /// P, M, L, K, F 이면서 Bit일 경우 문자열 오른쪽 끝을 16진수로 인식하고 그 이외의 자리수는 워드 단위 인덱스로 해석합니다.
         /// 그 외에는 인덱스가 .으로 나누어져있고 Bit일 경우 마지막 자리만 16진수로 인식합니다.
         /// </summary>
         public bool UseHexBitIndex { get; set; }

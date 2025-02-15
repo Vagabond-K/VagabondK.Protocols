@@ -89,7 +89,8 @@ namespace VagabondK.Protocols.LSElectric
             }
             else
             {
-                //P, M, L, K, F 이면서 Bit일 경우 16진수
+                //P, M, L, K, F 이면서 Bit일 경우 워드 단위의 인덱스와 함께 비트 자리수를 16진수로
+                //I, Q일 경우 모든 인덱스를 10진수 그대로, U일 경우 모든 인덱스를 16진수로
                 //그 외에는 인덱스가 .으로 나누어져있고 Bit일 경우 마지막 자리만 16진수
                 switch (DeviceType)
                 {
@@ -98,7 +99,16 @@ namespace VagabondK.Protocols.LSElectric
                     case DeviceType.L:
                     case DeviceType.K:
                     case DeviceType.F:
-                        return $"%{(char)DeviceType}{(char)DataType}{Index:X}";
+                        return $"%{(char)DeviceType}{(char)DataType}{Index / 16}{Index % 16:X}";
+                    case DeviceType.I:
+                    case DeviceType.Q:
+                        stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index}");
+                        foreach (var subIndex in SubIndices)
+                        {
+                            stringBuilder.Append('.');
+                            stringBuilder.Append(subIndex.ToString());
+                        }
+                        return stringBuilder.ToString();
                     case DeviceType.U:
                         stringBuilder = new StringBuilder($"%{(char)DeviceType}{(char)DataType}{Index:X}");
                         foreach (var subIndex in SubIndices)
@@ -207,15 +217,39 @@ namespace VagabondK.Protocols.LSElectric
                         case DeviceType.L:
                         case DeviceType.K:
                         case DeviceType.F:
-                            if (!useHexBitIndex && indexText.Any(c => !char.IsDigit(c))
-                                || !uint.TryParse(indexText, useHexBitIndex && dataType == DataType.Bit ? NumberStyles.HexNumber : NumberStyles.Number, null, out index))
+                            if (!useHexBitIndex && indexText.Any(c => !char.IsDigit(c)))
+                            {
+                                deviceVariable = new DeviceVariable();
+                                return new FormatException();
+                            }
+                            else if (useHexBitIndex && dataType == DataType.Bit)
+                            {
+                                var wordIndexLength = indexText.Length - 1;
+                                if (uint.TryParse(indexText.Substring(0, wordIndexLength), out var wordIndex)
+                                    && uint.TryParse(indexText.Remove(0, wordIndexLength), NumberStyles.HexNumber, null, out var bitIndex))
+                                    index = wordIndex * 16 + bitIndex;
+                                else
+                                {
+                                    deviceVariable = new DeviceVariable();
+                                    return new FormatException();
+                                }
+                            }
+                            else if (!uint.TryParse(indexText, out index))
                             {
                                 deviceVariable = new DeviceVariable();
                                 return new FormatException();
                             }
                             indices.Add(index);
                             break;
-                        case DeviceType.U:
+                        case DeviceType.I:
+                            if (!uint.TryParse(indexText, out index))
+                            {
+                                deviceVariable = new DeviceVariable();
+                                return new FormatException();
+                            }
+                            indices.Add(index);
+                            break;
+                        case DeviceType.Q:
                             if (!uint.TryParse(indexText, NumberStyles.HexNumber, null, out index))
                             {
                                 deviceVariable = new DeviceVariable();

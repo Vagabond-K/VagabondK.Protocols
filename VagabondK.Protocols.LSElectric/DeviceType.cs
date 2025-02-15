@@ -57,6 +57,18 @@
         /// 플래시 메모리 전용 영역
         /// </summary>
         R = 0x52,
+        /// <summary>
+        /// 플래시 메모리 전용 영역
+        /// </summary>
+        W = 0x57,
+        /// <summary>
+        /// 입력 변수
+        /// </summary>
+        I = 0x49,
+        /// <summary>
+        /// 출력 변수
+        /// </summary>
+        Q = 0x51,
 
         /// <summary>
         /// U, 아날로그 리프레시
