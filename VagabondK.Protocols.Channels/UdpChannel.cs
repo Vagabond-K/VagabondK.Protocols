@@ -99,7 +99,8 @@ namespace VagabondK.Protocols.Channels
             }
         }
 
-        private void Close()
+        /// <inheritdoc/>
+        public override void Close()
         {
             lock (connectLock)
             {

@@ -188,7 +188,7 @@ namespace VagabondK.Protocols.Modbus
         /// <summary>
         /// 통신 채널 목록
         /// </summary>
-        public IReadOnlyList<IChannel> Channels { get => channelTasks.Keys.ToList(); }
+        public IEnumerable<IChannel> Channels { get => channels.ToArray(); }
 
         /// <summary>
         /// 통신 채널 추가

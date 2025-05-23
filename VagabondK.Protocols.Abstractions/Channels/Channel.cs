@@ -19,6 +19,11 @@ namespace VagabondK.Protocols.Channels
         public abstract void Dispose();
 
         /// <summary>
+        /// 채널 닫기
+        /// </summary>
+        public virtual void Close() { }
+
+        /// <summary>
         /// 바이트 배열 쓰기
         /// </summary>
         /// <param name="bytes">바이트 배열</param>

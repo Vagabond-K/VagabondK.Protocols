@@ -166,6 +166,13 @@ namespace VagabondK.Protocols.Modbus.Serialization
                         }
                         catch
                         {
+                            lock (responseWaitHandles)
+                            {
+                                foreach (var item in responseWaitHandles.Values)
+                                    item.Set();
+                                responseWaitHandles.Clear();
+                            }
+
                             break;
                         }
                     }

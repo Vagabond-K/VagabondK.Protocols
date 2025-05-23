@@ -68,7 +68,6 @@ namespace VagabondK.Protocols.Channels
 
                 IsDisposed = true;
             }
-
         }
 
         private byte? GetByte(int timeout)

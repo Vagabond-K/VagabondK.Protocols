@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using VagabondK.Protocols.Channels;
 using VagabondK.Protocols.Logging;
-using VagabondK.Protocols.Modbus.Data;
 using VagabondK.Protocols.Modbus.Serialization;
 
 namespace VagabondK.Protocols.Modbus
