@@ -164,7 +164,10 @@ namespace VagabondK.Protocols.Modbus
                 value |= (Values[i] ? 1 : 0) << bitIndex;
 
                 if (bitIndex == 7 || i == Values.Count - 1)
+                {
                     yield return (byte)value;
+                    value = 0;
+                }
             }
         }
 
