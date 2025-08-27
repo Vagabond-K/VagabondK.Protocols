@@ -5,7 +5,7 @@ Modbus RTU/ASCII/TCP 프로토콜, LS ELECTRIC(구 LS산전)의 Cnet, FEnet 프�
 
 [!["Buy me a soju"](https://vagabond-k.github.io/Images/buymeasoju131x36.png)](https://www.buymeacoffee.com/VagabondK)  
 
-# VagabondK.Protocols.Abstractions [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Abstractions.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Abstractions/)   
+# VagabondK.Protocols.Abstractions [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Abstractions.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Abstractions/) [![NuGet Downloads](https://img.shields.io/nuget/dt/VagabondK.Protocols.Abstractions.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Abstractions/)   
 여러 프로토콜에 대한 추상 형식들과, 기본적인 Logging 관련 기능들을 제공합니다.
 
 #### Console 기반 Logger 설정 예시
@@ -21,7 +21,7 @@ TcpChannel channel = new TcpChannel("127.0.0.1", 502)
 };
 ```
 
-# VagabondK.Protocols.Channels [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Channels.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels/)   
+# VagabondK.Protocols.Channels [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Channels.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels/) [![NuGet Downloads](https://img.shields.io/nuget/dt/VagabondK.Protocols.Channels.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels/)   
 여러 프로토콜들에 사용되는 Communication Channel 관련 기능들을 제공합니다.  
 기본적인 TCP 및 UDP Socket 기반 Channel을 구현합니다.
 
@@ -43,7 +43,7 @@ var udpChannelProvider = new UdpChannelProvider(502);
 ```
 
 
-# VagabondK.Protocols.Channels.SerialPort [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Channels.SerialPort.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels.SerialPort/)   
+# VagabondK.Protocols.Channels.SerialPort [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Channels.SerialPort.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels.SerialPort/) [![NuGet Downloads](https://img.shields.io/nuget/dt/VagabondK.Protocols.Channels.SerialPort.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Channels.SerialPort/)   
 Serial Port 기반 Communication Channel 관련 기능들을 제공합니다.   
 
 #### Serial Port Channel 생성 예시
@@ -52,7 +52,7 @@ var serialPortChannel = new SerialPortChannel("COM3", 9600, 8, StopBits.One, Par
 ```
 
 
-# VagabondK.Protocols.Modbus [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Modbus.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Modbus/)   
+# VagabondK.Protocols.Modbus [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.Modbus.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Modbus/) [![NuGet Downloads](https://img.shields.io/nuget/dt/VagabondK.Protocols.Modbus.svg)](https://www.nuget.org/packages/VagabondK.Protocols.Modbus/)   
 - [Modbus 라이브러리 사용법 [Part #1]](https://blog.naver.com/vagabond-k/222490531747)  
 - [Modbus 라이브러리 사용법 [Part #2]](https://blog.naver.com/vagabond-k/222493009718)  
 
@@ -140,7 +140,7 @@ class Program
     }
 }
 ```
-# VagabondK.Protocols.LSElectric [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.LSElectric.svg)](https://www.nuget.org/packages/VagabondK.Protocols.LSElectric/)   
+# VagabondK.Protocols.LSElectric [![NuGet](https://img.shields.io/nuget/v/VagabondK.Protocols.LSElectric.svg)](https://www.nuget.org/packages/VagabondK.Protocols.LSElectric/) [![NuGet Downloads](https://img.shields.io/nuget/dt/VagabondK.Protocols.LSElectric.svg)](https://www.nuget.org/packages/VagabondK.Protocols.LSElectric/)   
 - [LS ELECTRIC(구 LS산전) Cnet 프로토콜 라이브러리 사용법](https://blog.naver.com/vagabond-k/222498651714)
 - [LS ELECTRIC(구 LS산전) FEnet 프로토콜 라이브러리 사용법](https://blog.naver.com/vagabond-k/222877084987)
 
