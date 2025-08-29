@@ -176,14 +176,12 @@ namespace VagabondK.Protocols.Channels
                         {
                             int received = 0;
 
-                            if (timeout == 0)
-                                received = stream.Read(buffer, 0, buffer.Length);
-                            else
+                            try
                             {
-                                var task = stream.ReadAsync(buffer, 0, buffer.Length);
-                                if (task.Wait(timeout))
-                                    received = task.Result;
+                                tcpClient.ReceiveTimeout = timeout;
+                                received = stream.Read(buffer, 0, buffer.Length);
                             }
+                            catch { }
 
                             for (int i = 1; i < received; i++)
                                 readBuffer.Enqueue(buffer[i]);

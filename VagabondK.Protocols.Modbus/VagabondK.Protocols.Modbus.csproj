@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Modbus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>Modbus 관련 기능을 제공하는 라이브러리입니다.</Description>
-    <Version>1.1.22</Version>
+    <Version>1.1.23</Version>
     <PackageProjectUrl>https://github.com/Vagabond-K/VagabondK.Protocols/tree/master/VagabondK.Protocols.Modbus</PackageProjectUrl>
   </PropertyGroup>
 

@@ -47,6 +47,28 @@ namespace VagabondK.Protocols.Modbus.Serialization
             0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040
         };
 
+        private bool swapCRC;
+
+        /// <summary>
+        /// CRC 바이트 순서를 바꿉니다. 이 옵션은 기본적으로는 사용하면 안 됩니다. CRC는 Modbus 프로토콜에서 기본적으로 리틀 엔디안(하위 바이트 우선) 으로 전송됩니다. 특정 장비나 예외적인 상황에서 빅 엔디안(상위 바이트 우선) 전송이 필요한 경우에만 사용하세요.
+        /// </summary>
+        [Obsolete("In Modbus protocol, CRC is transmitted in little-endian format (low byte first) by default. Use this option only if your device requires big-endian CRC (high byte first) due to specific implementation needs.")]
+        public bool SwapCRC { get => swapCRC; set => swapCRC = value; }
+
+        private IEnumerable<byte> GetCrcBytes(ushort crc)
+        {
+            if (swapCRC)
+            {
+                yield return (byte)(crc >> 8);
+                yield return (byte)(crc & 0xff);
+            }
+            else
+            {
+                yield return (byte)(crc & 0xff);
+                yield return (byte)(crc >> 8);
+            }
+        }
+
         internal override IEnumerable<byte> OnSerialize(IModbusMessage message)
         {
             ushort crc = ushort.MaxValue;
@@ -59,7 +81,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 yield return b;
             }
 
-            foreach (var b in BitConverter.GetBytes(crc))
+            foreach (var b in GetCrcBytes(crc))
                 yield return b;
         }
 
@@ -347,7 +369,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
         }
 
 
-        private static byte[] CalculateCrc(IEnumerable<byte> data)
+        private IEnumerable<byte> CalculateCrc(IEnumerable<byte> data)
         {
             if (data == null)
                 throw new ArgumentNullException("data");
@@ -361,7 +383,7 @@ namespace VagabondK.Protocols.Modbus.Serialization
                 crc ^= crcTable[tableIndex];
             }
 
-            return BitConverter.GetBytes(crc);
+            return GetCrcBytes(crc);
         }
     }
 }
